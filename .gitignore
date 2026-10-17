@@ -1,0 +1,9 @@
+.arena/
+__pycache__/
+*.pyc
+.venv/
+ledger_data/
+reports/
+*.key
+*.pem
+.DS_Store
