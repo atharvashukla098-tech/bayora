@@ -7,3 +7,6 @@ reports/
 *.key
 *.pem
 .DS_Store
+demo_run.log
+runs/
+venv/

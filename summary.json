@@ -1,5 +1,5 @@
 {
-  "run_id": "demo-20261020-194700-0cdd76",
+  "run_id": "demo-20261020-220724-a39d92",
   "total": 20,
   "passed": 20,
   "failed": 0,
@@ -8,5 +8,5 @@
   "not_evaluated": 0,
   "report_status": "VERIFIED",
   "report_accepted": true,
-  "ledger": "C:\\Users\\Admin\\AppData\\Local\\Temp\\pytest-of-Admin\\pytest-236\\test_demo_sh_allocates_fresh_r0\\runs\\demo-20261020-194700-0cdd76\\ledger.jsonl"
+  "ledger": "runs\\demo-20261020-220724-a39d92\\ledger.jsonl"
 }
