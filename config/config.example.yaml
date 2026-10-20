@@ -1,0 +1,30 @@
+# Bayora sample configuration — safe defaults, no secrets.
+target_mode: deterministic_mock
+broker:
+  allow_destinations: ["http://target:8000"]   # explicit allowlist only
+  max_request_bytes: 8192
+  max_concurrent: 4
+  timeout_seconds: 5.0
+  rate_limit_per_minute: 120        # per-client token bucket (spec §3.2 rate limit)
+  max_error_events_per_run: 500    # rejected-request evidence cap (flood protection)
+  rejection_summary_window_s: 60   # collapse floods into per-window summaries
+  block_on_injection: false        # false = DETECT + forward (required by SC-02)
+canary:
+  enabled: true
+  prefix: "BAYORA-CANARY"
+  unique_per_run: true
+injection:
+  enabled: true
+  # Heuristic patterns — documented limitations, NOT a complete injection defense (spec §3.2).
+fs_write:
+  enabled: true
+  # Simulation markers for the mock's reported protected-path writes (SC-04); NOT a filesystem monitor.
+ledger:
+  runs_dir: "runs"
+  checkpoint_every: 10
+  sign_checkpoints: true          # SC-05b/SC-07 precondition; false => those scenarios report SKIPPED
+report:
+  signing_enabled: true
+  key_dir: "keys"
+docker:
+  required_for_runtime_tests: true

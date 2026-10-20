@@ -1,0 +1,47 @@
+services:
+  target:
+    build: .
+    read_only: true
+    user: "bayora"
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 0.5
+    networks: [internal_net]        # internal only — no published ports, ever
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+  broker:
+    build: .
+    command: ["python","-m","uvicorn","app.broker.service:create_app","--factory","--host","0.0.0.0","--port","8000"]
+    read_only: true
+    user: "bayora"
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    networks: [internal_net]
+    ports: ["127.0.0.1:8010:8000"]  # loopback-published broker only; target never published
+    volumes:
+      - ${BAYORA_RUNS_DIR:-./runs}:/app/runs   # evidence dir; target container gets NO mounts
+      - ./keys:/app/keys:ro
+    depends_on:
+      target:
+        condition: service_healthy
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+networks:
+  internal_net:
+    internal: true                  # no outbound path to host internet

@@ -1,0 +1,26 @@
+[project]
+name = "bayora"
+version = "1.0.0"
+description = "Zero-trust AI red-teaming sandbox — offline-first, mock-first, evidence-first"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115", "pydantic>=2.9", "uvicorn>=0.30", "httpx>=0.27",
+  "cryptography>=43", "PyYAML>=6.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-timeout>=2", "pytest-asyncio>=0.24"]
+
+[tool.setuptools]
+packages = ["app", "app.broker", "app.target", "app.guardrails", "app.harness",
+            "app.ledger", "app.reporting", "app.dashboard"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["runtime: Docker-gated runtime containment tests"]
+addopts = "-ra"
+asyncio_mode = "auto"

@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bayora Audit Report",
+  "description": "Machine-readable signed attestation schema. The Pydantic model app/reporting/report.py:AuditReport is the internal gate; this schema exists for external tooling.",
+  "type": "object",
+  "required": ["schema_version", "platform", "platform_version", "run_id",
+               "verification_timestamp", "target_mode", "environment",
+               "assertions", "scenario_results", "ledger",
+               "verification_steps", "limitations", "status", "report_signature"],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0"},
+    "platform": {"type": "string", "const": "Bayora"},
+    "platform_version": {"type": "string"},
+    "run_id": {"type": "string"},
+    "verification_timestamp": {"type": "string"},
+    "target_mode": {"type": "string", "enum": ["deterministic_mock", "local_model"]},
+    "environment": {
+      "type": "object",
+      "required": ["offline_mode", "docker_available", "os"],
+      "properties": {
+        "offline_mode": {"type": "boolean"},
+        "docker_available": {"type": ["boolean", "null"]},
+        "docker_compose_available": {"type": ["boolean", "null"]},
+        "os": {"type": "string"}
+      }
+    },
+    "assertions": {
+      "type": "object",
+      "required": ["total", "passed", "failed", "errors", "skipped", "not_evaluated"],
+      "properties": {
+        "total": {"type": "integer", "minimum": 0},
+        "passed": {"type": "integer", "minimum": 0},
+        "failed": {"type": "integer", "minimum": 0},
+        "errors": {"type": "integer", "minimum": 0},
+        "skipped": {"type": "integer", "minimum": 0},
+        "not_evaluated": {"type": "integer", "minimum": 0}
+      }
+    },
+    "scenario_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["scenario_id", "name", "status", "evidence_event_ids", "checks"],
+        "properties": {
+          "scenario_id": {"type": "string"},
+          "name": {"type": "string"},
+          "status": {"type": "string", "enum": ["PASS", "FAIL", "ERROR", "SKIPPED", "NOT_EVALUATED"]},
+          "outcome": {"type": ["string", "null"]},
+          "skip_reason": {"type": ["string", "null"]},
+          "evidence_event_ids": {"type": "array", "items": {"type": "string"}},
+          "checks": {"type": "array", "items": {"type": "object"}}
+        }
+      }
+    },
+    "ledger": {
+      "type": "object",
+      "required": ["block_height", "chain_valid", "checkpoint_present",
+                    "checkpoint_signature_valid", "truncation_check_possible",
+                    "checkpoint_coverage"],
+      "properties": {
+        "block_height": {"type": "integer", "minimum": 0},
+        "chain_valid": {"type": "boolean"},
+        "checkpoint_present": {"type": "boolean"},
+        "checkpoint_seq": {"type": ["integer", "null"]},
+        "checkpoint_signature_valid": {"type": "boolean"},
+        "truncation_check_possible": {"type": "boolean"},
+        "checkpoint_coverage": {"type": "string", "enum": ["none", "prefix", "full", "none_applicable"]},
+        "checkpoint_final_event_hash": {"type": ["string", "null"], "description": "Signed content binding: the checkpoint's final_event_hash, inside the signed scope; the verify path compares it against the referenced chain's event at checkpoint_seq."}
+      }
+    },
+    "verification_steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "required", "executed", "result", "evidence"],
+        "properties": {
+          "name": {"type": "string", "enum": ["ledger_chain", "checkpoint_signature", "truncation_vs_checkpoint"]},
+          "required": {"type": "boolean"},
+          "executed": {"type": "boolean"},
+          "result": {"type": "string", "enum": ["pass", "fail", "not_possible", "not_applicable"]},
+          "evidence": {"type": "string"}
+        }
+      }
+    },
+    "limitations": {"type": "array", "items": {"type": "string"}},
+    "status": {"type": "string", "enum": ["VERIFIED", "VERIFIED_WITH_LIMITATIONS", "FAILED", "NOT_VERIFIED"]},
+    "report_signature": {
+      "type": "object",
+      "required": ["algorithm", "key_id"],
+      "properties": {
+        "algorithm": {"type": "string", "const": "Ed25519"},
+        "key_id": {"type": "string"},
+        "signature": {"type": ["string", "null"]}
+      }
+    }
+  }
+}
