@@ -64,6 +64,9 @@ def build_key_provider(cfg: BayoraConfig) -> KeyProvider:
 def build_auth_policy(cfg: BayoraConfig) -> AuthPolicy:
     name = cfg.infra.auth_policy
     _require_known("auth_policy", name)
+    if name == "api-key":
+        from app.infra.apikey import ApiKeyAuth
+        return ApiKeyAuth()
     # Fail closed the moment a deployment leaves loopback without real auth
     # (threat-model L7): trusted-loopback is only valid for loopback binds.
     bind = cfg.broker.bind_host

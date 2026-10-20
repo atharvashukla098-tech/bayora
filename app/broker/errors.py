@@ -21,6 +21,8 @@ class BrokerErrorCode(str, Enum):
     TARGET_ERROR = "TARGET_ERROR"
     TARGET_TIMEOUT = "TARGET_TIMEOUT"
     TOO_BUSY = "TOO_BUSY"
+    AUTH_REQUIRED = "AUTH_REQUIRED"
+    AUTH_FORBIDDEN = "AUTH_FORBIDDEN"
     INTERNAL = "INTERNAL"
 
 
@@ -43,6 +45,10 @@ STATIC_MESSAGES: dict[BrokerErrorCode, str] = {
         "target evaluation timed out; response withheld (fail closed)",
     BrokerErrorCode.TOO_BUSY:
         "broker concurrency limit reached; try again shortly",
+    BrokerErrorCode.AUTH_REQUIRED:
+        "authentication required: provide a valid Bearer token",
+    BrokerErrorCode.AUTH_FORBIDDEN:
+        "authenticated principal is not permitted to perform this action",
     BrokerErrorCode.INTERNAL:
         "internal error; no details are exposed to callers",
 }

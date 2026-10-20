@@ -56,6 +56,7 @@ from app.broker.ratelimit import RejectionBuffer, TokenBucket
 from app.config import BayoraConfig
 from app.clock import monotonic_seconds
 from app.guardrails.policy import PolicyRules, resolve_outcome
+from app.infra.seams import AuthPolicy
 from app.ledger.chain import Ledger
 from app.schema import Component, EventType, Outcome, prompt_digest
 from app.target.adapter import (
@@ -89,8 +90,16 @@ def _error_body(code: BrokerErrorCode, outcome: Outcome,
 
 def create_broker_app(config: BayoraConfig, *, target_client: TargetClient,
                       ledger: Ledger, secret_store: SecretStore,
-                      semaphore: Optional[asyncio.Semaphore] = None) -> FastAPI:
-    """Build the broker app: full middleware stack, routes, error handlers."""
+                      semaphore: Optional[asyncio.Semaphore] = None,
+                      auth_policy: Optional["AuthPolicy"] = None) -> FastAPI:
+    """Build the broker app: full middleware stack, routes, error handlers.
+
+    ``auth_policy``: optional AuthPolicy seam instance. When provided,
+    every evidence-writing POST requires a principal authorized for
+    ``evaluate`` (401 without a token, 403 with a wrong role/key) and
+    /healthz stays public. Default (None) = the loopback demo mode where
+    the deployment contract is the trusted-loopback L7 scope.
+    """
     app = FastAPI(title="Bayora Policy Broker", version="1.0.0")
     rules = PolicyRules(config)
     token_bucket = TokenBucket(config.broker.rate_limit_per_minute,
@@ -101,6 +110,9 @@ def create_broker_app(config: BayoraConfig, *, target_client: TargetClient,
         now_fn=monotonic_seconds)
     sem: asyncio.Semaphore = semaphore or asyncio.Semaphore(config.broker.max_concurrent)
     current_run: dict = {"run_id": None}
+    auth = auth_policy
+    from app.broker.security_headers import SecurityHeadersMiddleware
+    app.add_middleware(SecurityHeadersMiddleware)
 
     # ------------------------------------------------------------ middleware
 
@@ -108,6 +120,25 @@ def create_broker_app(config: BayoraConfig, *, target_client: TargetClient,
     async def rate_and_size_gates(request: Request, call_next):
         run_id = request.headers.get("X-Bayora-Run")
         client_key = request.client.host if request.client else "unknown"
+
+        # AuthN/AuthZ gate (review: "protect admin routes / add proper
+        # authentication"). When an AuthPolicy is installed, every
+        # evidence-writing POST must carry a token whose principal is
+        # authorized for 'evaluate'. 401 (no/unknown token) / 403
+        # (authenticated, wrong role) — BEFORE any target work. /healthz
+        # stays public for orchestration probes.
+        if (auth is not None and request.method == "POST"
+                and request.url.path in ("/v1/evaluate", "/v1/check-destination")):
+            token = request.headers.get("Authorization", "")
+            if token.startswith("Bearer "):
+                token = token[len("Bearer "):]
+            principal = auth.authenticate(token or None)
+            if principal is None:
+                return JSONResponse(status_code=401, content=_error_body(
+                    BrokerErrorCode.AUTH_REQUIRED, Outcome.NOT_EVALUATED, run_id))
+            if not auth.authorize(principal, "evaluate"):
+                return JSONResponse(status_code=403, content=_error_body(
+                    BrokerErrorCode.AUTH_FORBIDDEN, Outcome.NOT_EVALUATED, run_id))
 
         # Rate gate (D27) — returns, never raises (spec §3.2's 4th limit).
         # Applies to EVERY route that can write evidence (evaluate AND

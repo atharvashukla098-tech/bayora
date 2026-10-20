@@ -101,7 +101,7 @@ class InfraSettings(BaseModel):
     rate_limiter: Literal["in-memory-token-bucket"] = "in-memory-token-bucket"
     ledger_sink: Literal["jsonl-fsync"] = "jsonl-fsync"
     key_provider: Literal["disk-pem"] = "disk-pem"
-    auth_policy: Literal["trusted-loopback"] = "trusted-loopback"
+    auth_policy: Literal["trusted-loopback", "api-key"] = "trusted-loopback"
 
 
 class BayoraConfig(BaseModel):

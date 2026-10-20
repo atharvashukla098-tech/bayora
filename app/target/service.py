@@ -20,6 +20,8 @@ class RespondRequest(BaseModel):
 def create_target_app(secret_store: SecretStore) -> FastAPI:
     app = FastAPI(title="Bayora Mock Target", version="1.0.0")
     mock = MockTarget(secret_store)
+    from app.broker.security_headers import SecurityHeadersMiddleware
+    app.add_middleware(SecurityHeadersMiddleware)
 
     @app.get("/healthz")
     async def healthz():
