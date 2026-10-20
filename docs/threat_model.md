@@ -48,3 +48,20 @@ response (spec §3.4) — it is the security boundary. Injection and fs-write
 detection are advisory DETECT layers whose misses are recorded as evidence,
 never silently absorbed. Every layer's verdict is one of six states with one
 meaning everywhere, and a SKIPPED/UNAVAILABLE result can never become PASS.
+
+## Production path (infrastructure seams)
+
+The core ships offline-first local defaults behind four pluggable seams
+(`app/infra/`). Production deployments swap adapters; the offline demo never
+requires any of them.
+
+| Concern | Shipped default (honest scope) | Production adapter (external, opt-in) |
+| --- | --- | --- |
+| Rate limiting & concurrency | In-memory TokenBucket + asyncio.Semaphore — **process-local**; effective limit = rate × workers behind an LB. Startup trace prints `synchronized=False`. | Redis via atomic Lua / sliding window (`RateLimiter`, `synchronized=True`) |
+| Ledger persistence | Single-writer JSONL + fsync — ideal single-node; shared storage serializes on fsync. | Kafka / Kinesis / QLDB / immudb (`LedgerSink`); exported JSONL remains the verifier contract |
+| Signing keys | Ed25519 PEM on disk (demo-grade, L4/L6). | AWS KMS / GCP KMS / Vault Transit (`KeyProvider`) — private key never in process |
+| AuthN/AuthZ | Trusted-loopback — **NOT an auth mechanism** (L7); broker **fails closed** if `bind_host` is non-loopback without a real provider. | mTLS / API key / Bearer JWT + RBAC (evaluator vs auditor) (`AuthPolicy`) |
+
+All backend selections are validated at startup (fail closed, spec §11):
+an unknown backend name refuses to boot rather than silently degrading to
+a local default.

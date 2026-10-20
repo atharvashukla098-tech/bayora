@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Callable, Optional, Protocol
+from typing import TYPE_CHECKING, Callable, Optional, Protocol
 
 from app.clock import Clock, iso_utc
 from app.schema import (
@@ -26,6 +26,9 @@ from app.schema import (
     Outcome,
     event_hash,
 )
+
+if TYPE_CHECKING:  # pragma: no cover — import cycle guard
+    from app.infra.seams import LedgerSink
 
 LEDGER_FILENAME = "ledger.jsonl"
 GENESIS_PREV_HASH = "0" * 64
@@ -43,17 +46,28 @@ class CheckpointSigner(Protocol):
 
 
 class Ledger:
-    """One run's append-only event chain."""
+    """One run's append-only event chain.
+
+    Persistence goes through a ``LedgerSink`` (infra seam): the shipped
+    default is single-writer JSONL+fsync; an append-only cloud store
+    adapter can replace it without touching chain logic. The exported
+    JSONL artifact remains the verifier's contract in every case.
+    """
 
     def __init__(self, run_dir: Path, clock: Clock,
                  checkpoint_signer: Optional[CheckpointSigner] = None,
-                 checkpoint_every: int = 10):
+                 checkpoint_every: int = 10,
+                 sink: Optional["LedgerSink"] = None):
         self.run_dir = Path(run_dir)
         self.run_dir.mkdir(parents=True, exist_ok=True)
         self.path = self.run_dir / LEDGER_FILENAME
         self.clock = clock
         self.checkpoint_signer = checkpoint_signer
         self.checkpoint_every = checkpoint_every
+        if sink is None:
+            from app.infra.local import JsonlLedgerSink
+            sink = JsonlLedgerSink(self.path)
+        self.sink: LedgerSink = sink
 
     # -- reading -----------------------------------------------------------
 
@@ -149,11 +163,11 @@ class Ledger:
         return announce
 
     def _write_line(self, ev: EventRecord) -> None:
-        line = ev.model_dump_json() + "\n"
-        with self.path.open("a", encoding="utf-8", newline="\n") as fh:
-            fh.write(line)
-            fh.flush()
-            os.fsync(fh.fileno())
+        self.sink.append_line(ev.model_dump_json() + "\n")
+
+    @property
+    def sink_backend(self) -> str:
+        return getattr(self.sink, "backend", "jsonl+fsync (single-writer)")
 
     # -- self check --------------------------------------------------------
 

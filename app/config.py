@@ -28,6 +28,7 @@ class BrokerSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
     allow_destinations: list[str] = Field(
         default_factory=lambda: ["http://target:8000"])   # explicit allowlist, never user-supplied
+    bind_host: str = "127.0.0.1"   # loopback default; non-loopback fails closed without real auth
     max_request_bytes: int = Field(8_192, ge=256, le=1_048_576)
     max_concurrent: int = Field(4, ge=1, le=64)
     timeout_seconds: float = Field(5.0, gt=0, le=60)
@@ -88,6 +89,21 @@ class DockerSettings(BaseModel):
     required_for_runtime_tests: bool = True   # gates tests/runtime
 
 
+class InfraSettings(BaseModel):
+    """Pluggable backend selection (production-hardening pass).
+
+    Shipped defaults are the local, offline-first adapters. Every name is
+    validated at startup (fail-closed) — unknown backends refuse to start
+    rather than silently degrading. Cloud adapters (Redis limiter, Kafka
+    sink, KMS keys, JWT auth) are external opt-ins.
+    """
+    model_config = ConfigDict(extra="forbid")
+    rate_limiter: Literal["in-memory-token-bucket"] = "in-memory-token-bucket"
+    ledger_sink: Literal["jsonl-fsync"] = "jsonl-fsync"
+    key_provider: Literal["disk-pem"] = "disk-pem"
+    auth_policy: Literal["trusted-loopback"] = "trusted-loopback"
+
+
 class BayoraConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     target_mode: Literal["deterministic_mock", "local_model"] = "deterministic_mock"
@@ -98,6 +114,7 @@ class BayoraConfig(BaseModel):
     ledger: LedgerSettings = Field(default_factory=lambda: LedgerSettings())
     report: ReportSettings = Field(default_factory=lambda: ReportSettings())
     docker: DockerSettings = Field(default_factory=lambda: DockerSettings())
+    infra: InfraSettings = Field(default_factory=lambda: InfraSettings())
 
     def config_digest(self) -> str:
         """sha256 of the canonical JSON dump — recorded in RUN_STARTED detail."""
@@ -158,9 +175,21 @@ def load_config(path: Optional[Path] = None) -> BayoraConfig:
 
 
 def validate_startup(cfg: BayoraConfig) -> str:
-    """One-line startup trace used by demo.sh (blueprint §4.4)."""
+    """One-line startup trace used by demo.sh (blueprint §4.4).
+
+    Fails closed on invalid infra selections (unknown backend names,
+    trusted-loopback auth on a non-loopback bind) via the build_* factory
+    functions — an unvetted deployment shape cannot boot silently.
+    """
+    from app.infra.wire import (  # fail-closed validation happens here
+        build_auth_policy, build_key_provider, build_rate_limiter)
+    limiter = build_rate_limiter(cfg)    # unknown backend -> ConfigError
+    build_key_provider(cfg)              # missing keys    -> ConfigError
+    auth = build_auth_policy(cfg)        # non-loopback w/o real auth -> ConfigError
     src = getattr(cfg, "_loaded_from", None) or "defaults"
     return (f"config loaded: {src}, mode={cfg.target_mode}, "
             f"destinations={len(cfg.broker.allow_destinations)}, "
             f"block_on_injection={cfg.broker.block_on_injection}, "
-            f"rate={cfg.broker.rate_limit_per_minute}/min")
+            f"rate={cfg.broker.rate_limit_per_minute}/min "
+            f"[{limiter.backend}; synchronized={limiter.synchronized}], "
+            f"auth={auth.backend}")

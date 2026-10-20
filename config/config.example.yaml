@@ -28,3 +28,10 @@ report:
   key_dir: "keys"
 docker:
   required_for_runtime_tests: true
+infra:
+  # Pluggable backends (production-hardening). Local defaults ship offline;
+  # every name is validated at startup — unknown backends fail closed.
+  rate_limiter: "in-memory-token-bucket"   # process-local; Redis/Lua adapter = synchronized
+  ledger_sink: "jsonl-fsync"               # single-writer; cloud append-only adapters pluggable
+  key_provider: "disk-pem"                 # demo-grade; KMS/HSM/Vault adapters pluggable
+  auth_policy: "trusted-loopback"          # L7: loopback only — broker refuses non-loopback bind without real auth
