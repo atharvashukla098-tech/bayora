@@ -28,7 +28,18 @@ PYTHON=./venv/Scripts/python.exe ./demo.sh
 # 4. (optional) launch the incident-response dashboard (Forensic Dossier UI)
 ./venv/Scripts/python.exe -m pip install -r requirements-dashboard.txt
 ./venv/Scripts/python.exe -m streamlit run app/dashboard/app.py
+
+# 5. (optional) launch the public 3D evidence site
+./venv/Scripts/python.exe -m app.site_server      # -> http://127.0.0.1:8010
 ```
+
+The **public site** (`site/`) is a scroll-driven WebGL experience built on
+the same run artifacts: the hash-chained ledger rendered as a 3D strand,
+the attack that was intercepted, a tamper that breaks the chain, and the
+signed attestation. It is free to run and free to host — three.js (MIT) and
+the OFL fonts are vendored into the repo, so the browser makes **zero
+external requests**. See `docs/site.md` for the chapter map, the data
+contract and the design tokens.
 
 The dashboard is offline and artifact-driven: it reads the run artifacts in
 `runs/<run_id>/` (ledger, state, demo result, signed report) through

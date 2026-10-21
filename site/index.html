@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bayora — Zero-Trust AI Red-Teaming, Verified</title>
+<meta name="description" content="Bayora is a zero-trust AI red-teaming sandbox: adversarial requests are evaluated, policy decisions are enforced, and every event is written to a hash-chained ledger with signed checkpoints and a verifiable attestation." />
+<meta name="theme-color" content="#08090b" />
+<link rel="stylesheet" href="./assets/css/site.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2308090b'/><path d='M16 5l9 4v7c0 6-4 9-9 11-5-2-9-5-9-11V9z' fill='none' stroke='%23e8a33d' stroke-width='2'/></svg>" />
+</head>
+<body>
+
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">BAYORA<span>//</span>EVIDENCE</div>
+  <div class="meta">
+    <span class="hide-sm" data-bind="run.id">run —</span>
+    <span class="hide-sm" data-bind="run.height">height —</span>
+    <span class="hide-sm" data-bind="run.target">target —</span>
+    <a href="/api/site/run.json" target="_blank" rel="noopener">raw evidence</a>
+    <a href="http://localhost:8501" rel="noopener">operator console</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- 0 · HERO ------------------------------------------------------- -->
+  <section class="chapter" id="ch-hero" data-chapter="0">
+    <div class="wrap">
+      <p class="eyebrow reveal">Zero-trust AI red-teaming</p>
+      <h1 class="reveal d1">Evidence,<br />not promises.</h1>
+      <p class="lede reveal d2">
+        An adversarial request is intercepted, a policy decision is enforced,
+        and every event is written to a hash-chained ledger — then signed,
+        then independently verified. A security claim you can check.
+      </p>
+      <div class="chips reveal d3">
+        <span class="chip mint"><b data-bind="summary.passed">—</b> assertions passed</span>
+        <span class="chip"><b data-bind="summary.total">—</b> executed</span>
+        <span class="chip"><b data-bind="summary.skipped">—</b> skipped</span>
+        <span class="chip cyan" data-bind="summary.status">status —</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1 · THE ATTACK ------------------------------------------------- -->
+  <section class="chapter" id="ch-attack" data-chapter="1">
+    <div class="wrap">
+      <p class="eyebrow reveal">Chapter 01 — the attack</p>
+      <h2 class="reveal d1">Adversarial<br />input arrives.</h2>
+      <p class="lede reveal d2">
+        The red harness drives controlled scenarios through the policy
+        broker — never straight to the target. Prompt injection, canary
+        disclosure, malformed payloads, unauthorized destinations.
+      </p>
+      <div class="rail reveal d3">
+        <div class="cell"><div class="k">Ingress events</div><div class="v" data-bind="attack.ingress">—</div></div>
+        <div class="cell"><div class="k">Scenarios exercised</div><div class="v" data-bind="attack.scenarios">—</div></div>
+        <div class="cell"><div class="k">First event</div><div class="v" data-bind="attack.first_ts">—</div></div>
+        <div class="cell"><div class="k">Target mode</div><div class="v" data-bind="run.target">—</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · THE DECISION ----------------------------------------------- -->
+  <section class="chapter align-right" id="ch-decision" data-chapter="2">
+    <div class="wrap">
+      <p class="eyebrow reveal">Chapter 02 — the decision</p>
+      <h2 class="reveal d1">Policy acts<br />before release.</h2>
+      <p class="lede reveal d2">
+        A detected threat, a blocked request and a redacted response are
+        different claims. The broker applies typed validation, size, rate,
+        timeout and concurrency limits — then redacts canary values out of
+        the response <em>before</em> it is released.
+      </p>
+      <div class="chips reveal d3">
+        <span class="chip mint" data-bind="decision.allowed">allowed —</span>
+        <span class="chip amber" data-bind="decision.detected">detected —</span>
+        <span class="chip alarm" data-bind="decision.blocked">blocked —</span>
+        <span class="chip" data-bind="decision.redacted">redacted —</span>
+        <span class="chip violet" data-bind="decision.error">error —</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · THE EVIDENCE ------------------------------------------------ -->
+  <section class="chapter" id="ch-evidence" data-chapter="3">
+    <div class="wrap">
+      <p class="eyebrow reveal">Chapter 03 — the evidence</p>
+      <h2 class="reveal d1">Every event<br />is hash-linked.</h2>
+      <p class="lede reveal d2">
+        Each ledger event carries the previous event's hash, so altering one
+        byte breaks every link after it. The strand you are scrolling is the
+        real chain — <em>observed</em> events, not yet a verdict.
+      </p>
+      <div class="evidence reveal d3" data-bind="events.table">
+        <div class="row"><span class="seq">#—</span><span class="comp">loading ledger…</span><span class="hash"></span><span class="state ash">—</span></div>
+      </div>
+      <div class="matrix reveal d4" data-bind="matrix.table">
+        <div class="mrow head"><span>Attack vector</span><span>Scenario</span><span>Result</span><span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · THE TAMPER -------------------------------------------------- -->
+  <section class="chapter align-right" id="ch-tamper" data-chapter="4">
+    <div class="wrap">
+      <p class="eyebrow reveal">Chapter 04 — the tamper</p>
+      <h2 class="reveal d1">Flip one byte.<br />The chain breaks.</h2>
+      <p class="lede reveal d2">
+        The verifier recomputes every hash and rejects the tampered copy —
+        while the original evidence ledger stays untouched. The block that
+        breaks below is an <em>illustration</em>; the live demo prints the
+        real expected and computed hashes in the operator console.
+      </p>
+      <div class="rail reveal d3">
+        <div class="cell"><div class="k">Verifier verdict</div><div class="v alarm">REJECTED</div></div>
+        <div class="cell"><div class="k">Original ledger</div><div class="v mint">UNMODIFIED</div></div>
+        <div class="cell"><div class="k">Detected by</div><div class="v" style="font-size:17px">hash-chain verifier</div></div>
+      </div>
+      <p class="note-line reveal d4">Live demo: scripts/tamper_demo.py — prints the real expected and computed hashes.</p>
+    </div>
+  </section>
+
+  <!-- 5 · THE ATTESTATION --------------------------------------------- -->
+  <section class="chapter" id="ch-attestation" data-chapter="5">
+    <div class="wrap">
+      <p class="eyebrow reveal">Chapter 05 — the attestation</p>
+      <h2 class="reveal d1">Signed, then<br />verified apart.</h2>
+      <p class="lede reveal d2">
+        An Ed25519 checkpoint anchors the chain, and the report is signed
+        over its canonical form. A separate verifier re-checks the
+        signature and the chain — it never trusts the report's own claim.
+      </p>
+      <div class="rail reveal d3">
+        <div class="cell"><div class="k">Report status</div><div class="v cyan long" data-bind="report.status">—</div></div>
+        <div class="cell"><div class="k">Chain</div><div class="v" data-bind="integrity.verification">—</div></div>
+        <div class="cell"><div class="k">Checkpoint</div><div class="v" data-bind="checkpoint.seq">—</div></div>
+        <div class="cell"><div class="k">Key id</div><div class="v" style="font-size:16px" data-bind="checkpoint.key">—</div></div>
+      </div>
+      <div class="chips reveal d4">
+        <span class="chip" data-bind="checkpoint.sig">checkpoint signature —</span>
+        <span class="chip" data-bind="report.limitations">limitations —</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p class="eyebrow" style="margin:0">What Bayora does not guarantee</p>
+  <div class="grid">
+    <div>
+      <h3>Honest limits</h3>
+      <ul>
+        <li>The mock target proves controls fire on defined scenarios — not real-model behavior.</li>
+        <li>Docker-gated runtime controls report <strong>SKIPPED</strong> when Docker is absent. Never PASS.</li>
+        <li>A signature proves the report matches its key — not the truth of every event.</li>
+        <li>A hash chain alone cannot prove the ledger was never rewritten wholesale; checkpoints anchor it.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>This run</h3>
+      <ul>
+        <li>Run <span data-bind="run.id">—</span></li>
+        <li>Started <span data-bind="run.started">—</span></li>
+        <li>Target <span data-bind="run.target">—</span></li>
+        <li>Docker <span data-bind="run.docker">—</span></li>
+        <li>Runtime <span data-bind="run.runtime">—</span></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Where to look next</h3>
+      <ul>
+        <li><a href="/api/site/run.json" target="_blank" rel="noopener">Raw evidence bundle (JSON)</a></li>
+        <li><a href="http://localhost:8501" rel="noopener">Operator console (Streamlit)</a></li>
+        <li><a href="https://github.com/atharvashukla098-tech/bayora" rel="noopener">Repository</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">
+    Every number on this page was read from run artifacts on disk — nothing here is simulated.
+    The 3D strand is a visualization of recorded events; verification verdicts are stated in text,
+    from the signed report.
+  </p>
+</footer>
+
+<div class="scroll-prompt" aria-hidden="true">
+  <span>scroll to explore</span>
+  <span class="bar"></span>
+</div>
+
+<div class="fallback">WebGL is unavailable — the 3D strand is disabled; the evidence below is complete and accurate.</div>
+
+<script type="importmap">
+{ "imports": { "three": "./assets/vendor/three.module.min.js" } }
+</script>
+<script type="module" src="./assets/js/main.js"></script>
+</body>
+</html>
