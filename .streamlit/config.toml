@@ -1,0 +1,36 @@
+# Bayora — Forensic Dossier theme (light)
+# Aged-paper case file: warm ink text, oxblood primary, hairline rules,
+# one dark element — the code/terminal pane styled as a pasted terminal photo.
+
+[theme]
+base = "light"
+primaryColor = "#8C2F39"          # oxblood — buttons, links, focus
+backgroundColor = "#F4F0E8"       # paper
+secondaryBackgroundColor = "#EBE5D9"  # inset (sidebar, table headers)
+textColor = "#1C2029"             # warm ink
+linkColor = "#8C2F39"
+linkUnderline = false
+borderColor = "#D8D0C0"           # rule
+baseRadius = "small"
+buttonRadius = "small"
+font = "serif"                    # Source Serif — dossier voice
+headingFont = "serif"
+codeFont = "monospace"            # Source Code — hashes, IDs, terminal
+codeBackgroundColor = "#23262E"   # terminal pane (the one dark element)
+codeTextColor = "#E8E2D4"
+dataframeHeaderBackgroundColor = "#EBE5D9"
+dataframeHeaderTextColor = "#1C2029"
+dataframeBorderColor = "#D8D0C0"
+
+[theme.sidebar]
+backgroundColor = "#EBE5D9"
+secondaryBackgroundColor = "#E0D8C8"
+textColor = "#1C2029"
+borderColor = "#D8D0C0"
+primaryColor = "#8C2F39"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false
