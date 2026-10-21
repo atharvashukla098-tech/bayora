@@ -1,8 +1,8 @@
 """Bayora — Forensic Dossier incident dashboard (pure Python, no HTML).
 
-Replaces the previous dashboard with the dossier-themed UI. Layout:
-case-file header → §5 live threat stream → incidents strip → §7
-evaluation matrix → §6 tamper simulator → §8 signed attestation.
+Layout: case-file header → live threat stream → 3D evidence chain →
+evaluation matrix → tamper simulator → signed attestation.
+
 Data comes exclusively from run artifacts on disk via ArtifactClient —
 nothing is fabricated, and Docker-dependent controls never claim PASS.
 
@@ -21,17 +21,17 @@ import streamlit as st
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from app.config import load_config                      # noqa: E402
+from app.config import load_config                         # noqa: E402
 from app.dashboard.artifact_client import ArtifactClient  # noqa: E402
-from app.dashboard.components import (                  # noqa: E402
+from app.dashboard.components import (                     # noqa: E402
     attestation_panel,
     containment_badges,
+    evidence_chain,
     event_stream,
     evaluation_matrix,
     tamper_panel,
 )
-from app.dashboard.models import badge_color            # noqa: E402
-from app.harness.scenarios import build_catalogue       # noqa: E402
+from app.harness.scenarios import build_catalogue          # noqa: E402
 
 st.set_page_config(
     page_title="Bayora — AI Red-Teaming Case File",
@@ -39,15 +39,16 @@ st.set_page_config(
     layout="wide",
 )
 
+# Fixed, conservative refresh rate — the stream polls disk artifacts, so a
+# slow tick is plenty and never overwhelms anything.
+POLL_SECONDS = 1.0
+
 # ---------------------------------------------------------------- sidebar
 with st.sidebar:
     st.title("\u2696\ufe0f Bayora")
-    st.caption("Zero-trust AI red-teaming — case controls")
 
-    config_path = st.text_input(
-        "Config path", value=str(ROOT / "config" / "config.example.yaml"))
     try:
-        config = load_config(Path(config_path))
+        config = load_config(None)          # config/config.yaml → example → defaults
         config_error = None
     except Exception as exc:
         config = None
@@ -61,9 +62,9 @@ with st.sidebar:
     history = probe.state.run_history()
     run_options = [r["run_id"] for r in reversed(history)]
     if not run_options:
-        run_options = ["(no runs yet — will allocate on first scene run)"]
+        run_options = ["(no runs yet — one is allocated on first scene run)"]
 
-    selected = st.selectbox("Case file (run)", run_options)
+    selected = st.selectbox("Case file", run_options)
     run_id = selected if not selected.startswith("(no runs") else None
 
     catalogue = build_catalogue()
@@ -96,17 +97,6 @@ with st.sidebar:
                 st.error(f"Scene run failed: {exc}")
 
     st.divider()
-    poll_interval = st.slider(
-        "Event poll interval (s)", 0.5, 5.0, 1.0, 0.5,
-        help="Controlled refresh rate — keeps disk polling lightweight",
-    )
-    display_tz = st.selectbox("Display timezone", ["UTC", "local"], index=0)
-
-    st.divider()
-    st.caption(f"Case file run_id: `{client.state.run_id or 'none'}`")
-    st.caption(f"Runs directory: `{config.ledger.runs_dir}`")
-
-    st.divider()
     st.markdown("**Environment & containment**")
     with st.expander("Verified containment states"):
         st.caption(
@@ -119,71 +109,38 @@ with st.sidebar:
 
 # ----------------------------------------------------------------- header
 st.title("Bayora")
-st.caption(
-    "Zero-Trust AI Red-Teaming \u00b7 Runtime Containment \u00b7 "
-    "Verifiable Security Evidence"
-)
-health = containment_badges.fetch_health(client)
-containment_badges.header_badges(health)
+st.caption("Zero-Trust AI Red-Teaming · Runtime Containment · "
+           "Verifiable Security Evidence")
+containment_badges.header_badges(containment_badges.fetch_health(client))
 st.divider()
 
-# --------------------------------------------------- \u00a75 live threat stream
-st.subheader("\u00a75\u2003Live Threat Interception")
+# ---------------------------------------------------- live threat stream
+st.subheader("Live Threat Interception")
 
 
-@st.fragment(run_every=poll_interval)
+@st.fragment(run_every=POLL_SECONDS)
 def live_stream_section() -> None:
-    event_stream.render(client, display_tz)
+    event_stream.render(client)
 
 
 live_stream_section()
 st.divider()
 
-# ------------------------------------------------------------- incidents
-st.subheader("Active & recent incidents")
-st.caption(
-    "Detected/blocked/redacted/errored outcomes recorded in the ledger "
-    "tail — observed incidents, not verdicts; verdicts live in the matrix."
-)
-try:
-    incidents = client.incidents()
-except Exception:
-    incidents = []
-if incidents:
-    st.dataframe(
-        [
-            {
-                "Time (UTC)": str(i.get("ts", ""))[:19],
-                "Scenario": i.get("scenario_id"),
-                "Outcome": i.get("outcome"),
-                "Reason": i.get("reason"),
-                "Event": str(i.get("event_id", ""))[:12],
-            }
-            for i in incidents[-20:]
-        ],
-        width="stretch",
-        hide_index=True,
-    )
-    for inc in incidents[-3:]:
-        with st.expander(
-            f"{str(inc.get('ts', ''))[:19]} · {inc.get('scenario_id')} · "
-            f"{inc.get('outcome')}"
-        ):
-            st.json(inc)
-else:
-    st.info("No incidents recorded in the current run's ledger tail.")
+# ------------------------------------------------------- 3D evidence chain
+st.subheader("Evidence Chain")
+evidence_chain.render(client)
 st.divider()
 
-# --------------------------------------------------- \u00a77 evaluation matrix
-st.subheader("\u00a77\u2003Attacker-versus-Target Evaluation Matrix")
+# ------------------------------------------------------ evaluation matrix
+st.subheader("Attacker-versus-Target Evaluation Matrix")
 evaluation_matrix.render(client)
 st.divider()
 
-# ------------------------------------------------------ \u00a76 tamper simulator
-st.subheader("\u00a76\u2003Interactive Tamper Simulator")
+# ------------------------------------------------------- tamper simulator
+st.subheader("Interactive Tamper Simulator")
 tamper_panel.render(client)
 st.divider()
 
-# ----------------------------------------------------- \u00a78 signed attestation
-st.subheader("\u00a78\u2003Machine-Readable Signed Attestation")
+# ----------------------------------------------------- signed attestation
+st.subheader("Machine-Readable Signed Attestation")
 attestation_panel.render(client)

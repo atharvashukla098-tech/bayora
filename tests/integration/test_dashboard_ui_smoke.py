@@ -52,15 +52,36 @@ def test_dashboard_renders_with_real_artifacts(real_run: str):
 
     subs = [s.value for s in at.subheader]
     assert any("Live Threat Interception" in s for s in subs), subs
+    assert any("Evidence Chain" in s for s in subs), subs
     assert any("Evaluation Matrix" in s for s in subs), subs
     assert any("Tamper Simulator" in s for s in subs), subs
     assert any("Signed Attestation" in s for s in subs), subs
-    assert any("incidents" in s.lower() for s in subs), subs
 
     # Terminal pane rendered and matrix summary carries a denominator.
     assert len(at.code) > 0
     md = " ".join(str(m.value) for m in at.markdown)
     assert "applicable assertions passed" in md
+
+
+def test_3d_evidence_chain_renders(real_run: str):
+    """The chain scene must render as a real plotly element built from
+    ledger events — never a placeholder."""
+    import json
+
+    at = _apptest()
+    at.run()
+    assert not at.exception
+    charts = at.get("plotly_chart")
+    assert len(charts) >= 1, "no 3D evidence-chain chart rendered"
+
+    spec = json.loads(charts[0].proto.spec)
+    traces = spec["data"]
+    assert len(traces) >= 2
+    assert traces[0].get("type") == "scatter3d"     # hash links
+    assert traces[1].get("type") == "scatter3d"     # event blocks
+    assert len(traces[1]["x"]) > 0                  # one block per event
+    assert None in traces[0]["x"]                   # link segments are split
+    assert spec["layout"]["paper_bgcolor"] == "#F4F0E8"
 
 
 def test_tamper_simulator_reports_real_rejection(real_run: str):
