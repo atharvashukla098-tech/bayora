@@ -13,7 +13,7 @@ import pandas as pd
 import streamlit as st
 
 from app.dashboard.artifact_client import ArtifactClient, BackendUnavailable
-from app.dashboard.models import badge_color, redact, redact_obj, summarize
+from app.dashboard.models import badge_color, redact, summarize
 
 COLUMNS = [
     "Attack vector",
@@ -51,18 +51,14 @@ def render(client: ArtifactClient) -> None:
             f"All scenarios shown as NOT_EVALUATED. ({err})"
         )
 
-    top = st.columns([8, 4])
-    with top[0]:
-        st.write(
-            f"**{counts['passed']}/{counts['applicable']} applicable "
-            f"assertions passed**"
-            f" · {counts['failed']} failed · {counts['errors']} errors ·"
-            f" {counts['skipped']} skipped · {counts['not_evaluated']} not "
-            f"evaluated · denominator = {counts['applicable']} of "
-            f"{counts['total']} scenarios"
-        )
-    with top[1]:
-        st.caption("Applicable = executed to a verdict (PASS/FAIL/ERROR)")
+    st.write(
+        f"**{counts['passed']}/{counts['applicable']} applicable "
+        f"assertions passed**"
+        f" · {counts['failed']} failed · {counts['errors']} errors ·"
+        f" {counts['skipped']} skipped · {counts['not_evaluated']} not "
+        f"evaluated · denominator = {counts['applicable']} of "
+        f"{counts['total']} scenarios"
+    )
 
     if rows:
         table = pd.DataFrame(
@@ -91,20 +87,14 @@ def render(client: ArtifactClient) -> None:
                 st.badge(r["result"], color=badge_color(r["result"]))
             with c2:
                 st.caption(f"Layer: {r['layer']}")
-            st.write(f"**Detection mechanism:** {r['mechanism']}")
             st.write(f"**Action taken:** {r['action_taken']}")
             skip = (r["evidence_detail"] or {}).get("skip_reason")
             if skip:
                 st.caption(f"Skip reason: {skip}")
             if r["evidence"]:
-                st.write("**Evidence references:**")
-                for ref in r["evidence"]:
-                    st.code(redact(str(ref)), language=None)
+                st.caption("Evidence: " + redact(", ".join(r["evidence"])))
             else:
                 st.caption("No evidence references recorded.")
-            if r["evidence_detail"]:
-                with st.expander("Evidence detail"):
-                    st.json(redact_obj(r["evidence_detail"]))
             if r["result"] == "NOT_EVALUATED":
                 st.caption(
                     "This assertion has not executed in the current run — "

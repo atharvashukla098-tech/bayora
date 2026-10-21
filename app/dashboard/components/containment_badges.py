@@ -22,7 +22,7 @@ def fetch_health(client: ArtifactClient) -> Health | None:
 
 
 def header_badges(health: Health | None) -> None:
-    cols = st.columns(5)
+    cols = st.columns(4)
     with cols[0]:
         if health is None:
             st.badge("Artifacts: UNKNOWN", color=badge_color("UNKNOWN"))
@@ -50,9 +50,6 @@ def header_badges(health: Health | None) -> None:
                           ("UNKNOWN" if docker is None else "NO")),
             color="green" if docker else "gray",
         )
-    with cols[4]:
-        version = (health.platform_version if health else None) or "—"
-        st.caption(f"platform {version}")
 
 
 def containment_panel(client: ArtifactClient) -> None:

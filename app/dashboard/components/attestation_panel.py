@@ -11,17 +11,10 @@ Two independent views, shown side by side:
 
 from __future__ import annotations
 
-import json
-
 import streamlit as st
 
 from app.dashboard.artifact_client import ArtifactClient, BackendUnavailable
-from app.dashboard.models import (
-    badge_color,
-    compute_report_status,
-    redact,
-    redact_obj,
-)
+from app.dashboard.models import badge_color, compute_report_status
 
 
 def _integrity_strip(client: ArtifactClient) -> None:
@@ -88,7 +81,7 @@ def render(client: ArtifactClient) -> None:
     sig = report.get("report_signature") or {}
     env = report.get("environment") or {}
 
-    m = st.columns(6)
+    m = st.columns(5)
     total = assertions.get("total", 0)
     with m[0]:
         st.metric("Assertions passed", f"{assertions.get('passed', 0)}/{total}")
@@ -100,8 +93,6 @@ def render(client: ArtifactClient) -> None:
     with m[3]:
         st.metric("Not evaluated", assertions.get("not_evaluated", 0))
     with m[4]:
-        st.metric("Ledger height", ledger.get("block_height", 0))
-    with m[5]:
         st.metric("Target mode", str(report.get("target_mode", "—")))
 
     checks = st.columns(3)
@@ -155,15 +146,3 @@ def render(client: ArtifactClient) -> None:
         "separately (keys/demo_public_key.pem). A signature proves the "
         "report matches the signing key — not the truth of every event."
     )
-
-    with st.expander("Signed report (audit_report.json)"):
-        st.json(redact_obj(report))
-
-    with st.expander("Canonical signed payload (as computed by the verifier)"):
-        signed_view = {k: v for k, v in report.items()
-                       if k != "report_signature"}
-        st.code(
-            redact(json.dumps(signed_view, indent=2, sort_keys=True,
-                              separators=(",", ": "))),
-            language="json",
-        )

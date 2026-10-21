@@ -107,6 +107,3 @@ def render(client: ArtifactClient) -> None:
     if result.get("earliest_failure"):
         st.write(f"**Earliest detected failure:** event "
                  f"#{result['earliest_failure']}")
-
-    with st.expander("Full verifier output"):
-        st.code(redact(str(result.get("output") or "")), language=None)
