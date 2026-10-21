@@ -21,7 +21,7 @@ from typing import Any
 import streamlit as st
 
 from app.dashboard.artifact_client import ArtifactClient, BackendUnavailable
-from app.dashboard.models import redact, redact_obj
+from app.dashboard.models import redact
 
 MAX_EVENTS = 400
 PANE_LINES = 10
@@ -65,21 +65,18 @@ def _poll(client: ArtifactClient) -> None:
         ss.stream_error = str(exc)[:160]
 
 
-def _fmt_ts(iso: str, display_tz: str = "UTC") -> str:
+def _fmt_ts(iso: str) -> str:
     try:
         dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
-        if display_tz == "local":
-            local = dt.astimezone()
-            return local.strftime("%H:%M:%S local (UTC%z)")
         return dt.astimezone(timezone.utc).strftime("%H:%M:%S UTC")
     except (ValueError, AttributeError):
         return "--:--:-- UTC"
 
 
-def _fmt_event(ev: dict[str, Any], display_tz: str = "UTC") -> str:
-    head = (f"[{_fmt_ts(str(ev.get('ts_utc', '')), display_tz)}] "
+def _fmt_event(ev: dict[str, Any]) -> str:
+    head = (f"[{_fmt_ts(str(ev.get('ts_utc', '')))}] "
             f"[{str(ev.get('component', '?')):<13}] "
             f"{redact(str(ev.get('message', '')))}")
     parts: list[str] = []
@@ -97,21 +94,20 @@ def _fmt_event(ev: dict[str, Any], display_tz: str = "UTC") -> str:
     return f"{head}\n  {body}" if body else head
 
 
-def _age_caption(display_tz: str = "UTC") -> str:
+def _age_caption() -> str:
     ss = st.session_state
     if ss.stream_last_ok:
         age = (datetime.now(timezone.utc) - ss.stream_last_ok).total_seconds()
-        last_ok = f"last successful poll {int(age)}s ago"
+        last_ok = f"polled {int(age)}s ago"
     else:
-        last_ok = "no successful poll yet"
-    tz_note = "Times in UTC" if display_tz == "UTC" else "Times in local time"
+        last_ok = "not polled yet"
     if ss.stream_events:
         last = ss.stream_events[-1]
-        return f"{tz_note} · {last_ok} · newest event #{last['seq']}"
-    return f"{tz_note} · {last_ok} · no events yet"
+        return f"UTC · {last_ok} · newest event #{last['seq']}"
+    return f"UTC · {last_ok} · no events yet"
 
 
-def render(client: ArtifactClient, display_tz: str = "UTC") -> None:
+def render(client: ArtifactClient) -> None:
     _poll(client)
     ss = st.session_state
 
@@ -121,19 +117,16 @@ def render(client: ArtifactClient, display_tz: str = "UTC") -> None:
              "DISCONNECTED": "SOURCE: DISCONNECTED",
              "UNKNOWN": "SOURCE: UNKNOWN"}[ss.stream_state]
 
-    top = st.columns([3, 6, 3])
+    top = st.columns([3, 9])
     with top[0]:
         st.badge(label, color=badge)
     with top[1]:
-        st.caption(_age_caption(display_tz))
-    with top[2]:
-        st.caption(f"buffered {len(ss.stream_events)}/{MAX_EVENTS}")
+        st.caption(_age_caption())
 
     if ss.stream_state == "DISCONNECTED" and ss.stream_error:
         st.caption(f"Event source unavailable — {ss.stream_error}")
 
-    lines = [_fmt_event(ev, display_tz)
-             for ev in list(ss.stream_events)[-PANE_LINES:]]
+    lines = [_fmt_event(ev) for ev in list(ss.stream_events)[-PANE_LINES:]]
     if not lines:
         if ss.stream_state == "DISCONNECTED":
             placeholder = ("[--:--:-- UTC] [SYSTEM]        event source "
@@ -150,9 +143,9 @@ def render(client: ArtifactClient, display_tz: str = "UTC") -> None:
         st.code("\n\n".join(lines), language=None)
 
     st.caption(
-        "Lines above are observed pipeline events from the run's hash-chained "
-        "ledger. An observed event is not a cryptographic claim — verification "
-        "status is reported only in section 8."
+        "Observed pipeline events from the run's hash-chained ledger. An "
+        "observed event is not a cryptographic claim — verification status "
+        "is reported in the signed attestation section."
     )
 
     recent = list(ss.stream_events)[-15:]
@@ -161,6 +154,13 @@ def render(client: ArtifactClient, display_tz: str = "UTC") -> None:
             f"#{e['seq']} · {e['component']} · {str(e['message'])[:48]}": e
             for e in reversed(recent)
         }
-        choice = st.selectbox("Inspect event details", list(options.keys()))
+        choice = st.selectbox("Inspect event", list(options.keys()))
         if choice:
-            st.json(redact_obj(options[choice]))
+            ev = options[choice]
+            detail = " · ".join([
+                f"seq {ev['seq']}",
+                str(ev.get("component", "")),
+                f"outcome {ev.get('status') or '—'}",
+                f"hash {str(ev.get('hash') or '')[:10]}",
+            ])
+            st.caption(detail)
