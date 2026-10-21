@@ -25,10 +25,20 @@ python -m venv venv
 # 3. run the 6-scene judge demo (exit 0, prints every status from real results)
 PYTHON=./venv/Scripts/python.exe ./demo.sh
 
-# 4. (optional) launch the incident-response dashboard
-./venv/Scripts/python.exe -m pip install streamlit>=1.39
+# 4. (optional) launch the incident-response dashboard (Forensic Dossier UI)
+./venv/Scripts/python.exe -m pip install -r requirements-dashboard.txt
 ./venv/Scripts/python.exe -m streamlit run app/dashboard/app.py
 ```
+
+The dashboard is offline and artifact-driven: it reads the run artifacts in
+`runs/<run_id>/` (ledger, state, demo result, signed report) through
+`app/dashboard/artifact_client.py` — no HTTP server, no new attack surface.
+Its theme lives in `.streamlit/config.toml` (aged-paper dossier, no CDN
+assets). It shows the live interception stream, the attacker-versus-target
+matrix with explicit denominators, the disposable-copy tamper demo (it
+executes `scripts/tamper_demo.py` and prints the real hashes), and the
+signed attestation whose status is recomputed in the UI rather than
+trusted from the report's own `status` field.
 
 No network is used at runtime: the target is the deterministic in-process
 mock, the transport is Starlette's TestClient over the real ASGI app, and the

@@ -1,0 +1,6 @@
+# Bayora dashboard extras — the core demo/tests never require Streamlit
+# (the dashboard imports it lazily; see README). Install on top of
+# requirements.txt:
+#   pip install -r requirements.txt -r requirements-dashboard.txt
+streamlit==1.66.0
+pandas==3.0.6

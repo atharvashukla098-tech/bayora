@@ -74,6 +74,24 @@ def test_matrix_rows_carry_event_ids(harness, tmp_path_run):
     assert sc01["evidence"]
 
 
+def test_matrix_tolerates_scene_without_evidence(harness, tmp_path_run):
+    """A scene recorded with no event_ids AND an empty checks list must not
+    crash the matrix — real demo.sh artifacts (skipped runtime scenes) hit
+    exactly this shape."""
+    rid = LEDGER_RUN
+    _run_scenarios(harness, rid)
+    harness.runstore.append_demo_result(rid, {
+        "scene": "runtime", "scenario_id": "SC-03r", "status": "SKIPPED",
+        "event_ids": [], "checks": [],
+        "skip_reason": "docker unavailable"})
+    state = _state_for(tmp_path_run)
+    state.run_id = rid
+    rows = state.matrix()
+    sc03r = next(r for r in rows if r["scenario_id"] == "SC-03r")
+    assert sc03r["result"] == "SKIPPED"
+    assert sc03r["skip_reason"]
+
+
 def test_stale_verification_shows_stale(harness, tmp_path_run, tmp_path):
     """D8: after the chain grows, the old verification must read as STALE."""
     rid = LEDGER_RUN

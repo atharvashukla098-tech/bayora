@@ -177,7 +177,8 @@ class DashboardState:
                 action=entry.get("outcome", "not run"),
                 result=entry.get("status", "NOT_EVALUATED"),
                 evidence=(entry.get("event_ids")
-                          or entry.get("checks", [{}])[0].get("evidence_event_ids", [])
+                          or ((entry.get("checks") or [{}])[0]).get(
+                              "evidence_event_ids", [])
                           if entry else []),
                 skip_reason=entry.get("skip_reason"),
             ))
