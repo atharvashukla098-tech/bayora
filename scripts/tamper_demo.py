@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.harness.adversary import (
     disposable_copy, flip_one_byte, delete_event, reorder_events,
-    truncate_tail, forge_checkpoint_signature,
+    truncate_tail, forge_checkpoint_signature, rehash_chain,
 )
 from app.ledger.verifier import verify_ledger
 
@@ -36,7 +36,8 @@ def main(argv=None) -> int:
     parser.add_argument("--ledger", required=True,
                         help="path to the ORIGINAL ledger.jsonl")
     parser.add_argument("--mode", default="byte",
-                        choices=["byte", "delete", "reorder", "truncate", "forge"])
+                        choices=["byte", "delete", "reorder", "truncate",
+                                 "forge", "rehash"])
     parser.add_argument("--event", type=int, default=3,
                         help="1-based event index to corrupt (default 3)")
     parser.add_argument("--checkpoint", default=None,
@@ -69,13 +70,13 @@ def main(argv=None) -> int:
     print(f"Disposable copy:       CREATED ({copy})")
 
     checkpoint = None
-    if args.mode == "forge":
+    if args.mode in ("forge", "rehash"):
         if not args.checkpoint:
             cp_path = original.parent / "checkpoint.json"
         else:
             cp_path = Path(args.checkpoint)
         if not cp_path.is_file():
-            print("ERROR: --mode forge needs a checkpoint (none found)")
+            print("ERROR: --mode {args.mode} needs a checkpoint (none found)")
             return 2
         from app.ledger.checkpoints import Checkpoint
         checkpoint = Checkpoint.model_validate_json(cp_path.read_text().strip())
@@ -109,6 +110,23 @@ def main(argv=None) -> int:
         print("Truncated tail by:      2 events")
         print(f"Removed event hash:     {info.expected_hash}")
         print(f"New head hash:          {info.computed_hash}")
+    elif args.mode == "rehash":
+        info = rehash_chain(copy, args.event)
+        print(f"Edit event #{info.event_index}, then RECOMPUTED every later hash.")
+        print("Chain reads:            INTERNALLY CONSISTENT (attacker succeeded)")
+        pre = verify_ledger(copy)
+        print(f"Hash-linkage result:    {'VALID' if pre.valid else 'INVALID'} "
+              f"(stored == recomputed for every event)")
+        print(f"Sealed checkpoint hash: {getattr(checkpoint, 'final_event_hash', '')[:32]}…")
+        print(f"Forged head hash:       {info.computed_hash[:32]}…")
+        vr = verify_ledger(copy, checkpoint=checkpoint,
+                           trusted_public_key=pub or _default_pub())
+        print()
+        print("[TAMPER REJECTED]" if not vr.valid else "[FAIL: forged chain accepted]")
+        print("Detection: the SIGNED CHECKPOINT, not the hash chain.")
+        print(f"Verifier findings:      {[f.value for f in vr.findings]}")
+        _original_ok(original, checkpoint, pub or _default_pub())
+        return 1 if not vr.valid else 0
     else:  # forge
         forged = forge_checkpoint_signature(checkpoint)
         from app.ledger.checkpoints import verify_checkpoint

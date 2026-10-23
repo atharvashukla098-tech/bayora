@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BAYORA — Zero-Trust AI Red-Teaming Sandbox</title>
+<meta name="description" content="BAYORA: attack simulation, policy enforcement, runtime containment, incident visibility, and verifiable evidence — one connected system.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="fonts" href="css/fonts.css">
+<link rel="stylesheet" href="css/main.css">
+<script type="module">
+  // Offline-first: libs are vendored locally. This register block lets
+  // index.html import bare names while running fully offline (Manali).
+  import { importmap } from './js/importmap.js';
+  const im = document.createElement('script');
+  im.type = 'importmap';
+  im.textContent = JSON.stringify(importmap);
+  document.currentScript.replaceWith(im);
+</script>
+</head>
+<body>
+  <!-- WebGL bootstrapping happens in main.js; this wrapper
+       degrades to the 2D fallback page when WebGL is unavailable. -->
+  <div id="app" aria-live="polite">
+    <noscript><div class="noscript-banner">BAYORA needs JavaScript for the interactive experience. All content is also in the <a href="fallback.html">2D version</a>.</div></noscript>
+  </div>
+
+  <!-- Preload the data so the 3D HUD can render real run artifacts -->
+  <link rel="preload" href="data/demo_bundle.json" as="fetch" crossorigin>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

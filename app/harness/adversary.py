@@ -18,7 +18,7 @@ from app.schema import EventRecord
 
 class TamperInfo(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    mode: Literal["byte", "delete", "reorder", "truncate", "forge"]
+    mode: Literal["byte", "delete", "reorder", "truncate", "forge", "rehash"]
     event_index: Optional[int]      # 1-based event number touched
     expected_hash: str              # real value recomputed from the chain
     computed_hash: str              # real value after corruption
@@ -133,6 +133,56 @@ def truncate_tail(copy: Path, n: int) -> TamperInfo:
                           expected_hash=expected, computed_hash=new_head.hash)
     return TamperInfo(mode="truncate", event_index=keep + 1,
                       expected_hash=expected, computed_hash="0" * 64)
+
+
+def rehash_chain(copy: Path, event_index: int) -> TamperInfo:
+    """The strongest attack: edit event #N AND recompute every later hash.
+
+    The attacker forges a fully self-consistent chain — every stored hash
+    matches its recomputed value, so hash-linkage alone reads VALID. The
+    DETECTION is not the chain: it is the signed checkpoint, whose sealed
+    ``final_event_hash`` no longer matches the forged head. This is exactly
+    why BAYORA signs checkpoints (blueprint §5.4): the chain proves
+    internal consistency; the signature proves the content is OURS.
+
+    expected_hash = the ORIGINAL head hash (what the checkpoint seals)
+    computed_hash = the FORGED head hash (after rehashing the edit)
+    """
+    import json
+    lines = _read_lines(copy)
+    idx = event_index - 1
+    if not (0 < event_index <= len(lines)):
+        raise IndexError(f"event_index {event_index} out of range 1..{len(lines)}")
+
+    original_head = EventRecord.model_validate_json(lines[-1])
+    expected = original_head.hash
+
+    # 1. corrupt the target event's payload (event_id first char, as in
+    #    flip_one_byte — payload field, not the stored hash)
+    obj = json.loads(lines[idx])
+    event_id = obj["event_id"]
+    obj["event_id"] = ("f" if event_id[0] != "f" else "e") + event_id[1:]
+    lines[idx] = json.dumps(obj, separators=(",", ":"), ensure_ascii=False)
+
+    # 2. re-seal from the corrupted event onward: each event's stored hash
+    #    is recomputed over its (possibly new) content, and every LATER
+    #    event's prev_hash + hash are resealed — a fully self-consistent
+    #    forged chain (stored == recomputed for every event).
+    from app.schema import event_hash
+    prev_hash = ""
+    for i in range(idx, len(lines)):
+        obj = json.loads(lines[i])
+        if i > idx:
+            obj["prev_hash"] = prev_hash
+        ev = EventRecord.model_validate(obj)        # hash field may be stale
+        obj["hash"] = event_hash(ev)
+        lines[i] = json.dumps(obj, separators=(",", ":"), ensure_ascii=False)
+        prev_hash = obj["hash"]
+    _write_lines(copy, lines)
+
+    forged_head = EventRecord.model_validate_json(lines[-1])
+    return TamperInfo(mode="rehash", event_index=event_index,
+                      expected_hash=expected, computed_hash=forged_head.hash)
 
 
 def forge_checkpoint_signature(cp) -> "Checkpoint":

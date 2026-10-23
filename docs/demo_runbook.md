@@ -38,6 +38,23 @@ Say while pointing at the output:
    re-checks the signature and re-verifies the ledger from scratch before
    ACCEPT."
 
+## The strongest attack (30s, judges who ask "what if I recompute the hashes?")
+
+```bash
+./venv/Scripts/python.exe scripts/tamper_demo.py \
+  --ledger runs/<id>/ledger.jsonl --mode rehash --event 3
+```
+
+Say while pointing at the output:
+
+"An attacker edits event #3 AND recomputes every later hash — the chain
+now reads INTERNALLY CONSISTENT, every stored hash matches. Hash linkage
+alone would call this VALID. But the signed checkpoint sealed the real
+head hash, and the forged head does not match — CHECKPOINT_MISMATCH,
+tamper REJECTED. That is the entire reason the checkpoints are signed:
+the chain proves internal consistency; the signature proves the content
+is ours. And the original ledger is re-verified UNMODIFIED at the end."
+
 ## Independent verification offer (5s)
 
 ```bash

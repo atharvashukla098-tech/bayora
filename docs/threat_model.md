@@ -20,6 +20,7 @@
 | Local tamperer | rewrite the ledger unnoticed | hash chain (any byte/seq/link change) + signed checkpoints vs truncation | a full rewrite WITH the signing key, or without any checkpoint (L3/L4) |
 | Report forger | fake a passing report | signature over canonical bytes incl. status/counts/limitations | a stolen private key (L4) |
 | Stale-status exploiter | pass off an old verification as current | STALE logic: checked_height must equal block_height at display time (D8) | nothing — recorded verifications are persistent facts |
+| Encoded-leak smuggler | exfiltrate the canary in encoded form (base64 etc.) | **NOTHING YET — known gap, empirically confirmed** (`scripts/known_gap_probe.py`: pattern redaction reports SAFE on a decodable encoded canary) | exact-value/prefix pattern matching only; mitigation roadmap: encoded-token heuristics / structured output policy |
 | Container escapee | egress to the internet / write the rootfs | internal-only network, read-only rootfs, cap-drop, non-root (Docker-gated evidence, D26) | environments without Docker (honest SKIPPED, L5) |
 
 ## Trust boundaries
@@ -33,6 +34,10 @@
 ## What the initial version does NOT guarantee
 
 - Universal prompt-injection prevention (heuristic detection only).
+- **Encoded-leak detection (known gap):** an encoded (e.g. base64) canary
+  passes the pattern redactor and the response-side check reports SAFE.
+  Empirically confirmed by `scripts/known_gap_probe.py`. Listed here as a
+  known gap, outside the pass/fail denominators — not hidden in a footnote.
 - Protection against every model behavior (the target is a documented mock, L1).
 - Security of a compromised host (L6).
 - Protection against a stolen signing key (L4).

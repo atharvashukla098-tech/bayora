@@ -82,9 +82,55 @@ docker compose up -d --wait && ./venv/Scripts/python.exe -m pytest tests/runtime
 |---|---|
 | `./demo.sh` | 6-scene judge demo; exit 0 only when every required gate passes |
 | `python scripts/verify_ledger.py --ledger runs/<id>/ledger.jsonl --explain` | independent verification + canonicalization rules for hand-recomputation |
-| `python scripts/tamper_demo.py --ledger … --mode byte\|delete\|reorder\|truncate\|forge` | disposable-copy tamper demo (original untouched, byte-verified) |
+| `python scripts/tamper_demo.py --ledger … --mode byte\|delete\|reorder\|truncate\|forge\|rehash` | disposable-copy tamper demo (original untouched, byte-verified); `rehash` = the full-rewrite attack where the chain reads VALID and only the SIGNED CHECKPOINT catches it |
 | `python scripts/generate_report.py --run <id>` / `--verify <file>` | build+sign / independently verify `audit_report.json` |
 | `python scripts/reset_demo.py --confirm` | wipe `runs/` for a clean repeat |
+
+## Verify it yourself (judges: 60 seconds, any laptop)
+
+The evidence is not a screenshot — it is a file you can verify with the
+public key, on your machine, offline:
+
+```bash
+# 1. trusted public key (pinned; fingerprint below)
+python - <<'PY'
+from cryptography.hazmat.primitives import serialization
+pem = open("keys/demo_public_key.pem","rb").read()
+k = serialization.load_pem_public_key(pem)
+print("ed25519 fingerprint:", k.public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw).hex())
+PY
+
+# 2. verify the ledger chain + checkpoint signature
+python scripts/verify_ledger.py \
+  --ledger runs/demo-20261020-220724-a39d92/ledger.jsonl \
+  --checkpoint runs/demo-20261020-220724-a39d92/checkpoint.json \
+  --public-key keys/demo_public_key.pem
+
+# 3. try to cheat: edit an event AND recompute every later hash
+python scripts/tamper_demo.py \
+  --ledger runs/demo-20261020-220724-a39d92/ledger.jsonl \
+  --mode rehash --event 3
+# chain reads VALID … the signed checkpoint still says REJECTED.
+```
+
+The verifier intentionally does not import the ledger writer — it
+re-implements the hashing from `app/schema.py` rules only, so a bug in
+the writer cannot hide in the reader.
+
+### Pinned public-key fingerprint
+
+`keys/demo_public_key.pem` (Ed25519), raw public key hex:
+
+```
+0858c30ea2a84166bd7fc02fef472fe1cc8495fc011766675333e01160409410
+```
+
+The verifier refuses any key whose signature does not verify against the
+supplied public key; treat the fingerprint above as the identity of the
+trusted key. A regenerated key invalidates old signatures (limitation
+L4) — which is exactly the failure you would see if the evidence were
+forged.
+
 
 ## Layout
 
