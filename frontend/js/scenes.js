@@ -28,7 +28,7 @@ export function createRenderer(canvas) {
   if (!gl) return null;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePIXELRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   // Performance tiering: fewer pixels/particles on weak GPUs
@@ -116,7 +116,6 @@ function buildMotes(scale = 1) {
       void main() {
         vec3 p = position;
         p.y += sin(uTime * 0.35 + aSeed * 6.28) * 1.4;
-        p.x += cos(uTame_placeholder) * 0.0;
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
         gl_Position = projectionMatrix * mv;
         float tw = 0.55 + 0.45 * sin(uTime * (0.8 + aSeed) + aSeed * 40.0);
@@ -308,10 +307,10 @@ export const CAM = {
   reveal: { pos: [0, 7.5, 13],   look: [0, 0, 0] },
 };
 
-export function applyScene(world, name, t) {
+export function applyScene(world, name, t, dt = 0.016) {
   // every object keeps animating with t (global time); scene switches
   // lerp object positions/opacities toward their target states.
-  const k = 0.04; // lerp factor
+  const k = 1 - Math.pow(0.78, dt * 60);   // framerate-independent lerp
 
   // core visible in hero + reveal
   const coreT = name === 'hero' || name === 'reveal' ? 1 : 0;
@@ -325,11 +324,11 @@ export function applyScene(world, name, t) {
   const atkT = name === 'attack' ? 1 : 0;
   const { beam, shield, impact } = world.attackGroup.userData;
   beam.material.opacity = lerp(beam.material.opacity, 0.85 * atkT, k);
-  shield.material.opacity = lerp(shield.material.opacity, 0.9 * atkF(beam.material.opacity), k);
+  shield.material.opacity = lerp(shield.material.opacity, 0.9 * atkT, k);
   impact.material.opacity = lerp(impact.material.opacity, (0.55 + 0.25 * Math.sin(t * 9)) * atkT, k);
-  beam.position.x = -15 + 15 * Math.abs(Math.sin(t * 0.7)) - 7.5 * atkT;
-  // beam pulsing toward shield
-  world.attackGroup.rotation.z = 0;
+  // beam pulses from distance toward the shield; pauses at impact
+  const cycle = Math.abs(Math.sin(t * 0.7));
+  beam.position.x = -16 + (16 + 2.35) * cycle;
 
   // chain visible in 'chain' scene
   const chT = name === 'chain' ? 1 : 0;
@@ -352,8 +351,9 @@ export function applyScene(world, name, t) {
   // architecture nodes visible in 'reveal' scene
   const rvT = name === 'reveal' ? 1 : 0;
   world.nodes.userData.nodes.forEach((n) => {
-    n.material.opacity = lerp(n.material.opacity || 1, rvT, k);
-    n.visible = true;
+    const mat = n.material;
+    if (!mat.transparent) { mat.transparent = true; mat.opacity = 0; }
+    mat.opacity = lerp(mat.opacity, rvT, k);
     n.rotation.y += 0.01;
   });
   world.nodes.userData.ring.material.opacity = lerp(world.nodes.userData.ring.material.opacity, 0.4 * rvT, 0.04);
@@ -365,5 +365,4 @@ export function applyScene(world, name, t) {
   world.grid.material.opacity = lerp(world.grid.material.opacity, name === 'reveal' ? 0.12 : 0.35, k);
 }
 
-function atkF(x) { return x > 0.05 ? 1 : 0; }
 function lerp(a, b, k) { return a + (b - a) * k; }
