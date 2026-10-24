@@ -1,5 +1,5 @@
 {
-  "run_id": "demo-20261023-225739-00ab09",
+  "run_id": "demo-20261024-234142-1bfbcf",
   "total": 20,
   "passed": 18,
   "failed": 0,
@@ -8,5 +8,5 @@
   "not_evaluated": 0,
   "report_status": "VERIFIED_WITH_LIMITATIONS",
   "report_accepted": true,
-  "ledger": "C:\\Users\\Admin\\AppData\\Local\\Temp\\pytest-of-Admin\\pytest-259\\test_demo_sh_allocates_fresh_r0\\runs\\demo-20261023-225739-00ab09\\ledger.jsonl"
+  "ledger": "C:\\Users\\Admin\\AppData\\Local\\Temp\\pytest-of-Admin\\pytest-273\\test_demo_sh_allocates_fresh_r0\\runs\\demo-20261024-234142-1bfbcf\\ledger.jsonl"
 }

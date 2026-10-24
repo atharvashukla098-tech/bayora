@@ -101,6 +101,17 @@ def main() -> None:
         for s in (report.get("scenario_results") or [])
     ]
 
+    def _sig_summary(sig) -> dict:
+        """Report signature as a JSON-safe summary dict (never a raw repr)."""
+        if isinstance(sig, dict):
+            return {
+                "algorithm": sig.get("algorithm"),
+                "key_id": sig.get("key_id"),
+                "signature_b64_preview": (sig.get("signature") or "")[:16] + "\u2026",
+            }
+        return {"algorithm": "Ed25519", "key_id": None,
+                "signature_b64_preview": str(sig)[:16] + "\u2026"}
+
     bundle = {
         "schema_version": "1.0",
         "run_id": report.get("run_id"),
@@ -116,7 +127,7 @@ def main() -> None:
             "skipped": a_counts.get("skipped"),
         },
         "verification_steps": assertions,
-        "signature": str(report.get("report_signature"))[:24] + "\u2026",
+        "signature": _sig_summary(report.get("report_signature")),
         "events": events,
         "observations": obs,
         "assertions": assertions,

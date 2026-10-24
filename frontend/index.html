@@ -55,7 +55,48 @@
     <div class="hud" id="hud-chain" aria-label="Ledger verification"></div>
   </section>
 
-  <!-- 4. REVEAL -->
+  <!-- 4. LIVE FIRE RANGE -->
+  <section id="range" data-scene="chain">
+    <div class="scene-copy">
+      <div class="kicker">03 // Live Fire Range</div>
+      <h2>Don't watch the demo.<br>Shoot at it.</h2>
+      <p>This is the real policy broker, running live on this machine. Type your own attack — the broker's rate gates, injection policy and canary guardrail evaluate it for real, and every verdict is sealed into the hash-chained ledger you just saw.</p>
+      <div class="range-conn" id="range-conn">CONNECTING TO LIVE BROKER…</div>
+
+      <div class="range-board" id="range-board">
+        <div class="range-presets" id="range-presets"></div>
+        <div class="range-input-row">
+          <input id="range-input" class="range-input" type="text" maxlength="4000"
+                 placeholder="Type your attack prompt… (Ctrl+Enter to fire)" autocomplete="off" spellcheck="false">
+          <button id="range-fire-btn" class="btn primary" type="button">FIRE ▸</button>
+        </div>
+        <div class="range-verdict-row">
+          <div id="range-verdict" class="verdict"><span class="v-label">AWAITING PAYLOAD</span><span class="v-sub">your prompt has not crossed the broker yet</span></div>
+          <div id="range-released" class="released"></div>
+        </div>
+        <div id="range-meta" class="range-meta"></div>
+
+        <div class="range-tools">
+          <button id="range-verify-btn" class="btn small" type="button">VERIFY CHAIN FROM GENESIS</button>
+          <button id="range-tamper-btn" class="btn small danger" type="button">TAMPER WITH A BLOCK</button>
+          <div id="range-verify-out" class="verify-out"><span class="v-label">VERIFIER IDLE</span><span class="v-sub">independent recompute, live ledger</span></div>
+          <div id="range-tamper-out" class="verify-out"><span class="v-label">TAMPER IDLE</span><span class="v-sub">disposable copy — evidence never touched</span></div>
+        </div>
+
+        <div class="range-stats">
+          <div class="stat"><span class="s-k">RUN</span><b id="stat-run">—</b></div>
+          <div class="stat"><span class="s-k">LEDGER HEIGHT</span><b id="stat-height">0</b></div>
+          <div class="stat"><span class="s-k">VERDICTS SEALED</span><b id="stat-verdicts">0</b></div>
+          <div class="stat"><span class="s-k">CANARY</span><b id="stat-canary">—</b></div>
+        </div>
+
+        <div class="range-feed-head">LIVE LEDGER FEED — fsynced on this machine, right now</div>
+        <div id="range-feed" class="range-feed"><div class="feed-row"><span class="f-seq">#—</span><span class="f-type">awaiting first event</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. REVEAL -->
   <section id="reveal" data-scene="reveal">
     <div class="scene-copy">
       <div class="kicker">03 // The Architecture</div>
@@ -70,12 +111,56 @@
   </section>
 
   <!-- 5. EVIDENCE -->
+  <!-- 6. EVIDENCE — verification receipt -->
   <section id="evidence" data-scene="reveal">
     <div class="scene-copy">
-      <div class="kicker">04 // Evidence</div>
-      <h2>Don't trust the demo.<br>Verify it.</h2>
-      <p id="evidence-rows">Every number on this page is exported from a real, reproducible demo run of the BAYORA backend.</p>
-      <p><a class="btn" href="data/demo_bundle.json" download>Download the run bundle (JSON)</a></p>
+      <div class="kicker">05 // The Receipt</div>
+      <h2>This page is not the proof.<br>The proof is on the disk.</h2>
+      <p>Every number on this site is exported from a real, reproducible demo run. Don't take the site's word for it — pull the artifacts and run the same independent verifier the report used. No network. No trust. Three commands.</p>
+
+      <div class="receipt" id="receipt">
+        <div class="receipt-head">
+          <span class="r-title">BAYORA · AUDIT RECEIPT</span>
+          <span class="r-status" id="receipt-status">—</span>
+        </div>
+        <div class="receipt-body" id="receipt-rows"></div>
+        <div class="receipt-key">
+          <div class="rk-label">PINNED ED25519 PUBLIC KEY — the identity the verifier trusts</div>
+          <div class="rk-hex">0858c30ea2a84166bd7fc02fef472fe1cc8495fc011766675333e01160409410</div>
+        </div>
+        <div class="receipt-foot">
+          <span>sealed by hash chain · anchored by signed checkpoint</span>
+          <span class="rf-dim">writer cannot hide in the reader</span>
+        </div>
+      </div>
+
+      <div class="verify-cmds" id="verify-cmds">
+        <div class="vc-title">RUN THE PROOF YOURSELF — offline, three commands</div>
+        <div class="cmd-row" data-cmd="./venv/Scripts/python.exe scripts/verify_ledger.py --ledger runs/demo-20261020-220724-a39d92/ledger.jsonl --checkpoint runs/demo-20261020-220724-a39d92/checkpoint.json --public-key keys/demo_public_key.pem --explain">
+          <span class="cmd-n">01</span>
+          <code class="cmd-text"></code>
+          <button class="cmd-copy" type="button">COPY</button>
+          <span class="cmd-what">recompute every hash from genesis; check the Ed25519 checkpoint</span>
+        </div>
+        <div class="cmd-row" data-cmd="PYTHON=./venv/Scripts/python.exe ./demo.sh">
+          <span class="cmd-n">02</span>
+          <code class="cmd-text"></code>
+          <button class="cmd-copy" type="button">COPY</button>
+          <span class="cmd-what">run the full 6-scene demo pipeline from scratch — a fresh run, fresh ledger</span>
+        </div>
+        <div class="cmd-row" data-cmd="./venv/Scripts/python.exe -m pytest">
+          <span class="cmd-n">03</span>
+          <code class="cmd-text"></code>
+          <button class="cmd-copy" type="button">COPY</button>
+          <span class="cmd-what">the whole suite: unit + integration + security + runtime gates</span>
+        </div>
+        <div class="cmd-note">Pinned key fingerprint is in the README · a regenerated key invalidates old signatures — which is exactly the failure you'd see if the evidence were forged.</div>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn primary" href="data/demo_bundle.json" download>Download the run bundle (JSON)</a>
+        <a class="btn" href="#range">Shoot at it again</a>
+      </div>
     </div>
   </section>
 

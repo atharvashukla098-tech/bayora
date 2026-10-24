@@ -29,7 +29,11 @@
    "detail": "coverage=full at height 19"
   }
  ],
- "signature": "{'algorithm': 'Ed25519',…",
+ "signature": {
+  "algorithm": "Ed25519",
+  "key_id": "local-demo-key",
+  "signature_b64_preview": "7Rxn/1FrDJyfTR9r…"
+ },
  "events": [
   {
    "seq": 1,

@@ -5,6 +5,7 @@
 
 import * as THREE from 'three';
 import { createRenderer, buildWorld, applyScene, CAM, SCENES } from './scenes.js';
+import { initRange, startRangeFeed } from './range.js';
 
 /* ------------------------------------------------------------------ */
 /* Data                                                                */
@@ -210,13 +211,100 @@ function makeCameraGlider(camera) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Live-range → 3D reaction bridge                                      */
+/* ------------------------------------------------------------------ */
+let _worldRef = null;
+let _pulseUntil = 0;
+
+function onRangeLedgerEvent(ev) {
+  if (!_worldRef) return;
+  // a live event landed: flash the chain's head + kick the attack beam
+  _pulseUntil = performance.now() + 1400;
+}
+
+function applyRangePulse(t) {
+  if (!_worldRef || performance.now() > _pulseUntil) return;
+  const k = Math.max(0, (_pulseUntil - performance.now()) / 1400);
+  const { beam, impact } = _worldRef.attackGroup.userData;
+  beam.material.opacity = Math.max(beam.material.opacity, 0.85 * k);
+  impact.material.opacity = Math.max(impact.material.opacity, 0.6 * k);
+  _worldRef.chain.userData.blocks.forEach((b, i) => {
+    if (i === _worldRef.chain.userData.blocks.length - 1) return;
+    b.material.emissiveIntensity = Math.max(b.material.emissiveIntensity, 0.3 + 0.6 * k);
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Evidence receipt — renders the run bundle as a stamped audit receipt  */
+/* ------------------------------------------------------------------ */
+function renderReceipt(b) {
+  const rows = document.getElementById('receipt-rows');
+  const status = document.getElementById('receipt-status');
+  const receipt = document.getElementById('receipt');
+  if (!rows || !b) return;
+
+  const steps = b.verification_steps ?? [];
+  const stepRow = (s) => `<div class="row"><span class="dim">${esc(s.assertion_id)}</span><b class="${s.status === 'pass' ? 'ok' : ''}">${esc(s.status)}</b></div>`;
+
+  const keyRow = `<div class="row"><span class="dim">signature</span><b>${esc(b.signature?.algorithm ?? 'Ed25519')} · ${esc(b.signature?.key_id ?? 'local-demo-key')}</b></div>`;
+
+  rows.innerHTML = [
+    `<div class="row"><span class="dim">run</span><b>${esc(b.run_id)}</b></div>`,
+    `<div class="row"><span class="dim">report status</span><b class="${b.status === 'VERIFIED' ? 'ok' : ''}">${esc(b.status)}</b></div>`,
+    `<div class="row"><span class="dim">exported</span><b>${esc((b.exported_at ?? '').slice(0, 19).replace('T', ' '))} UTC</b></div>`,
+    `<div class="row"><span class="dim">ledger height</span><b>${b.events.length} events</b></div>`,
+    `<div class="row"><span class="dim">assertions</span><b>${b.assertion_totals.passed}/${b.assertion_totals.total} passed</b></div>`,
+    ...steps.map(stepRow),
+    keyRow,
+    `<div class="row"><span class="dim">head hash</span><b>${esc((b.events.at(-1)?.hash ?? '').slice(0, 20))}…</b></div>`,
+  ].join('');
+
+  if (status) {
+    status.textContent = b.status === 'VERIFIED' ? 'VERIFIED ✓' : String(b.status ?? '—');
+    status.classList.toggle('ok', b.status === 'VERIFIED');
+  }
+  if (receipt) {
+    receipt.classList.add('stamp-in');
+    setTimeout(() => receipt.classList.remove('stamp-in'), 700);
+  }
+}
+
+/* copy-to-clipboard for the run-the-proof rows */
+function initCmdRows() {
+  document.querySelectorAll('.cmd-row').forEach(row => {
+    const text = row.dataset.cmd || '';
+    const code = row.querySelector('.cmd-text');
+    const btn = row.querySelector('.cmd-copy');
+    if (code) code.textContent = text;
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = 'COPIED ✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1600);
+      } catch {
+        btn.textContent = 'CTRL+C';
+        setTimeout(() => { btn.textContent = 'COPY'; }, 1600);
+      }
+    });
+  });
+}
+
+/* ------------------------------------------------------------------ */
 /* Main                                                                 */
 /* ------------------------------------------------------------------ */
 async function main() {
   const b = await loadBundle();
   renderHUDs(b);
+  renderReceipt(b);
+  initCmdRows();
   startTicker(b);
   initRail();
+
+  // Live Fire Range: probe the loopback broker; degrade silently if down.
+  const range = await initRange(onRangeLedgerEvent);
+  if (range.live) startRangeFeed(onRangeLedgerEvent);
 
   const canvas = document.getElementById('gl-canvas');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -242,6 +330,7 @@ async function main() {
   scene.fog = new THREE.FogExp2(0x05070d, 0.016);
   const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 300);
   const world = buildWorld(scene, tier);
+  _worldRef = world;
   const glide = makeCameraGlider(camera);
 
   let current = 'hero';
@@ -269,6 +358,7 @@ async function main() {
     const dt = Math.min(clock.getDelta(), 0.05);
     const t = clock.elapsedTime;
     applyScene(world, current, t, dt);
+    applyRangePulse(t);
     glide.update(dt);
     renderer.render(scene, camera);
   });
