@@ -103,6 +103,31 @@ function useOrbit(
   return { update, cleanup };
 }
 
+
+// ---- adaptive fps governor: keeps 60fps on any potato ----
+function makeGovernor(renderer: THREE.WebGLRenderer, maxPR: number) {
+  let pr = maxPR;
+  let accum = 0, frames = 0, cool = 0;
+  const step = 0.75;
+  const floor = 0.6;
+  const apply = (v: number) => { pr = v; renderer.setPixelRatio(Math.min(v, window.devicePixelRatio || 1)); };
+  return {
+    tick(dt: number) {
+      if (cool > 0) { cool -= dt; return; }
+      accum += dt; frames++;
+      if (frames < 30) return; // ~0.5s window at 60fps
+      const avg = accum / frames;
+      accum = 0; frames = 0; cool = 0.5;
+      if (avg > 1 / 50 && pr > floor) {           // dropping below 50fps: shed pixels
+        apply(Math.max(floor, +(pr - step).toFixed(2)));
+      } else if (avg < 1 / 75 && pr < maxPR) {    // headroom: reclaim quality
+        apply(Math.min(maxPR, +(pr + step * 0.5).toFixed(2)));
+      }
+    },
+    get pixelRatio() { return pr; },
+  };
+}
+
 function baseSetup(mount: HTMLDivElement, fov = 45, camZ = 8) {
   const tier = useTier();
   // max-def within potato limits: low 1.0 (potato laptops are 1366x768 @1x —
@@ -114,6 +139,7 @@ function baseSetup(mount: HTMLDivElement, fov = 45, camZ = 8) {
   renderer.setPixelRatio(PR);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
+  const governor = makeGovernor(renderer, PR_CAP);
   renderer.setClearColor(0x000000, 0);
   mount.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
@@ -129,7 +155,7 @@ function baseSetup(mount: HTMLDivElement, fov = 45, camZ = 8) {
   resize();
   const ro = new ResizeObserver(resize);
   ro.observe(mount);
-  return { renderer, scene, camera, ro, tier };
+  return { renderer, scene, camera, ro, tier, governor };
 }
 
 function disposeScene(scene: THREE.Scene, renderer: THREE.WebGLRenderer, ro: ResizeObserver, mount: HTMLDivElement) {
@@ -156,7 +182,7 @@ export function NeuralGateway({ mode = 'idle', onFirstGrab }: WorldProps) {
 
   useEffect(() => {
     const mount = mountRef.current!;
-    const { renderer, scene, camera, ro, tier } = baseSetup(mount, 46, 9.5);
+    const { renderer, scene, camera, ro, tier, governor } = baseSetup(mount, 46, 9.5);
     scene.fog = new THREE.FogExp2(0x04070f, 0.045);
 
     const world = new THREE.Group();
@@ -350,6 +376,7 @@ export function NeuralGateway({ mode = 'idle', onFirstGrab }: WorldProps) {
       raf = requestAnimationFrame(animate);
       if (document.hidden) return;
       const dt = Math.min(clock.getDelta(), 0.05);
+      governor.tick(dt);
       const t = clock.elapsedTime;
       modeT += dt;
 
@@ -449,7 +476,7 @@ export function CanaryKnot({ mode = 'idle', onFirstGrab }: WorldProps) {
 
   useEffect(() => {
     const mount = mountRef.current!;
-    const { renderer, scene, camera, ro, tier } = baseSetup(mount, 42, 8.6);
+    const { renderer, scene, camera, ro, tier, governor } = baseSetup(mount, 42, 8.6);
     scene.fog = new THREE.FogExp2(0x07060c, 0.028);
 
     // ---- studio environment: softbox strips the chrome can actually reflect.
@@ -610,6 +637,7 @@ export function CanaryKnot({ mode = 'idle', onFirstGrab }: WorldProps) {
       raf = requestAnimationFrame(animate);
       if (document.hidden) return;
       const dt = Math.min(clock.getDelta(), 0.05);
+      governor.tick(dt);
       const t = clock.elapsedTime;
       modeT += dt;
 
@@ -680,7 +708,7 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
 
   useEffect(() => {
     const mount = mountRef.current!;
-    const { renderer, scene, camera, ro, tier } = baseSetup(mount, 48, 11);
+    const { renderer, scene, camera, ro, tier, governor } = baseSetup(mount, 48, 11);
     renderer.toneMapping = THREE.NoToneMapping; // authored palette, keep exact colors
     camera.position.set(0, 2.6, 10.5);
     camera.lookAt(0, 1.8, 0);
@@ -851,6 +879,7 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
       raf = requestAnimationFrame(animate);
       if (document.hidden) return;
       const dt = Math.min(clock.getDelta(), 0.05);
+      governor.tick(dt);
       const t = clock.elapsedTime;
       modeT += dt;
 
@@ -912,7 +941,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
 
   useEffect(() => {
     const mount = mountRef.current!;
-    const { renderer, scene, camera, ro, tier } = baseSetup(mount, 40, 8.2);
+    const { renderer, scene, camera, ro, tier, governor } = baseSetup(mount, 40, 8.2);
     renderer.toneMapping = THREE.NoToneMapping; // authored palette, keep exact colors
     camera.position.set(2.6, 2.4, 12.8);
     camera.lookAt(0, 2.2, 0);
@@ -1195,6 +1224,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       raf = requestAnimationFrame(animate);
       if (document.hidden) return;
       const dt = Math.min(clock.getDelta(), 0.05);
+      governor.tick(dt);
       const t = clock.elapsedTime;
       modeT += dt;
 

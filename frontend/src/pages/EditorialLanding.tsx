@@ -223,7 +223,7 @@ function EditorialLandingInner({
 
       {/* 1. Continuous Bold Organic Dynamic SVG Line (0ms Latency, Animated Entry & Scroll Tracking) */}
 
-      {isActive && <ContinuousLine />}
+      <ContinuousLine paused={!isActive} />
 
 
 
@@ -793,7 +793,7 @@ function EditorialLandingInner({
 
       <section className="relative z-10 w-full min-h-[120vh] px-6 md:px-14 bg-[#06070a] text-white overflow-hidden flex flex-col justify-start">
         {/* Iridescent Liquid WebGL Background Canvas with Giant Typographic Mask */}
-        {isActive && <IridescentTypographyCanvas />}
+        <IridescentTypographyCanvas paused={!isActive} />
 
         {/* Sharp Foreground Content : Positioned strictly in the text space between Line 0 (VERIFY.) and Line 1 (CONTAIN.) */}
         <div 

@@ -4,7 +4,7 @@ interface IridescentTypographyCanvasProps {
   onPointerMove?: (e: React.PointerEvent) => void;
 }
 
-export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove }: IridescentTypographyCanvasProps) {
+export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove, paused = false }: IridescentTypographyCanvasProps & { paused?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -356,7 +356,10 @@ export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove
       lastMoveTime: 0,
     };
 
-    function render(now: number) {
+        let resumePending = false;
+function render(now: number) {
+      if (paused) { resumePending = true; return; }
+      if (resumePending) { resumePending = false; return; } // resume next frame: stagger warmup
       if (!isVisible || document.hidden) {
         isLoopRunning = false;
         return;

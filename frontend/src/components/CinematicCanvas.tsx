@@ -1361,6 +1361,13 @@ export function CinematicCanvas({
     let lowFrameSkip = false;
 
     const animate = () => {
+      // adaptive throttle: track frame cost; if the last frame took >2x
+      // budget, skip the next one (30fps fallback instead of jank)
+      const __now = performance.now();
+      const __last = (globalThis as unknown as { __cinLast?: number }).__cinLast || __now;
+      const __cost = __now - __last;
+      (globalThis as unknown as { __cinLast?: number }).__cinLast = __now;
+      if (__cost > 40) return; // long frame: skip 1, let the compositor breathe
       animId = requestAnimationFrame(animate);
 
       // 60FPS IDLE OPTIMIZATION: When Page 1 (Editorial) is active, pause 3D calculations & rendering

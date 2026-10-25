@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-export function LiquidGlassCanvas() {
+export function LiquidGlassCanvas({ paused = false }: { paused?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -214,7 +214,10 @@ export function LiquidGlassCanvas() {
     let animId = 0;
     const startTime = performance.now();
 
-    const render = (now: number) => {
+        let resumePending = false;
+const render = (now: number) => {
+      if (paused) { resumePending = true; return; }
+      if (resumePending) { resumePending = false; return; } // resume next frame: stagger warmup
       animId = requestAnimationFrame(render);
       if (!isVisible || document.hidden) return;
 

@@ -8,6 +8,20 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  build: {
+    // split the 1.1MB bundle: three.js + react load in parallel
+    // with app code, parse independently, cache independently.
+    rolldownOptions: {
+      output: {
+        advancedChunks: {
+          groups: [
+            { name: 'three', test: /node_modules[\/]three[\/]/ },
+            { name: 'react', test: /node_modules[\/](react|react-dom|scheduler)[\/]/ },
+          ],
+        },
+      },
+    },
+  },
   server: {
     port: 3000,
     proxy: {

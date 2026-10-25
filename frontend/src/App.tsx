@@ -649,7 +649,7 @@ export default function App() {
 
           tamperActive={tamperActive}
 
-          isActive={(activeView === 'cinematic' || activeView === 'secops') && !isTransitioning}
+          isActive={activeView === 'cinematic' && !isTransitioning}
 
           onOpenConsole={handleOpenConsole}
 

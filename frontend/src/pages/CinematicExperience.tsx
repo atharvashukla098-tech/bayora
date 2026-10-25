@@ -503,7 +503,7 @@ function CinematicExperienceInner({
 
         {/* Real-Time Procedural Liquid-Glass WebGL Canvas */}
 
-        {isActive && <LiquidGlassCanvas />}
+        <LiquidGlassCanvas paused={!isActive} />
 
 
 
