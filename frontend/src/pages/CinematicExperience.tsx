@@ -449,7 +449,7 @@ function CinematicExperienceInner({
 
             <div className="space-y-1 p-3 rounded-xl bg-white/[0.02] border border-white/5">
 
-              <span className="text-[10px] text-neutral-500 uppercase tracking-widest block">HASH MERKLE</span>
+              <span className="text-[10px] text-neutral-500 uppercase tracking-widest block">HASH CHAIN</span>
 
               <span className="text-[#00e5ff] font-bold text-lg">SHA-256</span>
 

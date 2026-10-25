@@ -263,7 +263,7 @@ function EditorialLandingInner({
 
               <p className="text-base sm:text-lg md:text-xl text-neutral-700 leading-relaxed max-w-xl font-normal pt-1">
 
-                Traditional safety benchmarks rely on fragile heuristic scorecards that fail under hostile exploitation. Bayora establishes deterministic zero-trust evaluation for frontier intelligence - coupling autonomous adversarial injection harnesses with synchronous hardware policy enforcement and tamper-evident SHA-256 Merkle audit chains.
+                Traditional safety benchmarks rely on fragile heuristic scorecards that fail under hostile exploitation. Bayora establishes deterministic zero-trust evaluation for frontier intelligence - coupling autonomous adversarial injection harnesses with synchronous hardware policy enforcement and tamper-evident SHA-256 hash-chained audit ledgers.
 
               </p>
 
@@ -461,7 +461,7 @@ function EditorialLandingInner({
 
                   <div className="space-y-0.5">
 
-                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 04 · Merkle Audit Chain</span>
+                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 04 · Hash-Chained Audit Ledger</span>
 
                     <span className="text-emerald-400 font-mono text-[10px]">Root: 0x25e1...98125</span>
 
@@ -979,7 +979,7 @@ function EditorialLandingInner({
 
             <p className="text-xs font-mono text-neutral-400 max-w-md leading-relaxed">
 
-              Deterministic Zero-Trust AI Red-Teaming Sandbox & Cryptographically Verifiable SHA-256 Merkle Ledger.
+              Deterministic Zero-Trust AI Red-Teaming Sandbox & Cryptographically Verifiable SHA-256 Hash-Chain Ledger.
 
               Engineered for autonomous intelligence in air-gapped environments.
 
@@ -1033,7 +1033,7 @@ function EditorialLandingInner({
 
             <ul className="space-y-2 text-neutral-500">
 
-              <li className="hover:text-neutral-300 transition-colors">SHA-256 Merkle Audit Chain</li>
+              <li className="hover:text-neutral-300 transition-colors">SHA-256 Hash-Chained Audit Ledger</li>
 
               <li className="hover:text-neutral-300 transition-colors">Ed25519 Asymmetric Signatures</li>
 
@@ -1180,7 +1180,7 @@ function EditorialLandingInner({
                 <p className="font-semibold text-white">2. Non-Custodial Hardware Execution</p>
                 <p>All red-team scenarios and mutation tests execute locally within air-gapped Docker sandboxes (EROFS filesystem mount, read-only permissions). No third-party API credentials or proprietary model weights are transmitted to external endpoints.</p>
                 <p className="font-semibold text-white">3. Cryptographic Verification & Liability</p>
-                <p>Audit ledgers are sealed using asymmetric Ed25519 signatures and SHA-256 Merkle hashes. Verification claims represent mathematically deterministic outputs at block height execution time. Bayora Protocol provides these auditing tools under open-source security licenses without warranty.</p>
+                <p>Audit ledgers are sealed using asymmetric Ed25519 signatures and SHA-256 block hashes chained to the previous sealed block. Verification claims represent mathematically deterministic outputs at block height execution time. Bayora Protocol provides these auditing tools under open-source security licenses without warranty.</p>
               </div>
             )}
 
@@ -1198,7 +1198,7 @@ function EditorialLandingInner({
             {legalModal === 'compliance' && (
               <div className="space-y-3.5 text-neutral-300 leading-relaxed text-[11px]">
                 <p className="font-semibold text-white">1. Verification Standard</p>
-                <p>Protocol version: Bayora SecOps v1.4. Root algorithm: Ed25519 asymmetric signing over SHA-256 Merkle leaf nodes. Mutation tolerance boundary: strictly 0 bytes.</p>
+                <p>Protocol version: Bayora SecOps v1.4. Root algorithm: Ed25519 asymmetric signing over SHA-256 ledger blocks. Mutation tolerance boundary: strictly 0 bytes.</p>
                 <p className="font-semibold text-white">2. Two-Party Verification Model</p>
                 <p>Ledgers can be audited offline by independent third parties using standard libsodium / cryptography libraries without requiring access to the original evaluation environment.</p>
               </div>

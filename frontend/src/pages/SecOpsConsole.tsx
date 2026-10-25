@@ -164,7 +164,7 @@ const SCENARIOS: ScenarioItem[] = [
     expectedOutcome: 'DETECTED',
     httpStatus: 200,
     policyReason: 'BAD_HASH',
-    pillar: 'Cryptographic Merkle Sentry',
+    pillar: 'Cryptographic Ledger Sentry',
     rawOutput: 'Mutated Block #3: 1 byte altered in canonical JSON payload.',
     releasedText: 'REJECTED: Stored hash does not match computed SHA-256. Cryptographic fraud detected.',
   },
@@ -555,7 +555,7 @@ function SecOpsConsoleInner({
         { scene: 'SC-05', result: 'PASS', control: 'SHA-256 hash-chain tamper detection' },
       ],
       ed25519_signature: '9zs1VSQ3ep6j/9HjAANFfB4/gOJCZKhEQP7sr6zvxP4iCntvwTtoNyaA4mNfEcmGMbupIgpOBCXVXnorA8geCw==',
-      ledger_merkle_root: '0x8f4d92a17cb6e3401fa95c02b3112009',
+      ledger_chain_head: '0x8f4d92a17cb6e3401fa95c02b3112009',
     };
 
     const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });

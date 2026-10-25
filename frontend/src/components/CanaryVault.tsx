@@ -7,6 +7,20 @@
 import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
+// Deprecation-free THREE.Clock replacement (same getDelta semantics)
+class FrameClock {
+  private prev = 0;
+  elapsedTime = 0;
+  getDelta() {
+    const now = performance.now() / 1000;
+    const dt = this.prev === 0 ? 0 : now - this.prev;
+    this.prev = now;
+    this.elapsedTime += dt;
+    return dt;
+  }
+}
+
+
 interface CanaryVaultProps {
   /** 'idle' | 'dispatching' | 'blocked' | 'redacted' | 'allowed' */
   mode?: string;
@@ -214,7 +228,7 @@ export function CanaryVault({ mode = 'idle', onFirstGrab }: CanaryVaultProps) {
 
     // ---------- render loop ----------
     let raf = 0;
-    const clock = new THREE.Clock();
+    const clock = new FrameClock();
     const coreMat = core.material as THREE.MeshStandardMaterial;
 
     const animate = () => {

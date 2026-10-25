@@ -98,7 +98,7 @@ export function InteractiveConsole({
       targetOutcome: 'REJECTED (BAD_HASH)',
       httpCode: 200,
       rule: 'BAD_HASH',
-      pillar: 'Cryptographic Merkle Sentry',
+      pillar: 'Cryptographic Ledger Sentry',
       vector: 'ledger event modification',
       control: 'independent hash-chain verifier',
       detection: 'stored vs recomputed SHA-256 (BAD_HASH)',
@@ -370,7 +370,7 @@ export function InteractiveConsole({
               <div className="p-4 rounded-xl border border-white/10 bg-white/5 space-y-2">
                 <div className="text-xs font-bold text-white flex items-center gap-2">
                   <span className="font-mono text-cyan-400 text-xs font-bold">[SEALED]</span>
-                  IMMUTABLE MERKLE TAMPER-EVIDENCE (5 MODES)
+                  IMMUTABLE HASH-CHAIN TAMPER-EVIDENCE (5 MODES)
                 </div>
                 <p className="text-[11px] text-neutral-400 leading-relaxed">
                   Select a tamper mode to corrupt a disposable copy of the ledger. The independent verifier will detect the corruption instantly.

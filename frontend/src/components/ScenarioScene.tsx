@@ -16,6 +16,21 @@ export interface WorldProps {
 }
 
 
+
+// Deprecation-free replacement for THREE.Clock (same getDelta/elapsedTime
+// semantics; THREE.Clock warns on every instantiation in current builds).
+class FrameClock {
+  private prev = 0;
+  elapsedTime = 0;
+  getDelta() {
+    const now = performance.now() / 1000;
+    const dt = this.prev === 0 ? 0 : now - this.prev;
+    this.prev = now;
+    this.elapsedTime += dt;
+    return dt;
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* shared helpers                                                       */
 /* ------------------------------------------------------------------ */
@@ -370,7 +385,7 @@ export function NeuralGateway({ mode = 'idle', onFirstGrab }: WorldProps) {
     apiRef.current = { setMode: (nm: string) => { m = nm || 'idle'; modeT = 0; } };
     apiRef.current.setMode(modeRef.current || 'idle'); // sync any mode that arrived during mount
 
-    const clock = new THREE.Clock();
+    const clock = new FrameClock();
     let raf = 0;
     const animate = () => {
       raf = requestAnimationFrame(animate);
@@ -629,7 +644,7 @@ export function CanaryKnot({ mode = 'idle', onFirstGrab }: WorldProps) {
     apiRef.current = { setMode: (nm: string) => { m = nm || 'idle'; modeT = 0; } };
     apiRef.current.setMode(modeRef.current || 'idle'); // sync any mode that arrived during mount
 
-    const clock = new THREE.Clock();
+    const clock = new FrameClock();
     let raf = 0;
     const canaryColor = new THREE.Color(0xff5566);
     const redactedColor = new THREE.Color(0x3ddc97);
@@ -872,7 +887,7 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
     apiRef.current = { setMode: (nm: string) => { m = nm || 'idle'; modeT = 0; } };
     apiRef.current.setMode(modeRef.current || 'idle'); // sync any mode that arrived during mount
 
-    const clock = new THREE.Clock();
+    const clock = new FrameClock();
     let raf = 0;
     const RAY_DIR = new THREE.Vector3(1, 0.05, 0.35).normalize();
     const animate = () => {
@@ -1218,7 +1233,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     apiRef.current = { setMode: (nm: string) => { m = nm || 'idle'; modeT = 0; } };
     apiRef.current.setMode(modeRef.current || 'idle'); // sync any mode that arrived during mount
 
-    const clock = new THREE.Clock();
+    const clock = new FrameClock();
     let raf = 0;
     const animate = () => {
       raf = requestAnimationFrame(animate);
