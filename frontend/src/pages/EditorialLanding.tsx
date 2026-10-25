@@ -235,37 +235,7 @@ function EditorialLandingInner({
 
       <section className="relative z-10 pt-32 md:pt-36 pb-20 px-6 md:px-14 max-w-7xl mx-auto min-h-[92vh] flex flex-col justify-between">
 
-        {/* Top Operational Context Bar */}
-
-        <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-black/5">
-
-          <div className="flex items-center space-x-3">
-
-            <span className="px-3.5 py-1 rounded-full bg-black/5 border border-black/10 text-[11px] font-mono font-medium tracking-widest uppercase">
-
-              Team Binary Blizzards · Zero-Trust AI Security
-
-            </span>
-
-            <span className="text-[11px] font-mono text-neutral-500 flex items-center gap-1.5">
-
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-
-              100% OFFLINE AIR-GAPPED RUNTIME
-
-            </span>
-
-          </div>
-
-          <div className="hidden md:flex items-center space-x-4 text-[10px] font-mono text-neutral-400">
-
-            <span>DOCKER EROFS: <strong className="text-neutral-700 font-bold">ERRNO 30 ENFORCED</strong></span>
-
-            <span>LEDGER: <strong className="text-cyan-700 font-bold">SHA-256 / Ed25519</strong></span>
-
-          </div>
-
-        </div>
+        
 
 
 

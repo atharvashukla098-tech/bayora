@@ -690,38 +690,82 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
     skyCanvas.width = 4; skyCanvas.height = 256;
     const sctx = skyCanvas.getContext('2d')!;
     const skyGrad = sctx.createLinearGradient(0, 0, 0, 256);
-    skyGrad.addColorStop(0, '#4a6f9e');
-    skyGrad.addColorStop(0.45, '#9fb8d8');
-    skyGrad.addColorStop(0.72, '#e8c8b0');
+    skyGrad.addColorStop(0, '#2a3f66');
+    skyGrad.addColorStop(0.42, '#7a9cc4');
+    skyGrad.addColorStop(0.68, '#d9c2ae');
     skyGrad.addColorStop(1, '#f0b896');
     sctx.fillStyle = skyGrad;
     sctx.fillRect(0, 0, 4, 256);
     const skyTex = new THREE.CanvasTexture(skyCanvas);
     scene.background = skyTex;
-    scene.fog = new THREE.Fog(0x9fb8d8, 16, 46);
+    scene.fog = new THREE.Fog(0xbcd2e4, 22, 52);
 
     const world = new THREE.Group();
     scene.add(world);
 
-    // ---- iridescent cloud: layered soft sprites ----
-    const softTex = makeGlowTexture('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.25)');
-    const pastels = [0xffc4e0, 0xc4f0dc, 0xc4d0ff, 0xffe4c4, 0xd4f4ff];
+    // ---- iridescent cumulus: structured cloud, NormalBlending so puffs
+    // layer as VOLUME instead of stacking into a white-hot sunburst ----
+    // puff texture: hard-ish edge — reads as a cumulus lobe, not lens bokeh
+    const puffCanvas = document.createElement('canvas');
+    puffCanvas.width = puffCanvas.height = 256;
+    const pctx = puffCanvas.getContext('2d')!;
+    const pg = pctx.createRadialGradient(128, 110, 10, 128, 128, 126);
+    pg.addColorStop(0, 'rgba(255,255,255,1)');
+    pg.addColorStop(0.55, 'rgba(255,255,255,0.92)');
+    pg.addColorStop(0.8, 'rgba(255,255,255,0.45)');
+    pg.addColorStop(1, 'rgba(255,255,255,0)');
+    pctx.fillStyle = pg;
+    pctx.fillRect(0, 0, 256, 256);
+    const cloudTex = new THREE.CanvasTexture(puffCanvas);
+    cloudTex.anisotropy = 8;
+    const pastels = [0xffffff, 0xffffff, 0xfff2f6, 0xffe8f0, 0xffffff]; // one family: white + blush pink
     const cloudPuffs: { s: THREE.Sprite; seed: number; base: THREE.Vector3 }[] = [];
-    const puffCount = tier === 'low' ? 60 : tier === 'mid' ? 140 : 200;
+    const puffCount = tier === 'low' ? 30 : tier === 'mid' ? 48 : 64;
+    const puffMat = (c: number, o: number) => new THREE.SpriteMaterial({
+      map: cloudTex, color: c, transparent: true, opacity: o,
+      depthWrite: false, blending: THREE.NormalBlending,
+    });
     for (let i = 0; i < puffCount; i++) {
-      const dir = new THREE.Vector3().randomDirection();
-      const r = Math.pow(Math.random(), 0.6) * 2.6;
+      // cumulus: flat collective base at y~1.1, lobes mound above it,
+      // tighter xz spread so the mass holds ONE silhouette
+      const spread = Math.pow(Math.random(), 1.4);
+      const angle = Math.random() * Math.PI * 2;
+      const radius = spread * 2.6;
+      const mound = Math.pow(Math.random(), 0.8) * 1.6 * (1 - spread * 0.55);
       const c = pastels[i % pastels.length];
-      const s = makeSoftSprite(softTex, c, 2.4 + Math.random() * 3.6, 0.3 + Math.random() * 0.3);
-      s.position.set(dir.x * r * 1.9, dir.y * r * 0.6 + 1.6, dir.z * r * 0.8);
+      const s = new THREE.Sprite(puffMat(c, 0.72 + Math.random() * 0.2));
+      s.scale.setScalar(1.4 + Math.random() * 1.8);
+      s.position.set(
+        Math.cos(angle) * radius + 1.4,
+        1.0 + mound,
+        Math.sin(angle) * radius * 0.5 - 2.6
+      );
       world.add(s);
       cloudPuffs.push({ s, seed: Math.random() * Math.PI * 2, base: s.position.clone() });
     }
-    // warm core glow
+    // sun: small warm disc ABOVE the cloud, not a mega-bloom in the middle
     const coreTex = makeGlowTexture('rgba(255,230,190,0.95)', 'rgba(255,170,90,0.3)');
-    const coreGlow = makeSoftSprite(coreTex, 0xffd9a8, 3.2, 0.45);
-    coreGlow.position.set(0, 1.2, 0);
+    const coreGlow = makeSoftSprite(coreTex, 0xffd9a8, 1.6, 0.45);
+    coreGlow.position.set(3.6, 4.8, -2);
     world.add(coreGlow);
+    // crisp solar disc: tiny, bright, unmistakably a sun
+    const sunCanvas = document.createElement('canvas');
+    sunCanvas.width = sunCanvas.height = 128;
+    const sunCtx = sunCanvas.getContext('2d')!;
+    const sunGrad = sunCtx.createRadialGradient(64, 64, 4, 64, 64, 64);
+    sunGrad.addColorStop(0, 'rgba(255,250,230,1)');
+    sunGrad.addColorStop(0.4, 'rgba(255,240,200,1)');
+    sunGrad.addColorStop(0.55, 'rgba(255,220,150,0.6)');
+    sunGrad.addColorStop(1, 'rgba(255,200,120,0)');
+    sunCtx.fillStyle = sunGrad;
+    sunCtx.fillRect(0, 0, 128, 128);
+    const sunDisc = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(sunCanvas), transparent: true, opacity: 1,
+      depthWrite: false, blending: THREE.AdditiveBlending,
+    }));
+    sunDisc.scale.setScalar(0.95);
+    sunDisc.position.set(3.7, 5.0, -2);
+    world.add(sunDisc);
 
     // ---- boundary rings with glowing orbs ----
     const ringGroup = new THREE.Group();
@@ -738,7 +782,7 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
       holder.add(ring);
       const n = 7;
       for (let b = 0; b < n; b++) {
-        const orb = makeSoftSprite(softTex, 0xfff4e0, 0.55, 0.95);
+        const orb = makeSoftSprite(cloudTex, 0xfff4e0, 0.55, 0.95);
         const a = (b / n) * Math.PI * 2;
         orb.position.set(Math.cos(a) * R, 0, Math.sin(a) * R);
         holder.add(orb);
@@ -750,11 +794,32 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
     // ---- water ----
     const water = new THREE.Mesh(
       new THREE.CircleGeometry(18, 48),
-      new THREE.MeshStandardMaterial({ color: 0x24404f, metalness: 0.85, roughness: 0.14 })
+      new THREE.MeshStandardMaterial({ color: 0x3d6b80, metalness: 0.7, roughness: 0.22 })
     );
     water.rotation.x = -Math.PI / 2;
     water.position.y = -2.2;
     world.add(water);
+    // horizon glow: a warm line where sea meets sky — reads instantly as a coast
+    // amber horizon strip — a WIDE flat glow, elongated along the horizon
+    const stripCanvas = document.createElement('canvas');
+    stripCanvas.width = 256; stripCanvas.height = 32;
+    const stCtx = stripCanvas.getContext('2d')!;
+    const stG = stCtx.createLinearGradient(0, 0, 256, 0);
+    stG.addColorStop(0, 'rgba(255,190,130,0)');
+    stG.addColorStop(0.5, 'rgba(255,214,160,0.9)');
+    stG.addColorStop(1, 'rgba(255,190,130,0)');
+    stCtx.fillStyle = stG;
+    stCtx.fillRect(0, 0, 256, 32);
+    const stripTex = new THREE.CanvasTexture(stripCanvas);
+    const horizonStrip = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: stripTex, color: 0xffd6aa, transparent: true, opacity: 0.9,
+      depthWrite: false, blending: THREE.AdditiveBlending,
+    }));
+    horizonStrip.scale.set(30, 1.1, 1);
+    horizonStrip.position.set(0, -2.05, -12);
+    horizonStrip.material.opacity = 1.0;
+    world.add(horizonStrip);
+
 
     // ---- request streak (the SSRF attempt) + shield ripple ----
     const streakTex = makeGlowTexture('rgba(255,255,255,0.95)', 'rgba(255,120,120,0.35)');
