@@ -141,6 +141,12 @@ export function ScenarioDossier({ scenario, onBack }: ScenarioDossierProps) {
             </span>
             <span className="text-[10px] font-mono text-neutral-400">
               HTTP {result.httpStatus} / {result.policyReason} / {result.timing}
+              {result.matchedPatterns && result.matchedPatterns.length > 0 && (
+                <span className="text-cyan-300/80"> / matched: {result.matchedPatterns.join(', ')}</span>
+              )}
+              {result.rawBehavior && (
+                <span className="text-amber-300/80"> / behavior: {result.rawBehavior}</span>
+              )}
             </span>
           </div>
 
