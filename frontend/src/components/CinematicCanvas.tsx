@@ -4,18 +4,6 @@ import * as THREE from 'three';
 
 import { sound } from '../utils/audio';
 
-// Deprecation-free THREE.Clock replacement (same getDelta semantics)
-class FrameClock {
-  private prev = 0;
-  elapsedTime = 0;
-  getDelta() {
-    const now = performance.now() / 1000;
-    const dt = this.prev === 0 ? 0 : now - this.prev;
-    this.prev = now;
-    this.elapsedTime += dt;
-    return dt;
-  }
-}
 
 
 

@@ -10,3 +10,7 @@ reports/
 demo_run.log
 runs/
 venv/
+node_modules/
+dist/
+.vercel/
+.playwright-mcp/

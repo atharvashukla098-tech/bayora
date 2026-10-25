@@ -184,20 +184,21 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
         <div className="min-h-full max-w-6xl mx-auto px-5 sm:px-10 pt-24 sm:pt-32 pb-16 pointer-events-auto">
 
           {/* title block */}
-          <header className="space-y-5 mb-40">
+          <header className="space-y-5 mb-40 max-w-4xl relative">
+            {/* Clean directional scrim for crisp typography contrast without muddy blur blotches */}
+            <div className="absolute -inset-x-8 -inset-y-4 -z-10 bg-gradient-to-r from-black/65 via-black/25 to-transparent pointer-events-none rounded-xl" />
+
             <div className="font-mono text-[10px] tracking-[0.35em] text-neutral-400 uppercase">
               Scenario {scenario.scenarioId} / {scenario.tag}
             </div>
-            <h1 className="font-sans font-bold tracking-[-0.03em] leading-[0.93] text-white text-[clamp(3rem,9vw,7.5rem)] max-w-5xl"
-              style={{ textShadow: '0 2px 30px rgba(0,0,0,0.75)' }}>
+            <h1 className="font-sans font-bold tracking-[-0.03em] leading-[1.04] text-white text-[clamp(2.8rem,8vw,6.5rem)] drop-shadow-[0_4px_16px_rgba(0,0,0,0.65)]">
               {scenario.title.split(' : ').map((line, i, arr) => (
                 <span key={i} className={`block ${i === arr.length - 1 ? 'text-cyan-300' : ''}`}>
                   {line}{i === arr.length - 1 ? '.' : ''}
                 </span>
               ))}
             </h1>
-            <p className="text-sm sm:text-base text-neutral-200 leading-relaxed max-w-xl"
-              style={{ textShadow: '0 1px 14px rgba(0,0,0,0.9)' }}>
+            <p className="text-sm sm:text-base text-neutral-200 leading-relaxed max-w-xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
               {scenario.desc}
             </p>
             <div className="font-mono text-[10px] tracking-[0.25em] text-neutral-400 uppercase pt-1">

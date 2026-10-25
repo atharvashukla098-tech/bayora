@@ -18,6 +18,9 @@ class FrameClock {
     this.elapsedTime += dt;
     return dt;
   }
+  getElapsedTime() {
+    return this.elapsedTime;
+  }
 }
 
 

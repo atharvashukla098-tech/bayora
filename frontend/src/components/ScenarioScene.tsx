@@ -120,24 +120,24 @@ function useOrbit(
 }
 
 
-// ---- adaptive fps governor: keeps 60fps on any potato ----
+// ---- adaptive fps governor: keeps native resolution without dropping below 1.0 ----
 function makeGovernor(renderer: THREE.WebGLRenderer, maxPR: number) {
   let pr = maxPR;
-  let accum = 0, frames = 0, cool = 0;
-  const step = 0.75;
-  const floor = 0.6;
+  let accum = 0, frames = 0, cool = 2.0; // 2s initial warmup
+  const step = 0.25;
+  const floor = 1.0; // Never drop below native 1.0 DPR!
   const apply = (v: number) => { pr = v; renderer.setPixelRatio(Math.min(v, window.devicePixelRatio || 1)); };
   return {
     tick(dt: number) {
       if (cool > 0) { cool -= dt; return; }
       accum += dt; frames++;
-      if (frames < 30) return; // ~0.5s window at 60fps
+      if (frames < 45) return; // ~0.75s sample window
       const avg = accum / frames;
-      accum = 0; frames = 0; cool = 0.5;
-      if (avg > 1 / 50 && pr > floor) {           // dropping below 50fps: shed pixels
+      accum = 0; frames = 0; cool = 1.0;
+      if (avg > 1 / 28 && pr > floor) {           // only if sustained below 28fps
         apply(Math.max(floor, +(pr - step).toFixed(2)));
-      } else if (avg < 1 / 75 && pr < maxPR) {    // headroom: reclaim quality
-        apply(Math.min(maxPR, +(pr + step * 0.5).toFixed(2)));
+      } else if (avg < 1 / 55 && pr < maxPR) {    // reclaim on standard 60hz/120hz displays
+        apply(Math.min(maxPR, +(pr + step).toFixed(2)));
       }
     },
     get pixelRatio() { return pr; },
@@ -146,15 +146,12 @@ function makeGovernor(renderer: THREE.WebGLRenderer, maxPR: number) {
 
 function baseSetup(mount: HTMLDivElement, fov = 45, camZ = 8) {
   const tier = useTier();
-  // max-def within potato limits: low 1.0 (potato laptops are 1366x768 @1x —
-  // that's already native), mid up to 1.75, high up to 2. AA everywhere
-  // except low tier.
-  const PR_CAP = tier === 'low' ? 1.0 : tier === 'mid' ? 1.75 : 2.0;
+  const PR_CAP = tier === 'low' ? 1.25 : tier === 'mid' ? 1.75 : 2.0;
   const PR = Math.min(window.devicePixelRatio || 1, PR_CAP);
-  const renderer = new THREE.WebGLRenderer({ antialias: tier !== 'low', alpha: true, powerPreference: 'high-performance' });
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(PR);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  renderer.toneMappingExposure = 1.12;
   const governor = makeGovernor(renderer, PR_CAP);
   renderer.setClearColor(0x000000, 0);
   mount.appendChild(renderer.domElement);
@@ -958,13 +955,53 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
   useEffect(() => {
     const mount = mountRef.current!;
     const { renderer, scene, camera, ro, tier, governor } = baseSetup(mount, 40, 8.2);
-    renderer.toneMapping = THREE.NoToneMapping; // authored palette, keep exact colors
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
 
-    // ---- PMREM studio environment: sky/water reflections on every material.
-    // Baked once per mount; zero runtime cost. Sells the 3D read instantly.
+    camera.position.set(3.0, 3.2, 15.0);
+    camera.lookAt(0.5, 2.5, 0);
+
+    // Deep atmospheric dawn fog that blends seamlessly into the horizon
+    scene.fog = new THREE.Fog(0x223647, 48, 125);
+
+    // ---- High-Resolution Panoramic Dawn Sky Backdrop ----
+    const skyCanvas = document.createElement('canvas');
+    skyCanvas.width = 32; skyCanvas.height = 512;
+    const sCtx = skyCanvas.getContext('2d')!;
+    const sGrad = sCtx.createLinearGradient(0, 0, 0, 512);
+    sGrad.addColorStop(0.00, '#0a1928'); // deep oceanic zenith
+    sGrad.addColorStop(0.25, '#16354d'); // twilight blue
+    sGrad.addColorStop(0.50, '#2d5873'); // misty atmosphere
+    sGrad.addColorStop(0.68, '#6d6974'); // morning lilac
+    sGrad.addColorStop(0.80, '#d97d52'); // radiant dawn amber
+    sGrad.addColorStop(0.90, '#f9be7b'); // golden horizon alpenglow
+    sGrad.addColorStop(1.00, '#e5d7c8'); // warm sea horizon
+    sCtx.fillStyle = sGrad;
+    sCtx.fillRect(0, 0, 32, 512);
+    const skyTexture = new THREE.CanvasTexture(skyCanvas);
+    scene.background = skyTexture;
+
+    // Curved cyclorama backdrop plane so Reflector & camera see the warm horizon
+    const backdropGeo = new THREE.PlaneGeometry(240, 80);
+    const backdropMat = new THREE.MeshBasicMaterial({
+      map: skyTexture,
+      side: THREE.DoubleSide,
+      fog: false,
+    });
+    const skyBackdrop = new THREE.Mesh(backdropGeo, backdropMat);
+    skyBackdrop.position.set(0, 16, -65);
+    scene.add(skyBackdrop);
+
+    // Soft celestial morning sun disc
+    const sunDiscTex = makeGlowTexture('rgba(255,248,230,1.0)', 'rgba(255,185,110,0.3)');
+    const sunDisc = makeSoftSprite(sunDiscTex, 0xfff4db, 14, 0.85);
+    sunDisc.position.set(12, 18, -60);
+    scene.add(sunDisc);
+
+    // ---- PMREM Environment Reflections ----
     const pmrem = new THREE.PMREMGenerator(renderer);
     const envScene = new THREE.Scene();
-    envScene.background = new THREE.Color(0x9db8cc);
+    envScene.background = new THREE.Color(0x182c3c);
     const strip = (color: number, intensity: number, w: number, h: number, x: number, y: number, z: number, ry = 0) => {
       const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide }));
       m.material.color.multiplyScalar(intensity);
@@ -972,328 +1009,501 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       m.rotation.y = ry;
       envScene.add(m);
     };
-    strip(0xfff2dc, 5, 9, 1.4, 0, 6, 6);            // warm sun softbox
-    strip(0xffc9a0, 2.5, 8, 1.0, -6, 2, -2, Math.PI / 2);  // peach horizon strip
-    strip(0x8fc4e8, 2, 7, 0.9, 6, 3, -2, -Math.PI / 2);   // sky-blue strip
-    strip(0x4a8ca0, 1.5, 10, 0.8, 0, -4, -4);      // teal water bounce below
-    scene.environment = pmrem.fromScene(envScene, 0.08).texture;
+    strip(0xffdfa8, 4.5, 14, 4, 10, 8, 8);               // warm dawn key
+    strip(0xff9966, 3.2, 12, 3, -8, 2, -2, Math.PI / 2); // alpenglow horizon strip
+    strip(0x3898d4, 2.5, 10, 3, 8, 4, -4, -Math.PI / 2); // azure fill
+    strip(0x0c3242, 2.0, 16, 3, 0, -5, -4);             // ocean deep bounce
+    scene.environment = pmrem.fromScene(envScene, 0.05).texture;
     pmrem.dispose();
-    camera.position.set(3.4, 3.0, 15.5);
-    camera.lookAt(0.6, 2.6, 0);
-    scene.fog = new THREE.Fog(0xd8e4e8, 48, 110);
-    // pastel sky gradient: pale blue -> warm peach at the horizon
-    const skyC = document.createElement('canvas');
-    skyC.width = 4; skyC.height = 256;
-    const skyCtx = skyC.getContext('2d')!;
-    const sg = skyCtx.createLinearGradient(0, 0, 0, 256);
-    sg.addColorStop(0, '#7fa8cf');
-    sg.addColorStop(0.35, '#bcd4de');
-    sg.addColorStop(0.52, '#f5d4b8');
-    sg.addColorStop(0.62, '#f7b98e');
-    sg.addColorStop(0.7, '#f7ad7a');
-    sg.addColorStop(1, '#e8c9a8');
-    skyCtx.fillStyle = sg;
-    skyCtx.fillRect(0, 0, 4, 256);
-    scene.background = new THREE.CanvasTexture(skyC);
 
     const world = new THREE.Group();
     scene.add(world);
-    world.position.x = 3.4; // island fully clear of the text column
+    world.position.x = 3.2;
 
-    // ---- floating island: classic inverted-teardrop earth chunk ----
-    // Lathe profile: flat grass-top rim, stone walls tapering DOWN to a
-    // point (the iconic floating-island silhouette), gentle jitter only.
+    // =========================================================================
+    // 1. HIGH-RESOLUTION FLOATING ISLAND (Sculpted Granite & Ancient Bedrock)
+    // =========================================================================
     const islandCore = new THREE.Group();
     world.add(islandCore);
 
-    // (contact shadow handled by the floatShadow further below)
+    // Lathe profile with geological stratifications and natural rock taper
     const rockProfile: THREE.Vector2[] = [];
-    const RP = (h: number, r: number) => rockProfile.push(new THREE.Vector2(Math.max(r, 0.001), h));
-    RP(0.9, 1.9);   // top rim (grass line)
-    RP(0.72, 2.05); // slight overhang bulge
-    RP(0.4, 1.75);
-    RP(0.0, 1.45);
-    RP(-0.5, 1.0);  // taper begins
-    RP(-1.2, 0.62);
-    RP(-1.9, 0.30);
-    RP(-2.5, 0.10); // tip
-    const rockGeo = new THREE.LatheGeometry(rockProfile, tier === 'low' ? 9 : 14);
+    const RP = (h: number, r: number) => rockProfile.push(new THREE.Vector2(Math.max(r, 0.01), h));
+    RP(1.05, 2.25); // top turf rim
+    RP(0.85, 2.42); // rock overhang
+    RP(0.55, 2.22);
+    RP(0.15, 1.90);
+    RP(-0.35, 1.55);
+    RP(-0.90, 1.18);
+    RP(-1.50, 0.82);
+    RP(-2.15, 0.48);
+    RP(-2.75, 0.22);
+    RP(-3.20, 0.04); // keel tip
+
+    const rockSegments = tier === 'low' ? 32 : 48;
+    const rockGeo = new THREE.LatheGeometry(rockProfile, rockSegments);
     const pos = rockGeo.attributes.position as THREE.BufferAttribute;
+    
+    // Per-vertex geological strata sculpting using pure spatial harmonic functions
     for (let i = 0; i < pos.count; i++) {
-      // gentle strata ripple — organic, not exploded
       const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
       const a = Math.atan2(z, x);
-      const ripple = 1 + Math.sin(a * 6 + y * 2.2) * 0.045 + Math.sin(a * 11) * 0.02;
-      pos.setXYZ(i, x * ripple, y, z * ripple);
+      const strata = Math.sin(y * 4.2 + a * 4) * 0.05 + Math.cos(a * 7 - y * 2.5) * 0.035;
+      const crag = Math.sin(a * 11 + y * 5.5) * 0.02;
+      const mult = 1 + strata + crag;
+      pos.setXYZ(i, x * mult, y, z * mult);
     }
     rockGeo.computeVertexNormals();
-    const rock = new THREE.Mesh(rockGeo, new THREE.MeshStandardMaterial({
-      color: 0xa08a6c, roughness: 0.62, metalness: 0.08, flatShading: true, envMapIntensity: 1.2,
-    }));
-    islandCore.add(rock);
-    // grass top: flat disc capping the island rim
-    const grassTop = new THREE.Mesh(
-      new THREE.CylinderGeometry(2.12, 1.92, 0.34, tier === 'low' ? 18 : 28),
-      new THREE.MeshStandardMaterial({ color: 0x7ab558, roughness: 0.8, flatShading: true, envMapIntensity: 0.9 })
-    );
-    grassTop.position.y = 0.92;
-    islandCore.add(grassTop);
 
+    const rockMat = new THREE.MeshStandardMaterial({
+      color: 0x383e46,
+      roughness: 0.82,
+      metalness: 0.15,
+      envMapIntensity: 1.0,
+    });
+    const rockMesh = new THREE.Mesh(rockGeo, rockMat);
+    islandCore.add(rockMesh);
 
+    // Floating satellite boulder shards hovering near the keel
+    const shardGeo = new THREE.DodecahedronGeometry(0.24, 1);
+    const shardMat = new THREE.MeshStandardMaterial({ color: 0x30363d, roughness: 0.85, metalness: 0.1 });
+    const shards: THREE.Mesh[] = [];
+    const shardPositions = [
+      [1.6, -1.8, 0.6],
+      [-1.4, -2.1, -0.4],
+      [0.8, -2.6, -0.9],
+      [-0.7, -2.4, 0.8],
+    ];
+    shardPositions.forEach(([sx, sy, sz]) => {
+      const sh = new THREE.Mesh(shardGeo, shardMat);
+      sh.position.set(sx, sy, sz);
+      sh.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+      islandCore.add(sh);
+      shards.push(sh);
+    });
 
-    // ---- real oak: lathe trunk w/ root flare + taper, limbs, organic canopy ----
+    // Glowing EROFS Kernel Cryptographic Veins running through fractures
+    const veinMat = new THREE.MeshStandardMaterial({
+      color: 0x00f0ff,
+      emissive: 0x00c4e2,
+      emissiveIntensity: 0.95,
+      roughness: 0.2,
+      metalness: 0.8,
+    });
+    const vein1 = new THREE.Mesh(new THREE.TorusGeometry(1.72, 0.038, 10, 48), veinMat);
+    vein1.rotation.x = Math.PI / 2 + 0.14;
+    vein1.rotation.y = 0.25;
+    vein1.position.set(0, -0.45, 0);
+    islandCore.add(vein1);
+
+    const vein2 = new THREE.Mesh(new THREE.TorusGeometry(1.22, 0.032, 10, 40), veinMat);
+    vein2.rotation.x = Math.PI / 2 - 0.20;
+    vein2.rotation.y = -0.32;
+    vein2.position.set(0.08, -1.25, 0.05);
+    islandCore.add(vein2);
+
+    // Hanging Root Tendrils cascading off the cliffs
+    const rootMat = new THREE.MeshStandardMaterial({
+      color: 0x2b2118,
+      roughness: 0.9,
+      metalness: 0.05,
+    });
+    const makeRoot = (curvePts: THREE.Vector3[], radius: number) => {
+      const curve = new THREE.CatmullRomCurve3(curvePts);
+      const geo = new THREE.TubeGeometry(curve, 18, radius, 8, false);
+      return new THREE.Mesh(geo, rootMat);
+    };
+
+    const rootTendrils: THREE.Mesh[] = [
+      makeRoot([new THREE.Vector3(2.0, 0.8, 0.4), new THREE.Vector3(2.2, 0.1, 0.5), new THREE.Vector3(1.9, -0.8, 0.45), new THREE.Vector3(1.7, -1.8, 0.4)], 0.045),
+      makeRoot([new THREE.Vector3(-1.9, 0.85, 0.6), new THREE.Vector3(-2.05, 0.1, 0.7), new THREE.Vector3(-1.8, -1.0, 0.6), new THREE.Vector3(-1.5, -2.2, 0.5)], 0.048),
+      makeRoot([new THREE.Vector3(0.5, 0.82, -1.9), new THREE.Vector3(0.7, 0.0, -2.0), new THREE.Vector3(0.5, -1.2, -1.8), new THREE.Vector3(0.35, -2.3, -1.6)], 0.04),
+      makeRoot([new THREE.Vector3(-0.9, 0.9, -1.7), new THREE.Vector3(-1.15, 0.25, -1.8), new THREE.Vector3(-0.9, -0.7, -1.6)], 0.038),
+    ];
+    rootTendrils.forEach((r) => islandCore.add(r));
+
+    // Lush undulating turf top
+    const turfGeo = new THREE.CylinderGeometry(2.45, 2.28, 0.35, rockSegments, 3);
+    const turfPos = turfGeo.attributes.position as THREE.BufferAttribute;
+    for (let i = 0; i < turfPos.count; i++) {
+      const tx = turfPos.getX(i), ty = turfPos.getY(i), tz = turfPos.getZ(i);
+      if (ty > 0.05) {
+        const d = Math.sqrt(tx * tx + tz * tz);
+        const mound = Math.max(0, (2.1 - d) * 0.15) + Math.sin(tx * 3.5 + tz * 2.8) * 0.035;
+        turfPos.setY(i, ty + mound);
+      }
+    }
+    turfGeo.computeVertexNormals();
+
+    const turfMat = new THREE.MeshStandardMaterial({
+      color: 0x487f32,
+      roughness: 0.85,
+      metalness: 0.06,
+      envMapIntensity: 0.8,
+    });
+    const turf = new THREE.Mesh(turfGeo, turfMat);
+    turf.position.y = 1.02;
+    islandCore.add(turf);
+
+    // =========================================================================
+    // 2. THE ANCIENT GREAT OAK (Smooth High-Poly Trunk + Organic Canopy)
+    // =========================================================================
     const tree = new THREE.Group();
-    const barkMat = new THREE.MeshStandardMaterial({ color: 0x5a4632, roughness: 0.9, flatShading: true, envMapIntensity: 0.55 });
-    // trunk profile: wide flared base -> slim waist -> thick shoulder -> tip.
-    // Lathe gives one smooth, continuous, organic surface (no stacked cans).
-    const profile: THREE.Vector2[] = [];
-    const P = (h: number, r: number) => profile.push(new THREE.Vector2(r, h));
-    P(0.0, 0.52);   // root flare (wide)
-    P(0.10, 0.46);
-    P(0.28, 0.30);  // pulls in above the roots
-    P(0.55, 0.24);
-    P(0.85, 0.27);  // swell (burl shoulder)
-    P(1.15, 0.20);
-    P(1.5, 0.15);
-    P(1.8, 0.10);
-    P(2.05, 0.05);  // tip
-    const trunkGeo = new THREE.LatheGeometry(profile, tier === 'low' ? 7 : 10);
-    // bark ridges: radial ripple so it reads as bark, not plastic
+    const barkMat = new THREE.MeshStandardMaterial({
+      color: 0x423224,
+      roughness: 0.88,
+      metalness: 0.05,
+      envMapIntensity: 0.6,
+    });
+
+    const trunkProfile: THREE.Vector2[] = [];
+    const TP = (h: number, r: number) => trunkProfile.push(new THREE.Vector2(r, h));
+    TP(0.00, 0.72); // wide root buttress
+    TP(0.14, 0.58);
+    TP(0.38, 0.40);
+    TP(0.75, 0.33); // slender waist
+    TP(1.15, 0.36); // burl shoulder
+    TP(1.60, 0.30);
+    TP(2.00, 0.24);
+    TP(2.35, 0.16); // crown stem
+    TP(2.60, 0.08);
+
+    const trunkGeo = new THREE.LatheGeometry(trunkProfile, tier === 'low' ? 18 : 32);
     const tp = trunkGeo.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < tp.count; i++) {
       const x = tp.getX(i), y = tp.getY(i), z = tp.getZ(i);
-      const rr = Math.atan2(z, x);
-      const ripple = 1 + Math.sin(rr * (tier === 'low' ? 9 : 14)) * 0.05 + Math.sin(y * 6.0) * 0.02;
-      tp.setXYZ(i, x * ripple, y, z * ripple);
+      const angle = Math.atan2(z, x);
+      const barkGroove = Math.sin(angle * 10 + y * 2.2) * 0.04 + Math.cos(angle * 5) * 0.025;
+      const buttress = (y < 0.45) ? Math.pow(Math.cos(angle * 3.5), 2) * 0.09 : 0;
+      const m = 1 + barkGroove + buttress;
+      tp.setXYZ(i, x * m, y, z * m);
     }
     trunkGeo.computeVertexNormals();
+
     const trunk = new THREE.Mesh(trunkGeo, barkMat);
-    trunk.position.y = 0.92;
+    trunk.position.y = 1.08;
     tree.add(trunk);
-    // main limbs: two asymmetric forking arms from the upper trunk
-    const limb = (len: number, r0: number, _r1: number, bend: number, twist: number) => {
-      const pts: THREE.Vector3[] = [];
-      for (let i = 0; i <= 5; i++) {
-        const t = i / 5;
-        pts.push(new THREE.Vector3(
-          Math.sin(twist + bend * t * 2.2) * len * t * 0.5,
-          len * t * Math.cos(bend * 0.8),
-          Math.cos(twist) * len * t * 0.3
-        ));
+
+    // Natural curving boughs
+    const makeBough = (pts: THREE.Vector3[], r0: number, r1: number) => {
+      const curve = new THREE.CatmullRomCurve3(pts);
+      const geo = new THREE.TubeGeometry(curve, 16, r0, 12, false);
+      const p = geo.attributes.position as THREE.BufferAttribute;
+      for (let i = 0; i < p.count; i++) {
+        const u = Math.floor(i / 13) / 16;
+        const curR = r0 * (1 - u) + r1 * u;
+        const scale = curR / r0;
+        p.setXYZ(i, p.getX(i) * scale, p.getY(i), p.getZ(i) * scale);
       }
-      const g = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), tier === 'low' ? 5 : 8, r0, tier === 'low' ? 5 : 7, false);
-      const m = new THREE.Mesh(g, barkMat);
-      m.userData.tip = pts[5];
-      return m;
+      geo.computeVertexNormals();
+      return new THREE.Mesh(geo, barkMat);
     };
-    const arm1 = limb(1.35, 0.09, 0.03, 0.7, 0.4);
-    arm1.position.set(0.02, 2.54, 0.02);
-    arm1.rotation.z = 0.95;
-    tree.add(arm1);
-    const arm2 = limb(1.15, 0.08, 0.03, -0.9, 2.6);
-    arm2.position.set(-0.02, 2.42, 0.02);
-    arm2.rotation.z = -0.8;
-    arm2.rotation.y = 0.5;
-    tree.add(arm2);
-    // organic canopy: 9 clumps, EACH with its own tone (sunlit vs shadow
-    // greens) + irregular jittered icosahedra — reads as leaf masses, not a ball
-    const leafTones = [0x84b45e, 0x4c7a38, 0x9cc46e, 0x5c8d46, 0x6f9d4e, 0x87ae52];
-    const canopy: THREE.Mesh[] = [];
-    // clumps anchored ON the limb tips / trunk top — nothing floats free.
-    // limb tips (from the limb() calls): R-limb ends ~ (1.9, +2.3), L-limb ~ (-1.7, +2.1), top ~ (0.5, +3.4)
-    const clumpAnchors: [number, number, number, number][] = [
-      [0.95, 2.72, 0.25, 0.52],   // right-limb tip mass (big)
-      [-0.85, 2.62, 0.15, 0.5],  // left-limb tip mass (big)
-      [0.12, 3.5, -0.3, 0.5],    // trunk-top crown
-      [1.35, 2.95, 0.35, 0.38],  // right outer satellite (overlaps limb mass)
-      [-1.2, 2.85, -0.2, 0.4],   // left outer satellite (overlaps limb mass)
-      [0.85, 3.4, 0.2, 0.34],    // crown right shoulder
-      [-0.75, 3.3, 0.1, 0.32],   // crown left shoulder
-      [0.25, 3.95, 0.0, 0.3],    // crown cap
+
+    const bough1 = makeBough([
+      new THREE.Vector3(0.05, 2.85, 0.02),
+      new THREE.Vector3(0.55, 3.3, 0.25),
+      new THREE.Vector3(1.35, 3.6, 0.45),
+      new THREE.Vector3(1.85, 3.9, 0.6),
+    ], 0.13, 0.045);
+    tree.add(bough1);
+
+    const bough2 = makeBough([
+      new THREE.Vector3(-0.05, 2.75, 0.0),
+      new THREE.Vector3(-0.65, 3.15, -0.2),
+      new THREE.Vector3(-1.3, 3.45, -0.35),
+      new THREE.Vector3(-1.75, 3.7, -0.45),
+    ], 0.12, 0.04);
+    tree.add(bough2);
+
+    const bough3 = makeBough([
+      new THREE.Vector3(0.0, 2.95, -0.05),
+      new THREE.Vector3(0.1, 3.5, -0.55),
+      new THREE.Vector3(0.2, 4.0, -0.9),
+    ], 0.10, 0.038);
+    tree.add(bough3);
+
+    // Volumetric Lush Canopy (Smooth Subdivided Spheres with Spatial Harmonic Bulges)
+    // Pure spatial functions — zero index dependencies for butter-smooth organic leaf clouds
+    const leafPalette = [
+      0x4a8532, // sunlit lime-olive
+      0x325f20, // deep forest shadow
+      0x58953c, // radiant leaf green
+      0x3e7428, // rich midtone
+      0x68a544, // dawn highlight
+      0x2c531c, // under-canopy emerald
     ];
-    clumpAnchors.forEach(([ax, ay, az, ar], i) => {
-      const g = new THREE.IcosahedronGeometry(ar, 1);
+
+    const canopy: THREE.Mesh[] = [];
+    const canopyClusters: [number, number, number, number, number][] = [
+      [1.6, 4.0, 0.55, 0.74, 0],
+      [2.15, 3.8, 0.75, 0.58, 2],
+      [-1.5, 3.8, -0.4, 0.70, 1],
+      [-1.98, 3.6, -0.55, 0.54, 3],
+      [0.2, 4.2, -0.85, 0.64, 2],
+      [0.05, 4.3, 0.15, 0.88, 4],
+      [0.78, 4.5, 0.2, 0.62, 0],
+      [-0.68, 4.4, -0.1, 0.60, 3],
+      [0.15, 4.9, 0.0, 0.54, 4],
+      [0.98, 3.5, 0.5, 0.50, 1],
+      [-0.95, 3.4, -0.3, 0.48, 5],
+      [0.0, 3.75, 0.65, 0.52, 2],
+    ];
+
+    canopyClusters.forEach(([cx, cy, cz, cr, cIdx]) => {
+      // Smooth SphereGeometry (22 width, 18 height segments) for completely facet-free volume
+      const g = new THREE.SphereGeometry(cr, tier === 'low' ? 14 : 22, tier === 'low' ? 12 : 18);
       const gp = g.attributes.position as THREE.BufferAttribute;
       for (let k = 0; k < gp.count; k++) {
-        const j = 1 + ((Math.sin(k * 7.3 + i * 3.1) * 43758.5) % 1) * 0.16;
-        gp.setXYZ(k, gp.getX(k) * j, gp.getY(k) * j * 0.85, gp.getZ(k) * j);
+        const vx = gp.getX(k), vy = gp.getY(k), vz = gp.getZ(k);
+        // Pure spatial harmonic displacement
+        const b1 = Math.sin(vx * 4.2 + cy) * Math.cos(vy * 3.8 + cx) * 0.10;
+        const b2 = Math.cos(vz * 4.5 + cz) * 0.06;
+        const mult = 1 + b1 + b2;
+        gp.setXYZ(k, vx * mult, vy * (1 + b1 * 0.6), vz * mult);
       }
       g.computeVertexNormals();
+
       const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({
-        color: leafTones[i % leafTones.length], roughness: 0.85, flatShading: true, envMapIntensity: 0.55,
+        color: leafPalette[cIdx % leafPalette.length],
+        roughness: 0.80,
+        metalness: 0.04,
+        envMapIntensity: 0.7,
       }));
-      m.position.set(ax, ay + 0.92, az);
+      m.position.set(cx, cy + 0.8, cz);
       tree.add(m);
       canopy.push(m);
     });
+
     islandCore.add(tree);
 
-    // ---- mist sprites under the island ----
-    const mistTex = makeGlowTexture('rgba(255,255,255,0.55)', 'rgba(230,240,245,0.2)');
-    const mists: { s: THREE.Sprite; seed: number }[] = [];
-    for (let i = 0; i < (tier === 'low' ? 14 : tier === 'mid' ? 30 : 42); i++) {
-      const s = makeSoftSprite(mistTex, 0xf4f8f9, 5 + Math.random() * 4, 0.10 + Math.random() * 0.10);
-      s.material.blending = THREE.NormalBlending;
-      const a = Math.random() * Math.PI * 2;
-      s.position.set(Math.cos(a) * (2 + Math.random() * 3), -2.6 - Math.random() * 1.4, Math.sin(a) * (2 + Math.random() * 3));
-      world.add(s);
-      mists.push({ s, seed: Math.random() * 6.28 });
+    // Glowing Bio-luminescent Spore Motes orbiting the Canopy
+    const sporeCount = tier === 'low' ? 12 : 24;
+    const sporeGeo = new THREE.BufferGeometry();
+    const sporePositions = new Float32Array(sporeCount * 3);
+    const sporeSeeds = new Float32Array(sporeCount);
+    for (let i = 0; i < sporeCount; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const rad = 1.0 + Math.random() * 2.2;
+      sporePositions[i * 3] = Math.cos(ang) * rad;
+      sporePositions[i * 3 + 1] = 3.6 + Math.random() * 2.5;
+      sporePositions[i * 3 + 2] = Math.sin(ang) * rad;
+      sporeSeeds[i] = Math.random() * 10;
     }
+    sporeGeo.setAttribute('position', new THREE.BufferAttribute(sporePositions, 3));
+    const sporeTex = makeGlowTexture('rgba(210,255,190,1.0)', 'rgba(120,250,170,0.35)');
+    const sporeMat = new THREE.PointsMaterial({
+      color: 0x9eff75,
+      size: 0.42,
+      map: sporeTex,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const sporeField = new THREE.Points(sporeGeo, sporeMat);
+    tree.add(sporeField);
 
-    // ---- real mountains: displaced ridged peaks with snowlines ----
-    // Each peak: cone base geometry, then radial ridging (alternate ring
-    // radii) + per-vertex jitter + vertex colors (rock strata below the
-    // snowline, bright snow above). flatShading keeps facets crisp and
-    // cheap — no textures, no normals work, potato-friendly.
-    const makeMountain = (h: number, base: number, seed: number) => {
-      const segs = tier === 'low' ? 9 : 12;
-      const geo = new THREE.ConeGeometry(base, h, segs, tier === 'low' ? 4 : 6);
-      const p = geo.attributes.position as THREE.BufferAttribute;
-      const colors: number[] = [];
-      const snowLine = h * 0.62;
-      const rockC = new THREE.Color(0x5d6b7c);
-      const rockD = new THREE.Color(0x45525f);
-      const snowC = new THREE.Color(0xf6fafc);
-      for (let i = 0; i < p.count; i++) {
-        const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
-        // ridging: alternate radius by angle ring — jagged silhouette
-        const ang = Math.atan2(z, x);
-        const ring = Math.floor((y + h / 2) / (h / (segs / 1.5)));
-        const ridge = 1 + Math.sin(ang * segs + ring * 1.7 + seed) * 0.30
-          + Math.sin(ang * (segs * 2) + seed * 2) * 0.12;
-        const nx = x * ridge, nz = z * ridge;
-        // per-vertex jitter: no perfect cones in nature
-        const j = (Math.sin(i * 12.9898 + seed) * 43758.5453) % 1;
-        p.setXYZ(i, nx * (1 + j * 0.05), y, nz * (1 + j * 0.05));
-        // snow above the line, strata rock below
-        const vy = y + h / 2;
-        const c = vy > snowLine + j * h * 0.08
-          ? snowC
-          : rockC.clone().lerp(rockD, Math.abs(j));
-        colors.push(c.r, c.g, c.b);
+    // =========================================================================
+    // 3. MAJESTIC ALPINE MOUNTAIN MASSIFS (Horizon Ridge with Alpenglow)
+    // =========================================================================
+    const makeMassif = (height: number, baseRadius: number, seed: number) => {
+      const radialSegs = tier === 'low' ? 24 : 44;
+      const heightSegs = tier === 'low' ? 12 : 20;
+      const geo = new THREE.ConeGeometry(baseRadius, height, radialSegs, heightSegs);
+      const pos = geo.attributes.position as THREE.BufferAttribute;
+      const colors = new Float32Array(pos.count * 3);
+
+      const snowLine = height * 0.58;
+      const rockDeep = new THREE.Color(0x273444);
+      const rockMid = new THREE.Color(0x445568);
+      const snowAlpenglow = new THREE.Color(0xfff3e6);
+
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+        const elevation = y + height / 2;
+        const angle = Math.atan2(z, x);
+
+        // Craggy ridges and couloirs
+        const ridge1 = Math.sin(angle * 5 + seed) * 0.28;
+        const ridge2 = Math.cos(angle * 11 + elevation * 0.8) * 0.12;
+        const crag = Math.sin(elevation * 3.5 + angle * 7) * 0.05;
+        const displacement = 1 + ridge1 + ridge2 + crag;
+
+        pos.setXYZ(i, x * displacement, y, z * displacement);
+
+        const snowVariation = snowLine + Math.sin(angle * 6 + seed) * (height * 0.08);
+        let vertexCol: THREE.Color;
+        if (elevation > snowVariation) {
+          const snowFade = Math.min(1, (elevation - snowVariation) / (height * 0.14));
+          vertexCol = rockMid.clone().lerp(snowAlpenglow, snowFade);
+        } else {
+          const rockFade = elevation / snowLine;
+          vertexCol = rockDeep.clone().lerp(rockMid, rockFade);
+        }
+        colors[i * 3] = vertexCol.r;
+        colors[i * 3 + 1] = vertexCol.g;
+        colors[i * 3 + 2] = vertexCol.b;
       }
-      geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
+
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
       geo.computeVertexNormals();
       return geo;
     };
+
     const mountainMat = new THREE.MeshStandardMaterial({
-      vertexColors: true, roughness: 0.9, flatShading: true, envMapIntensity: 0.8, emissive: 0x1c222b, emissiveIntensity: 0.5,
+      vertexColors: true,
+      roughness: 0.80,
+      metalness: 0.12,
+      envMapIntensity: 0.9,
     });
+
     const mountainDefs = [
-      { h: 16, b: 5.4, x: -7.0, z: -15, seed: 3.1 },
-      { h: 19, b: 6.2, x: 0.8, z: -19, seed: 7.7 },
-      { h: 15, b: 5.2, x: 8.0, z: -14, seed: 1.4 },
+      { h: 24, b: 7.8, x: -11.0, z: -25, seed: 2.4 },  // Western Peak
+      { h: 29, b: 9.2, x: 1.0, z: -29, seed: 5.8 },    // Imperial Central Massif
+      { h: 23, b: 7.2, x: 12.5, z: -23, seed: 8.1 },   // Eastern Ridge
     ];
-    mountainDefs.forEach((d, i) => {
-      const mtn = new THREE.Mesh(makeMountain(d.h, d.b, d.seed), mountainMat);
-      mtn.position.set(d.x, -5.6 + (i % 2) * 0.4, d.z);
-      mtn.scale.setScalar(1 - i * 0.03); // slight size falloff = depth
-      world.add(mtn);
+
+    mountainDefs.forEach((d) => {
+      const massif = new THREE.Mesh(makeMassif(d.h, d.b, d.seed), mountainMat);
+      massif.position.set(d.x, -5.2, d.z);
+      world.add(massif);
     });
 
-    // ---- water: TRUE planar mirror (Reflector) under a tinted glass layer ----
-    // physical warm-horizon backdrop (the mirror reflects this -> peach folds onto water)
-    const backdropCanvas = document.createElement('canvas');
-    backdropCanvas.width = 4; backdropCanvas.height = 256;
-    const bdCtx = backdropCanvas.getContext('2d')!;
-    const bdG = bdCtx.createLinearGradient(0, 0, 0, 256);
-    bdG.addColorStop(0, '#7fa8cf');
-    bdG.addColorStop(0.45, '#bcd4de');
-    bdG.addColorStop(0.66, '#f7b98e');
-    bdG.addColorStop(0.8, '#f7ad7a');
-    bdG.addColorStop(1, '#e8c9a8');
-    bdCtx.fillStyle = bdG;
-    bdCtx.fillRect(0, 0, 4, 256);
-    const skyBackdrop = new THREE.Mesh(
-      new THREE.PlaneGeometry(220, 60),
-      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(backdropCanvas), side: THREE.DoubleSide })
-    );
-    skyBackdrop.position.set(0, 10, -80);
-    scene.add(skyBackdrop); // static backdrop
-
-    const mirror = new Reflector(new THREE.CircleGeometry(46, 64), {
+    // =========================================================================
+    // 4. WATER SURFACE & TRUE PLANAR REFLECTOR MIRROR
+    // =========================================================================
+    const mirrorSize = 100;
+    const mirror = new Reflector(new THREE.CircleGeometry(mirrorSize, 64), {
       clipBias: 0.003,
       textureWidth: tier === 'low' ? 512 : 1024,
       textureHeight: tier === 'low' ? 512 : 1024,
-      color: 0xffffff, // pure mirror — the sky paints the water
+      color: 0xffffff,
     });
     mirror.rotation.x = -Math.PI / 2;
     mirror.position.y = -4.6;
-    scene.add(mirror); // NOT in `world`: Reflector's virtual camera must not inherit orbit rotation
-    const water = new THREE.Mesh(
-      new THREE.CircleGeometry(45, 48),
-      new THREE.MeshStandardMaterial({ color: 0x1f7f96, metalness: 0.1, roughness: 0.2, transparent: true, opacity: 0.65, envMapIntensity: 1.2 })
-    );
-    water.rotation.x = -Math.PI / 2;
-    water.position.y = -4.54;
-    scene.add(water); // above the mirror, below the island; stable under orbit
+    scene.add(mirror);
 
-    // ---- float proof: soft shadow cast on the water + island tilt ----
-    const shadowTex = makeGlowTexture('rgba(20,30,38,0.6)', 'rgba(20,30,38,0.12)');
-    const floatShadow = makeSoftSprite(shadowTex, 0x0d2028, 9.5, 0.66);
-    floatShadow.position.set(0.3, -4.32, 0.4);
+    const waterGlaze = new THREE.Mesh(
+      new THREE.CircleGeometry(mirrorSize - 1, 48),
+      new THREE.MeshStandardMaterial({
+        color: 0x113b4c,
+        metalness: 0.18,
+        roughness: 0.14,
+        transparent: true,
+        opacity: 0.58,
+        envMapIntensity: 1.4,
+      })
+    );
+    waterGlaze.rotation.x = -Math.PI / 2;
+    waterGlaze.position.y = -4.55;
+    scene.add(waterGlaze);
+
+    // Floating island soft contact shadow on the mirror
+    const shadowTex = makeGlowTexture('rgba(10,22,30,0.75)', 'rgba(10,22,30,0.18)');
+    const floatShadow = makeSoftSprite(shadowTex, 0x06141a, 11.5, 0.72);
+    floatShadow.position.set(0.2, -4.38, 0.3);
     world.add(floatShadow);
-    islandCore.rotation.z = 0.045; // slight flying tilt
-    islandCore.rotation.x = 0.03;
-    islandCore.position.y = 2.6; // clear air gap: rock bottom ~0.5, water at -4.6
 
-    // ---- corruption (write attempt) + roots seal ----
-    const corruptTex = makeGlowTexture('rgba(255,90,90,0.9)', 'rgba(200,20,20,0.3)');
-    const corrupt = makeSoftSprite(corruptTex, 0xff4444, 2.2, 0);
-    corrupt.position.set(0.5, 1.8, 0.3);
-    world.add(corrupt);
-    // corruption = FIRE on the rock: a hot glowing shell + ember sprites that burn off
-    const corruptShell = new THREE.Mesh(
-      rockGeo.clone(),
-      new THREE.MeshBasicMaterial({ color: 0xff2233, transparent: true, opacity: 0 })
-    );
-    corruptShell.scale.setScalar(1.05);
-    islandCore.add(corruptShell);
-    const fireTex = makeGlowTexture('rgba(255,120,60,0.95)', 'rgba(255,40,20,0.35)');
-    const fireFlares: THREE.Sprite[] = [];
-    const flareCount = tier === 'low' ? 10 : tier === 'mid' ? 22 : 34;
-    for (let i = 0; i < flareCount; i++) {
-      const f = makeSoftSprite(fireTex, 0xff6633, 0.6 + Math.random() * 0.9, 0);
-      const d = new THREE.Vector3().randomDirection();
-      f.position.set(d.x * 1.6, d.y * 1.2 + 0.4, d.z * 1.6);
-      islandCore.add(f);
-      fireFlares.push(f);
+    // Atmosphere low mists over the water
+    const mistTex = makeGlowTexture('rgba(255,255,255,0.4)', 'rgba(210,235,245,0.15)');
+    const mists: { s: THREE.Sprite; seed: number; baseSpeed: number }[] = [];
+    const mistCount = tier === 'low' ? 14 : 32;
+    for (let i = 0; i < mistCount; i++) {
+      const s = makeSoftSprite(mistTex, 0xe4f2f7, 7 + Math.random() * 5, 0.12 + Math.random() * 0.12);
+      s.material.blending = THREE.NormalBlending;
+      const a = Math.random() * Math.PI * 2;
+      const rad = 3.5 + Math.random() * 5.5;
+      s.position.set(Math.cos(a) * rad, -2.8 - Math.random() * 1.5, Math.sin(a) * rad);
+      world.add(s);
+      mists.push({ s, seed: Math.random() * 6.28, baseSpeed: 0.2 + Math.random() * 0.3 });
     }
-    const bigFire = makeSoftSprite(fireTex, 0xff4422, 4.5, 0);
-    bigFire.position.set(0.5, 0.6, 0.3);
-    islandCore.add(bigFire);
-    const seal = new THREE.Mesh(
-      new THREE.TorusGeometry(2.7, 0.07, 10, 72),
-      new THREE.MeshBasicMaterial({ color: 0x3ddc97, transparent: true, opacity: 0 })
-    );
-    seal.rotation.x = Math.PI / 2;
-    seal.position.y = -0.6;
-    world.add(seal);
-    const sealGlowTex = makeGlowTexture('rgba(90,240,170,0.85)', 'rgba(40,200,120,0.25)');
-    const sealGlow = makeSoftSprite(sealGlowTex, 0x3ddc97, 7.5, 0);
-    sealGlow.position.y = -0.6;
-    world.add(sealGlow);
 
-    // ---- soft god-ray lighting ----
-    scene.add(new THREE.AmbientLight(0xe8ddd0, 1.0));
-    const sun = new THREE.DirectionalLight(0xffd7a0, 4.2); sun.position.set(-10, 12, 14); scene.add(sun); // low warm sun from front-left
-    const fill = new THREE.DirectionalLight(0xa8c8d8, 0.55); fill.position.set(-5, 3, -4); scene.add(fill);
-    const cyanRim = new THREE.DirectionalLight(0x7deeff, 0.5); cyanRim.position.set(8, 4, -6); scene.add(cyanRim); // cyan rim ties to UI accent
-    const bounce = new THREE.DirectionalLight(0xffc490, 0.5); bounce.position.set(2, -8, 8); scene.add(bounce); // water bounce up-light
-    const sunGlowTex = makeGlowTexture('rgba(255,245,220,0.8)', 'rgba(255,230,180,0.15)');
-    const sunGlow = makeSoftSprite(sunGlowTex, 0xfff2d8, 8, 0.5);
-    sunGlow.position.set(7, 6, 4);
-    world.add(sunGlow);
+    // =========================================================================
+    // 5. DEFENSE DYNAMICS: EROFS KERNEL BOUNDARY & CORRUPTION REJECTION FX
+    // =========================================================================
+    const corruptGeo = new THREE.OctahedronGeometry(0.55, 1);
+    const corruptMat = new THREE.MeshStandardMaterial({
+      color: 0xff1e38,
+      emissive: 0xbd001f,
+      emissiveIntensity: 1.8,
+      roughness: 0.2,
+      metalness: 0.8,
+      transparent: true,
+      opacity: 0,
+    });
+    const corruptShard = new THREE.Mesh(corruptGeo, corruptMat);
+    corruptShard.position.set(0.4, 5.0, 0.3);
+    world.add(corruptShard);
+
+    const corruptAuraTex = makeGlowTexture('rgba(255,40,60,0.95)', 'rgba(180,10,20,0.25)');
+    const corruptAura = makeSoftSprite(corruptAuraTex, 0xff2244, 3.2, 0);
+    corruptShard.add(corruptAura);
+
+    // Cryptographic EROFS Read-Only Kernel Boundary Shield
+    const shieldGeo = new THREE.TorusGeometry(3.1, 0.08, 16, 64);
+    const shieldMat = new THREE.MeshStandardMaterial({
+      color: 0x00f5ff,
+      emissive: 0x00d9e6,
+      emissiveIntensity: 1.5,
+      roughness: 0.1,
+      metalness: 0.9,
+      transparent: true,
+      opacity: 0,
+    });
+    const shield = new THREE.Mesh(shieldGeo, shieldMat);
+    shield.rotation.x = Math.PI / 2;
+    shield.position.y = 0.5;
+    world.add(shield);
+
+    const shieldGlowTex = makeGlowTexture('rgba(0,245,255,0.9)', 'rgba(0,180,220,0.25)');
+    const shieldGlow = makeSoftSprite(shieldGlowTex, 0x00f5ff, 8.5, 0);
+    shieldGlow.position.y = 0.5;
+    world.add(shieldGlow);
+
+    // Sparkling Defense Shockwave Sparks
+    const sparkCount = tier === 'low' ? 12 : 28;
+    const sparkTex = makeGlowTexture('rgba(255,255,255,1.0)', 'rgba(0,240,255,0.4)');
+    const sparks: THREE.Sprite[] = [];
+    for (let i = 0; i < sparkCount; i++) {
+      const sp = makeSoftSprite(sparkTex, 0x38ef7d, 0.6 + Math.random() * 0.8, 0);
+      world.add(sp);
+      sparks.push(sp);
+    }
+
+    // =========================================================================
+    // 6. CINEMATIC LIGHTING RIG
+    // =========================================================================
+    scene.add(new THREE.AmbientLight(0xdde8ef, 0.85));
+    // Warm morning key sun
+    const sun = new THREE.DirectionalLight(0xffdfa8, 4.6);
+    sun.position.set(-11, 14, 15);
+    scene.add(sun);
+    // Cool ambient sky fill
+    const skyFill = new THREE.DirectionalLight(0x78a6c8, 1.2);
+    skyFill.position.set(12, 8, -6);
+    scene.add(skyFill);
+    // Sharp cyan cryptographic rim light
+    const cyanRim = new THREE.DirectionalLight(0x00f5ff, 1.1);
+    cyanRim.position.set(-6, 2, -12);
+    scene.add(cyanRim);
+    // Warm water mirror bounce
+    const waterBounce = new THREE.DirectionalLight(0xf2a468, 0.85);
+    waterBounce.position.set(2, -9, 8);
+    scene.add(waterBounce);
+
+    islandCore.position.y = 2.4;
+    islandCore.rotation.z = 0.04;
+    islandCore.rotation.x = 0.025;
 
     const orbit = useOrbit(mount, world, onFirstGrab);
 
     let m = modeRef.current || 'idle';
     let modeT = 0;
     apiRef.current = { setMode: (nm: string) => { m = nm || 'idle'; modeT = 0; } };
-    apiRef.current.setMode(modeRef.current || 'idle'); // sync any mode that arrived during mount
+    apiRef.current.setMode(modeRef.current || 'idle');
 
     const clock = new FrameClock();
     let raf = 0;
+
     const animate = () => {
       raf = requestAnimationFrame(animate);
       if (document.hidden) return;
@@ -1303,46 +1513,80 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       modeT += dt;
 
       orbit.update(dt);
-      // island gently bobs; tree canopy sways
-      world.position.y = Math.sin(t * 0.5) * 0.18;
-    islandCore.rotation.z = 0.045 + Math.sin(t * 0.4) * 0.02;
-      canopy.forEach((b, i) => { b.scale.setScalar(1 + Math.sin(t * 1.4 + i) * 0.04); });
-      mists.forEach((p) => { p.s.position.y += Math.sin(t * 0.3 + p.seed) * 0.002; });
 
+      // Gentle organic breathing & floating physics
+      world.position.y = Math.sin(t * 0.6) * 0.16;
+      islandCore.rotation.z = 0.04 + Math.sin(t * 0.5) * 0.015;
+      islandCore.rotation.x = 0.025 + Math.cos(t * 0.4) * 0.012;
+
+      // Canopy leaf billow sways gently in the breeze
+      canopy.forEach((b, i) => {
+        b.scale.setScalar(1 + Math.sin(t * 1.5 + i * 0.9) * 0.035);
+      });
+
+      // Shard satellites gentle float
+      shards.forEach((sh, idx) => {
+        sh.rotation.x += dt * 0.4;
+        sh.rotation.y += dt * 0.3;
+        sh.position.y = shardPositions[idx][1] + Math.sin(t * 0.8 + idx) * 0.08;
+      });
+
+      // Bio-spores gentle orbital levitation
+      const spPositions = sporeField.geometry.attributes.position as THREE.BufferAttribute;
+      for (let i = 0; i < sporeCount; i++) {
+        const curY = sporePositions[i * 3 + 1];
+        spPositions.setY(i, curY + Math.sin(t * 1.8 + sporeSeeds[i]) * 0.004);
+      }
+      spPositions.needsUpdate = true;
+
+      // Water mists drift
+      mists.forEach((p) => {
+        p.s.position.y += Math.sin(t * p.baseSpeed + p.seed) * 0.0018;
+      });
+
+      // Vein idle glow breathing
+      veinMat.emissiveIntensity = 0.95 + Math.sin(t * 2.2) * 0.35;
+
+      // Mode Choreography
       if (m === 'dispatching') {
-        // write attempt descends onto the island
         const p = Math.min(modeT / 1.1, 1);
-        corrupt.material.opacity = p;
-        corrupt.position.set(0.5, 4.2 - p * 2.4, 0.3);
-        corrupt.scale.setScalar(1.4 - p * 0.5);
+        corruptMat.opacity = p;
+        corruptAura.material.opacity = p * 0.85;
+        corruptShard.position.set(0.4, 5.0 - p * 3.1, 0.3);
+        corruptShard.rotation.y += dt * 3.5;
+        corruptShard.rotation.x += dt * 2.0;
+
+        shieldMat.opacity = Math.max(0, shieldMat.opacity - dt * 2);
+        shieldGlow.material.opacity = Math.max(0, shieldGlow.material.opacity - dt * 2);
       } else if (m === 'detected' || m === 'denied' || m === 'blocked') {
-        // corruption IGNITES on the rock, then the armor burns it off
-        const flare = Math.min(modeT / 0.7, 1);
-        const burnOut = Math.max(0, Math.min((modeT - 0.7) / 1.6, 1)); // 0->1 after 0.7s
-        const heat = (1 - burnOut) * flare;
-        (corruptShell.material as THREE.MeshBasicMaterial).opacity = heat * (0.7 + Math.sin(t * 11) * 0.2);
-        fireFlares.forEach((f, i) => {
-          f.material.opacity = heat * (0.7 + Math.sin(t * 13 + i * 2.4) * 0.3);
-          f.position.y += dt * heat * 0.35; // embers rise
-          f.scale.setScalar(f.scale.x * (1 + dt * heat * 0.12));
+        const flare = Math.min(modeT / 0.5, 1);
+        const shieldScale = 0.4 + flare * 0.65;
+        shield.scale.setScalar(shieldScale);
+        shieldMat.opacity = flare * 0.95;
+        shieldGlow.material.opacity = flare * 0.8;
+        shield.rotation.z += dt * 1.2;
+
+        veinMat.emissiveIntensity = 2.4;
+
+        const repelled = Math.min(modeT / 0.6, 1);
+        corruptShard.position.y += dt * 2.5;
+        corruptMat.opacity = Math.max(0, 1 - repelled * 1.4);
+        corruptAura.material.opacity = Math.max(0, 0.85 - repelled * 1.4);
+
+        sparks.forEach((sp, idx) => {
+          const spAngle = (idx / sparkCount) * Math.PI * 2 + t * 0.8;
+          const spDist = 1.2 + flare * 2.4;
+          sp.position.set(Math.cos(spAngle) * spDist, 1.8 + Math.sin(idx * 3 + t * 4) * 0.6, Math.sin(spAngle) * spDist);
+          sp.material.opacity = Math.max(0, flare * (1 - (modeT - 0.3) * 0.7));
         });
-        bigFire.material.opacity = heat * 0.75;
-        bigFire.scale.setScalar(4.2 + Math.sin(t * 9) * 0.6 * heat);
-        corrupt.material.opacity = Math.max(0, 1 - Math.max(modeT - 0.7, 0) * 1.4);
-        // green seal rings in as EROFS verdict — bright enough to win the frame
-        const so = Math.min(Math.max(modeT - 0.8, 0) / 0.8, 1);
-        (seal.material as THREE.MeshBasicMaterial).opacity = so * 0.95;
-        seal.scale.setScalar(0.01 + so);
-        sealGlow.material.opacity = so * 0.65;
-        seal.rotation.z += dt * 0.5;
       } else {
-        // idle: all fire settles out
-        (corruptShell.material as THREE.MeshBasicMaterial).opacity = Math.max(0, (corruptShell.material as THREE.MeshBasicMaterial).opacity - dt * 2);
-        fireFlares.forEach((f) => { f.material.opacity = Math.max(0, f.material.opacity - dt * 2); });
-        bigFire.material.opacity = Math.max(0, bigFire.material.opacity - dt * 2);
-        corrupt.material.opacity = Math.max(0, corrupt.material.opacity - dt);
-        (seal.material as THREE.MeshBasicMaterial).opacity = Math.max(0, (seal.material as THREE.MeshBasicMaterial).opacity - dt * 0.4);
-        sealGlow.material.opacity = Math.max(0, sealGlow.material.opacity - dt * 0.5);
+        corruptMat.opacity = Math.max(0, corruptMat.opacity - dt * 2.5);
+        corruptAura.material.opacity = Math.max(0, corruptAura.material.opacity - dt * 2.5);
+        shieldMat.opacity = Math.max(0, shieldMat.opacity - dt * 1.5);
+        shieldGlow.material.opacity = Math.max(0, shieldGlow.material.opacity - dt * 1.5);
+        sparks.forEach((sp) => {
+          sp.material.opacity = Math.max(0, sp.material.opacity - dt * 2);
+        });
       }
 
       renderer.render(scene, camera);
@@ -1352,6 +1596,20 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     return () => {
       cancelAnimationFrame(raf);
       orbit.cleanup();
+      rockGeo.dispose();
+      rockMat.dispose();
+      veinMat.dispose();
+      turfGeo.dispose();
+      turfMat.dispose();
+      trunkGeo.dispose();
+      barkMat.dispose();
+      mountainMat.dispose();
+      sporeGeo.dispose();
+      sporeMat.dispose();
+      corruptGeo.dispose();
+      corruptMat.dispose();
+      shieldGeo.dispose();
+      shieldMat.dispose();
       disposeScene(scene, renderer, ro, mount);
     };
   }, []);

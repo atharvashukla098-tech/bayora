@@ -27,7 +27,11 @@ export interface JudgeSceneData {
   title: string;
   desc: string;
   evaluates: string;
-  evidenceFiles: {
+  verification?: {
+    title: string;
+    detail: string;
+  };
+  evidenceFiles?: {
     name: string;
     size: string;
     timestamp: string;
