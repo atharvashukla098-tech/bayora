@@ -224,10 +224,32 @@ def create_broker_app(config: BayoraConfig, *, target_client: TargetClient,
 
     @app.get("/healthz")
     async def healthz():
-        return {"status": "ok", "service": "broker",
-                "target_mode": config.target_mode,
-                "current_run": current_run["run_id"],
-                "block_height": ledger.block_height}
+        from app.harness.docker_probe import DockerProbe
+        docker_ok = DockerProbe().check().available
+        return {
+            "status": "ok",
+            "service": "broker",
+            "target_mode": config.target_mode,
+            "current_run": current_run["run_id"],
+            "block_height": ledger.block_height,
+            "docker_available": docker_ok,
+            "runtime_containment": "ACTIVE" if docker_ok else "SKIPPED (Docker unavailable)",
+        }
+
+    @app.get("/v1/state")
+    async def get_state():
+        from app.harness.docker_probe import DockerProbe
+        docker_ok = DockerProbe().check().available
+        return {
+            "broker": "ONLINE",
+            "service": "broker",
+            "target_mode": config.target_mode,
+            "current_run": current_run["run_id"],
+            "block_height": ledger.block_height,
+            "docker_available": docker_ok,
+            "runtime_containment": "ACTIVE" if docker_ok else "SKIPPED (Docker unavailable)",
+            "offline_mode": True,
+        }
 
     @app.post("/v1/check-destination")
     async def check_destination(req: CheckDestinationRequest, request: Request):
