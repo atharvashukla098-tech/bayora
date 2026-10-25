@@ -157,8 +157,9 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
       {/* THE 3D WORLD — built from this scenario's reference */}
       <ScenarioScene scenarioId={scenario.scenarioId} mode={sceneMode} onFirstGrab={() => setShowHint(false)} />
 
-      {/* chrome */}
-      <div className="absolute top-0 inset-x-0 z-20 px-5 sm:px-10 py-5 flex items-center justify-between pointer-events-none">
+      {/* chrome — solid backdrop so scrolled dossier content passes UNDER
+          the case label instead of through it */}
+      <div className="absolute top-0 inset-x-0 z-20 px-5 sm:px-10 py-5 flex items-center justify-between pointer-events-none bg-black/85 border-b border-white/10 backdrop-blur-sm">
         <div className="flex items-baseline gap-4 pointer-events-auto">
           <span className="font-mono text-[10px] tracking-[0.3em] text-cyan-400/80">CASE {scenario.id}</span>
           <span className="hidden sm:block font-mono text-[10px] tracking-[0.3em] text-neutral-400 uppercase">{scenario.category}</span>

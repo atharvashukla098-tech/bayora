@@ -667,27 +667,7 @@ function EditorialLandingInner({
 
       <section id="capability-pillars" className="relative z-10 py-12 md:py-16 px-6 md:px-14 max-w-7xl mx-auto">
 
-        {/* Top Centered Pill */}
-
-        <div className="flex justify-center mb-6">
-
-          <button
-
-            onClick={() => onOpenConsole()}
-
-            onMouseEnter={() => sound.playHover()}
-
-            className="px-6 py-2 rounded-full bg-white text-black border border-black/10 shadow-sm font-sans text-xs font-bold tracking-wider uppercase flex items-center space-x-2.5 hover:bg-neutral-50 hover:shadow-md transition-all cursor-pointer"
-
-          >
-
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-pulse" />
-
-            <span>FOUR CAPABILITY PILLARS // BENCHMARK MATRIX</span>
-
-          </button>
-
-        </div>
+        
 
 
 
