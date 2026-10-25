@@ -5,6 +5,9 @@ interface IridescentTypographyCanvasProps {
 }
 
 export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove, paused = false }: IridescentTypographyCanvasProps & { paused?: boolean }) {
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused; // live value for the render loop
+
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -358,8 +361,8 @@ export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove
 
         let resumePending = false;
 function render(now: number) {
-      if (paused) { resumePending = true; return; }
-      if (resumePending) { resumePending = false; return; } // resume next frame: stagger warmup
+      if (pausedRef.current) { resumePending = true; requestAnimationFrame(render); return; } // paused: keep the loop ALIVE, skip the work
+      if (resumePending) { resumePending = false; requestAnimationFrame(render); return; } // staggered resume: skip 1 frame
       if (!isVisible || document.hidden) {
         isLoopRunning = false;
         return;

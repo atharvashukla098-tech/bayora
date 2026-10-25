@@ -1367,7 +1367,7 @@ export function CinematicCanvas({
       const __last = (globalThis as unknown as { __cinLast?: number }).__cinLast || __now;
       const __cost = __now - __last;
       (globalThis as unknown as { __cinLast?: number }).__cinLast = __now;
-      if (__cost > 40) return; // long frame: skip 1, let the compositor breathe
+      if (__cost > 40) { requestAnimationFrame(animate); return; } // long frame: skip 1 draw, keep the loop ALIVE
       animId = requestAnimationFrame(animate);
 
       // 60FPS IDLE OPTIMIZATION: When Page 1 (Editorial) is active, pause 3D calculations & rendering

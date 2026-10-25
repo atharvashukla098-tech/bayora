@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 
 export function LiquidGlassCanvas({ paused = false }: { paused?: boolean }) {
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused; // live value for the render loop
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -216,8 +219,8 @@ export function LiquidGlassCanvas({ paused = false }: { paused?: boolean }) {
 
         let resumePending = false;
 const render = (now: number) => {
-      if (paused) { resumePending = true; return; }
-      if (resumePending) { resumePending = false; return; } // resume next frame: stagger warmup
+      if (pausedRef.current) { resumePending = true; requestAnimationFrame(render); return; } // paused: keep the loop ALIVE, skip the work
+      if (resumePending) { resumePending = false; requestAnimationFrame(render); return; } // staggered resume: skip 1 frame
       animId = requestAnimationFrame(render);
       if (!isVisible || document.hidden) return;
 

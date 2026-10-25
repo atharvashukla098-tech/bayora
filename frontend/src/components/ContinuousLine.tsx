@@ -6,6 +6,9 @@ interface PointSample {
 }
 
 export function ContinuousLine({ paused = false }: { paused?: boolean }) {
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
+
   const pathRef = useRef<SVGPathElement>(null);
   const totalLengthRef = useRef<number>(0);
   const samplesRef = useRef<PointSample[]>([]);
@@ -117,7 +120,7 @@ export function ContinuousLine({ paused = false }: { paused?: boolean }) {
     // Throttled RAF scroll handler for locked 60/120FPS tracking with zero latency
     let ticking = false;
     const handleScroll = () => {
-      if (paused) return;
+      if (pausedRef.current) return;
       if (!ticking) {
         ticking = true;
         requestAnimationFrame(() => {
