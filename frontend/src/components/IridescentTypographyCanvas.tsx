@@ -146,6 +146,8 @@ export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove
 
       uniform vec2 u_mouse;
 
+      uniform float u_glance;
+
 
 
       float hash(vec2 p) {
@@ -227,10 +229,35 @@ export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove
         // Sample Trail Intensity
         float t = texture2D(u_trailTex, uv).r;
 
-        // STRICT TEXT CONTAINMENT: If this pixel is not on text, return pure resting background!
-        // This completely eliminates any lingering glow in the empty background.
+        // Introductory Single Glance: sweeps diagonally across the whole text in ~1 second
+        float glanceBeam = 0.0;
+        vec2 glanceNormal = vec2(0.0);
+        if (u_glance >= 0.0 && u_glance <= 1.0) {
+          float smoothP = smoothstep(0.0, 1.0, u_glance);
+          float diagCoord = uv.x * 0.75 + (1.0 - uv.y) * 0.45;
+          float sweepCenter = mix(-0.25, 1.45, smoothP);
+          float dist = abs(diagCoord - sweepCenter);
+
+          // Wide luminous sweep beam
+          float beam = smoothstep(0.32, 0.0, dist);
+          // Crisp radiant core gleam in the center of the beam
+          float core = smoothstep(0.10, 0.0, dist);
+          
+          glanceBeam = beam * 0.75 + core * 0.55;
+          
+          // Introduce light wave normal deflection for crystalline refraction
+          float slope = (diagCoord - sweepCenter) / 0.32;
+          if (abs(slope) <= 1.0) {
+            glanceNormal = vec2(-slope * 0.5, slope * 0.5) * beam;
+          }
+        }
+
+        // Combine cursor fluid trail 't' with the glance beam
+        float effectiveT = max(t, glanceBeam);
+
+        // STRICT TEXT CONTAINMENT: If this pixel is not on text or has no light, return resting background!
         float textCoverage = clamp(maskBase.r + maskBase.g * 1.5, 0.0, 1.0);
-        if (t < 0.003 || textCoverage < 0.003) {
+        if (effectiveT < 0.003 || textCoverage < 0.003) {
           gl_FragColor = vec4(restingColor, 1.0);
           return;
         }
@@ -242,12 +269,15 @@ export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove
         float tD = texture2D(u_trailTex, uv - vec2(0.0, texel.y * 3.5)).r;
         vec2 trailGrad = vec2(tR - tL, tU - tD);
 
+        // Combine trail gradient with glance normal
+        vec2 combinedGrad = trailGrad + glanceNormal * 0.35;
+
         // Subtle living fluid turbulence
         float turb = fbm(uv * 7.5 + u_time * 0.2) * 0.12;
-        vec2 fluidNormal = trailGrad * 24.0 + vec2(turb, -turb) * (0.12 + t * 0.88);
+        vec2 fluidNormal = combinedGrad * 24.0 + vec2(turb, -turb) * (0.12 + effectiveT * 0.88);
 
         // True chromatic dispersion (split R, G, B refractive indices like real glass)
-        float disp = 0.015 * clamp(t * 1.3, 0.0, 1.0);
+        float disp = 0.015 * clamp(effectiveT * 1.3, 0.0, 1.0);
         float maskRefractR = texture2D(u_maskTex, uv - fluidNormal * (disp * 1.25)).r;
         float maskRefractG = texture2D(u_maskTex, uv - fluidNormal * disp).r;
         float maskRefractB = texture2D(u_maskTex, uv - fluidNormal * (disp * 0.75)).r;
@@ -259,12 +289,12 @@ export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove
         vec3 H = normalize(lightDir + viewDir);
 
         float NdotH = max(0.0, dot(N, H));
-        float spec = pow(NdotH, 26.0) * 3.2 * t;
+        float spec = pow(NdotH, 26.0) * 3.2 * effectiveT;
         float fresnel = pow(1.0 - max(0.0, dot(N, viewDir)), 2.4);
 
         // Lusion authentic thin-film chromatic spectrum:
         // Electric Cyan -> Deep Cobalt -> Prismatic Violet -> Sunset Cadmium Ruby -> Molten Gold
-        float phase = dot(N.xy, vec2(3.2, 4.0)) + u_time * 0.35 + t * 2.2;
+        float phase = dot(N.xy, vec2(3.2, 4.0)) + u_time * 0.35 + effectiveT * 2.2;
         vec3 cCyan   = vec3(0.00, 0.92, 1.00); // Electric Cyan
         vec3 cBlue   = vec3(0.08, 0.28, 0.98); // Deep Cobalt
         vec3 cViolet = vec3(0.78, 0.10, 0.95); // Prismatic Violet
@@ -289,10 +319,10 @@ export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove
         );
 
         // Level of color revelation based on trail intensity 't':
-        float reveal = smoothstep(0.015, 0.40, t);
+        float reveal = smoothstep(0.015, 0.40, effectiveT);
 
         // Cursor Reveal Dynamics: As cursor drags on text, reveal the architectural text structure
-        float cursorReveal = clamp(t * 2.4, 0.0, 1.0);
+        float cursorReveal = clamp(effectiveT * 2.4, 0.0, 1.0);
         vec3 activeStroke = mix(vec3(0.58, 0.68, 0.82), vec3(0.95, 0.98, 1.0), cursorReveal);
         vec3 activeFill   = mix(vec3(0.04, 0.05, 0.08), vec3(0.12, 0.15, 0.22), cursorReveal);
         vec3 activeBevel  = mix(vec3(0.45, 0.55, 0.70), vec3(0.90, 0.95, 1.0), cursorReveal);
@@ -676,14 +706,51 @@ export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove
 
 
 
+    // First-time visit glance effect:
+    // Glances once across the entire typography when the user views the page for the first time
+    const GLANCE_STORAGE_KEY = 'bayora_glance_first_visit_done';
+    let hasSeenGlance = false;
+    try {
+      hasSeenGlance = !!sessionStorage.getItem(GLANCE_STORAGE_KEY);
+    } catch {
+      hasSeenGlance = false;
+    }
+
+    let isGlancing = false;
+    let glanceStartTime = -1;
+    const GLANCE_DURATION = 1200; // ms (~1.2 seconds)
+
+    const triggerGlance = () => {
+      glanceStartTime = performance.now();
+      isGlancing = true;
+    };
+
+    // Expose on window for easy verification or manual re-trigger anytime
+    (window as unknown as { __triggerTextGlance?: () => void }).__triggerTextGlance = () => {
+      try {
+        sessionStorage.removeItem(GLANCE_STORAGE_KEY);
+      } catch {}
+      triggerGlance();
+    };
+
     // Intersection Observer to avoid GPU rendering when off-screen
-
+    // AND trigger the initial glance once when the section first enters viewport!
+    let initialIntersectionFired = false;
     const intersectionObserver = new IntersectionObserver(([entry]) => {
-
       isVisible = entry.isIntersecting;
-
-    });
-
+      if (entry.isIntersecting && !initialIntersectionFired) {
+        initialIntersectionFired = true;
+        if (!hasSeenGlance) {
+          hasSeenGlance = true;
+          try {
+            sessionStorage.setItem(GLANCE_STORAGE_KEY, 'true');
+          } catch {}
+          setTimeout(() => {
+            triggerGlance();
+          }, 250);
+        }
+      }
+    }, { threshold: 0.1 });
     intersectionObserver.observe(container);
 
 
@@ -893,6 +960,22 @@ export function IridescentTypographyCanvas({ onPointerMove: _externalPointerMove
       gl!.uniform1f(gl!.getUniformLocation(prog, 'u_time'), now * 0.001);
 
       gl!.uniform2f(gl!.getUniformLocation(prog, 'u_mouse'), pointer.currentX, pointer.currentY);
+
+      let glanceVal = -1.0;
+      if (isGlancing && glanceStartTime > 0) {
+        const elapsed = now - glanceStartTime;
+        if (elapsed >= 0) {
+          glanceVal = Math.min(elapsed / GLANCE_DURATION, 1.0);
+          if (elapsed >= GLANCE_DURATION) {
+            isGlancing = false;
+            glanceVal = -1.0;
+          }
+        }
+      }
+      const glanceLoc = gl!.getUniformLocation(prog, 'u_glance');
+      if (glanceLoc) {
+        gl!.uniform1f(glanceLoc, glanceVal);
+      }
 
 
 

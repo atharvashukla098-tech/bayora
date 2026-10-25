@@ -595,21 +595,23 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
   useEffect(() => {
     const mount = mountRef.current!;
     const { renderer, scene, camera, ro, tier } = baseSetup(mount, 48, 11);
+    camera.position.set(0, 2.6, 10.5);
+    camera.lookAt(0, 1.8, 0);
 
     // ---- pastel sky gradient ----
     const skyCanvas = document.createElement('canvas');
     skyCanvas.width = 4; skyCanvas.height = 256;
     const sctx = skyCanvas.getContext('2d')!;
     const skyGrad = sctx.createLinearGradient(0, 0, 0, 256);
-    skyGrad.addColorStop(0, '#7fa8d8');
-    skyGrad.addColorStop(0.45, '#c9d4e8');
-    skyGrad.addColorStop(0.72, '#f2d8c8');
-    skyGrad.addColorStop(1, '#f7c8ac');
+    skyGrad.addColorStop(0, '#4a6f9e');
+    skyGrad.addColorStop(0.45, '#9fb8d8');
+    skyGrad.addColorStop(0.72, '#e8c8b0');
+    skyGrad.addColorStop(1, '#f0b896');
     sctx.fillStyle = skyGrad;
     sctx.fillRect(0, 0, 4, 256);
     const skyTex = new THREE.CanvasTexture(skyCanvas);
     scene.background = skyTex;
-    scene.fog = new THREE.Fog(0xd8d4e4, 14, 42);
+    scene.fog = new THREE.Fog(0x9fb8d8, 16, 46);
 
     const world = new THREE.Group();
     scene.add(world);
@@ -618,19 +620,19 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
     const softTex = makeGlowTexture('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.25)');
     const pastels = [0xffc4e0, 0xc4f0dc, 0xc4d0ff, 0xffe4c4, 0xd4f4ff];
     const cloudPuffs: { s: THREE.Sprite; seed: number; base: THREE.Vector3 }[] = [];
-    const puffCount = tier === 'low' ? 36 : 80;
+    const puffCount = tier === 'low' ? 60 : 140;
     for (let i = 0; i < puffCount; i++) {
       const dir = new THREE.Vector3().randomDirection();
-      const r = Math.pow(Math.random(), 0.6) * 2.2;
+      const r = Math.pow(Math.random(), 0.6) * 2.6;
       const c = pastels[i % pastels.length];
-      const s = makeSoftSprite(softTex, c, 1.6 + Math.random() * 2.4, 0.16 + Math.random() * 0.22);
-      s.position.set(dir.x * r * 1.3, dir.y * r * 0.75 + 1.4, dir.z * r * 0.9);
+      const s = makeSoftSprite(softTex, c, 2.4 + Math.random() * 3.6, 0.3 + Math.random() * 0.3);
+      s.position.set(dir.x * r * 1.9, dir.y * r * 0.6 + 1.6, dir.z * r * 0.8);
       world.add(s);
       cloudPuffs.push({ s, seed: Math.random() * Math.PI * 2, base: s.position.clone() });
     }
     // warm core glow
     const coreTex = makeGlowTexture('rgba(255,230,190,0.95)', 'rgba(255,170,90,0.3)');
-    const coreGlow = makeSoftSprite(coreTex, 0xffd9a8, 6.5, 0.9);
+    const coreGlow = makeSoftSprite(coreTex, 0xffd9a8, 3.2, 0.45);
     coreGlow.position.set(0, 1.2, 0);
     world.add(coreGlow);
 
@@ -660,8 +662,8 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
 
     // ---- water ----
     const water = new THREE.Mesh(
-      new THREE.CircleGeometry(30, 48),
-      new THREE.MeshStandardMaterial({ color: 0x8fb2c8, metalness: 0.75, roughness: 0.22 })
+      new THREE.CircleGeometry(18, 48),
+      new THREE.MeshStandardMaterial({ color: 0x24404f, metalness: 0.85, roughness: 0.14 })
     );
     water.rotation.x = -Math.PI / 2;
     water.position.y = -2.2;
@@ -759,9 +761,9 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
   useEffect(() => {
     const mount = mountRef.current!;
     const { renderer, scene, camera, ro, tier } = baseSetup(mount, 40, 8.2);
-    camera.position.set(0.4, 1.1, 8.2);
-    camera.lookAt(0, 0.6, 0);
-    scene.fog = new THREE.Fog(0xbfd8dc, 20, 60);
+    camera.position.set(6.0, -1.4, 12.0);
+    camera.lookAt(1.2, 1.9, 0);
+    scene.fog = new THREE.Fog(0xcfe0e4, 34, 95);
     // pastel sky gradient: pale blue -> warm peach at the horizon
     const skyC = document.createElement('canvas');
     skyC.width = 4; skyC.height = 256;
@@ -779,8 +781,11 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
 
     const world = new THREE.Group();
     scene.add(world);
+    world.position.x = 4.6; // island fully clear of the headline column
 
     // ---- floating rock island (jittered icosahedron) ----
+    const islandCore = new THREE.Group();
+    world.add(islandCore);
     const rockGeo = new THREE.IcosahedronGeometry(2.1, tier === 'low' ? 1 : 2);
     const pos = rockGeo.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < pos.count; i++) {
@@ -789,17 +794,17 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     }
     rockGeo.computeVertexNormals();
     const rock = new THREE.Mesh(rockGeo, new THREE.MeshStandardMaterial({
-      color: 0x5c5648, roughness: 0.95, metalness: 0.02, flatShading: true,
+      color: 0x8a7a62, roughness: 0.9, metalness: 0.02, flatShading: true,
     }));
-    world.add(rock);
+    islandCore.add(rock);
 
     // ---- moss cap ----
-    const mossGeo = new THREE.IcosahedronGeometry(1.95, 2);
+    const mossGeo = new THREE.IcosahedronGeometry(1.55, 2);
     const mpos = mossGeo.attributes.position as THREE.BufferAttribute;
     const mossColors: number[] = [];
     const cA = new THREE.Color(0x4f7d3a), cB = new THREE.Color(0x77a84f);
     for (let i = 0; i < mpos.count; i++) {
-      if (mpos.getY(i) > 0.2) mpos.setXYZ(i, mpos.getX(i) * (1 + Math.sin(i * 3.7) * 0.08), mpos.getY(i) * 0.55, mpos.getZ(i) * (1 + Math.cos(i * 2.9) * 0.08));
+      if (mpos.getY(i) > 0.2) mpos.setXYZ(i, mpos.getX(i) * (1 + Math.sin(i * 3.7) * 0.08), mpos.getY(i) * 0.38, mpos.getZ(i) * (1 + Math.cos(i * 2.9) * 0.08));
       const mix = Math.abs((Math.sin(i * 12.9898) * 43758.5453) % 1);
       const c = cA.clone().lerp(cB, mix);
       mossColors.push(c.r, c.g, c.b);
@@ -809,8 +814,8 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     const moss = new THREE.Mesh(mossGeo, new THREE.MeshStandardMaterial({
       vertexColors: true, roughness: 0.95,
     }));
-    moss.position.y = 1.05;
-    world.add(moss);
+    moss.position.y = 1.45; // perched as grass on the rock's shoulder
+    islandCore.add(moss);
 
     // ---- gnarled oak: stacked bent trunk + canopy blobs ----
     const tree = new THREE.Group();
@@ -844,7 +849,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       tree.add(blob);
       canopy.push(blob);
     }
-    world.add(tree);
+    islandCore.add(tree);
 
     // ---- mist sprites under the island ----
     const mistTex = makeGlowTexture('rgba(255,255,255,0.55)', 'rgba(230,240,245,0.2)');
@@ -873,11 +878,20 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     // ---- water ----
     const water = new THREE.Mesh(
       new THREE.CircleGeometry(45, 48),
-      new THREE.MeshStandardMaterial({ color: 0x7aa8ac, metalness: 0.6, roughness: 0.28 })
+      new THREE.MeshStandardMaterial({ color: 0x5e8c96, metalness: 0.55, roughness: 0.3 })
     );
     water.rotation.x = -Math.PI / 2;
     water.position.y = -4.4;
     world.add(water);
+
+    // ---- float proof: soft shadow cast on the water + island tilt ----
+    const shadowTex = makeGlowTexture('rgba(20,30,38,0.6)', 'rgba(20,30,38,0.12)');
+    const floatShadow = makeSoftSprite(shadowTex, 0x141e26, 7.0, 0.6);
+    floatShadow.position.set(0.3, -4.32, 0.4);
+    world.add(floatShadow);
+    islandCore.rotation.z = 0.045; // slight flying tilt
+    islandCore.rotation.x = 0.03;
+    islandCore.position.y = 2.2; // clear air gap: rock bottom ~0.1, water at -4.4
 
     // ---- corruption (write attempt) + roots seal ----
     const corruptTex = makeGlowTexture('rgba(255,90,90,0.9)', 'rgba(200,20,20,0.3)');
@@ -890,7 +904,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       new THREE.MeshBasicMaterial({ color: 0xff2233, transparent: true, opacity: 0 })
     );
     corruptShell.scale.setScalar(1.05);
-    world.add(corruptShell);
+    islandCore.add(corruptShell);
     const fireTex = makeGlowTexture('rgba(255,120,60,0.95)', 'rgba(255,40,20,0.35)');
     const fireFlares: THREE.Sprite[] = [];
     const flareCount = tier === 'low' ? 10 : 22;
@@ -898,12 +912,12 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       const f = makeSoftSprite(fireTex, 0xff6633, 0.6 + Math.random() * 0.9, 0);
       const d = new THREE.Vector3().randomDirection();
       f.position.set(d.x * 1.6, d.y * 1.2 + 0.4, d.z * 1.6);
-      world.add(f);
+      islandCore.add(f);
       fireFlares.push(f);
     }
     const bigFire = makeSoftSprite(fireTex, 0xff4422, 4.5, 0);
     bigFire.position.set(0.5, 0.6, 0.3);
-    world.add(bigFire);
+    islandCore.add(bigFire);
     const seal = new THREE.Mesh(
       new THREE.TorusGeometry(2.7, 0.07, 10, 72),
       new THREE.MeshBasicMaterial({ color: 0x3ddc97, transparent: true, opacity: 0 })
@@ -944,6 +958,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       orbit.update(dt);
       // island gently bobs; tree canopy sways
       world.position.y = Math.sin(t * 0.5) * 0.18;
+    islandCore.rotation.z = 0.045 + Math.sin(t * 0.4) * 0.02;
       canopy.forEach((b, i) => { b.scale.setScalar(1 + Math.sin(t * 1.4 + i) * 0.04); });
       mists.forEach((p) => { p.s.position.y += Math.sin(t * 0.3 + p.seed) * 0.002; });
 
