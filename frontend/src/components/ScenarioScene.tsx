@@ -914,9 +914,9 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     const mount = mountRef.current!;
     const { renderer, scene, camera, ro, tier } = baseSetup(mount, 40, 8.2);
     renderer.toneMapping = THREE.NoToneMapping; // authored palette, keep exact colors
-    camera.position.set(6.0, -1.4, 12.0);
-    camera.lookAt(1.2, 1.9, 0);
-    scene.fog = new THREE.Fog(0xcfe0e4, 34, 95);
+    camera.position.set(2.6, 2.4, 12.8);
+    camera.lookAt(0, 2.2, 0);
+    scene.fog = new THREE.Fog(0xd8e4e8, 48, 110);
     // pastel sky gradient: pale blue -> warm peach at the horizon
     const skyC = document.createElement('canvas');
     skyC.width = 4; skyC.height = 256;
@@ -934,99 +934,189 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
 
     const world = new THREE.Group();
     scene.add(world);
-    world.position.x = 4.6; // island fully clear of the headline column
+    world.position.x = 1.2; // island center-right; mountains read behind
 
-    // ---- floating rock island (jittered icosahedron) ----
+    // ---- floating island: classic inverted-teardrop earth chunk ----
+    // Lathe profile: flat grass-top rim, stone walls tapering DOWN to a
+    // point (the iconic floating-island silhouette), gentle jitter only.
     const islandCore = new THREE.Group();
     world.add(islandCore);
-    const rockGeo = new THREE.IcosahedronGeometry(2.1, tier === 'low' ? 1 : tier === 'mid' ? 2 : 3);
+    const rockProfile: THREE.Vector2[] = [];
+    const RP = (h: number, r: number) => rockProfile.push(new THREE.Vector2(Math.max(r, 0.001), h));
+    RP(0.9, 1.9);   // top rim (grass line)
+    RP(0.72, 2.05); // slight overhang bulge
+    RP(0.4, 1.75);
+    RP(0.0, 1.45);
+    RP(-0.5, 1.0);  // taper begins
+    RP(-1.2, 0.62);
+    RP(-1.9, 0.30);
+    RP(-2.5, 0.10); // tip
+    const rockGeo = new THREE.LatheGeometry(rockProfile, tier === 'low' ? 9 : 14);
     const pos = rockGeo.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < pos.count; i++) {
-      const jitter = 1 + (Math.sin(i * 12.9898) * 43758.5453 % 1) * 0.22;
-      pos.setXYZ(i, pos.getX(i) * jitter, pos.getY(i) * (jitter * 0.8), pos.getZ(i) * jitter);
+      // gentle strata ripple — organic, not exploded
+      const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+      const a = Math.atan2(z, x);
+      const ripple = 1 + Math.sin(a * 6 + y * 2.2) * 0.045 + Math.sin(a * 11) * 0.02;
+      pos.setXYZ(i, x * ripple, y, z * ripple);
     }
     rockGeo.computeVertexNormals();
     const rock = new THREE.Mesh(rockGeo, new THREE.MeshStandardMaterial({
-      color: 0x8a7a62, roughness: 0.9, metalness: 0.02, flatShading: true,
+      color: 0x96876d, roughness: 0.92, metalness: 0.02, flatShading: true,
     }));
     islandCore.add(rock);
+    // grass top: flat disc capping the island rim
+    const grassTop = new THREE.Mesh(
+      new THREE.CylinderGeometry(2.12, 1.92, 0.34, tier === 'low' ? 18 : 28),
+      new THREE.MeshStandardMaterial({ color: 0x6f9d4e, roughness: 0.95, flatShading: true })
+    );
+    grassTop.position.y = 0.92;
+    islandCore.add(grassTop);
 
-    // ---- moss cap ----
-    const mossGeo = new THREE.IcosahedronGeometry(1.55, 2);
-    const mpos = mossGeo.attributes.position as THREE.BufferAttribute;
-    const mossColors: number[] = [];
-    const cA = new THREE.Color(0x4f7d3a), cB = new THREE.Color(0x77a84f);
-    for (let i = 0; i < mpos.count; i++) {
-      if (mpos.getY(i) > 0.2) mpos.setXYZ(i, mpos.getX(i) * (1 + Math.sin(i * 3.7) * 0.08), mpos.getY(i) * 0.38, mpos.getZ(i) * (1 + Math.cos(i * 2.9) * 0.08));
-      const mix = Math.abs((Math.sin(i * 12.9898) * 43758.5453) % 1);
-      const c = cA.clone().lerp(cB, mix);
-      mossColors.push(c.r, c.g, c.b);
-    }
-    mossGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(mossColors), 3));
-    mossGeo.computeVertexNormals();
-    const moss = new THREE.Mesh(mossGeo, new THREE.MeshStandardMaterial({
-      vertexColors: true, roughness: 0.95,
-    }));
-    moss.position.y = 1.45; // perched as grass on the rock's shoulder
-    islandCore.add(moss);
 
-    // ---- gnarled oak: stacked bent trunk + canopy blobs ----
+
+    // ---- real oak: lathe trunk w/ root flare + taper, limbs, organic canopy ----
     const tree = new THREE.Group();
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3b2c, roughness: 0.9, flatShading: true });
-    let ty = 1.3;
-    let tRot = 0;
-    for (let i = 0; i < 7; i++) {
-      const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.14 - i * 0.013, 0.17 - i * 0.013, 0.42, 8), trunkMat);
-      tRot += 0.34;
-      seg.position.set(Math.sin(tRot) * i * 0.075, ty + 0.2, Math.cos(tRot * 0.7) * i * 0.055);
-      seg.rotation.z = 0.16 * Math.sin(i * 1.3);
-      tree.add(seg);
-      if (i === 2 || i === 4) {
-        const stub = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.5, 6), trunkMat);
-        stub.position.set(seg.position.x + (i === 2 ? 0.3 : -0.32), seg.position.y + 0.08, seg.position.z);
-        stub.rotation.z = i === 2 ? -1.1 : 1.2;
-        tree.add(stub);
+    const barkMat = new THREE.MeshStandardMaterial({ color: 0x5a4632, roughness: 0.95, flatShading: true });
+    // trunk profile: wide flared base -> slim waist -> thick shoulder -> tip.
+    // Lathe gives one smooth, continuous, organic surface (no stacked cans).
+    const profile: THREE.Vector2[] = [];
+    const P = (h: number, r: number) => profile.push(new THREE.Vector2(r, h));
+    P(0.0, 0.52);   // root flare (wide)
+    P(0.10, 0.46);
+    P(0.28, 0.30);  // pulls in above the roots
+    P(0.55, 0.24);
+    P(0.85, 0.27);  // swell (burl shoulder)
+    P(1.15, 0.20);
+    P(1.5, 0.15);
+    P(1.8, 0.10);
+    P(2.05, 0.05);  // tip
+    const trunkGeo = new THREE.LatheGeometry(profile, tier === 'low' ? 7 : 10);
+    // bark ridges: radial ripple so it reads as bark, not plastic
+    const tp = trunkGeo.attributes.position as THREE.BufferAttribute;
+    for (let i = 0; i < tp.count; i++) {
+      const x = tp.getX(i), y = tp.getY(i), z = tp.getZ(i);
+      const rr = Math.atan2(z, x);
+      const ripple = 1 + Math.sin(rr * (tier === 'low' ? 9 : 14)) * 0.05 + Math.sin(y * 6.0) * 0.02;
+      tp.setXYZ(i, x * ripple, y, z * ripple);
+    }
+    trunkGeo.computeVertexNormals();
+    const trunk = new THREE.Mesh(trunkGeo, barkMat);
+    trunk.position.y = 0.92;
+    tree.add(trunk);
+    // main limbs: two asymmetric forking arms from the upper trunk
+    const limb = (len: number, r0: number, _r1: number, bend: number, twist: number) => {
+      const pts: THREE.Vector3[] = [];
+      for (let i = 0; i <= 5; i++) {
+        const t = i / 5;
+        pts.push(new THREE.Vector3(
+          Math.sin(twist + bend * t * 2.2) * len * t * 0.5,
+          len * t * Math.cos(bend * 0.8),
+          Math.cos(twist) * len * t * 0.3
+        ));
       }
-      ty += 0.38;
-    }
-    const canopyMat = new THREE.MeshStandardMaterial({ color: 0x5c8d46, roughness: 0.85, flatShading: true });
+      const g = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), tier === 'low' ? 5 : 8, r0, tier === 'low' ? 5 : 7, false);
+      const m = new THREE.Mesh(g, barkMat);
+      m.userData.tip = pts[5];
+      return m;
+    };
+    const arm1 = limb(1.35, 0.09, 0.03, 0.7, 0.4);
+    arm1.position.set(0.02, 2.54, 0.02);
+    arm1.rotation.z = 0.95;
+    tree.add(arm1);
+    const arm2 = limb(1.15, 0.08, 0.03, -0.9, 2.6);
+    arm2.position.set(-0.02, 2.42, 0.02);
+    arm2.rotation.z = -0.8;
+    arm2.rotation.y = 0.5;
+    tree.add(arm2);
+    // organic canopy: 9 clumps, EACH with its own tone (sunlit vs shadow
+    // greens) + irregular jittered icosahedra — reads as leaf masses, not a ball
+    const leafTones = [0x84b45e, 0x4c7a38, 0x9cc46e, 0x5c8d46, 0x6f9d4e, 0x87ae52];
     const canopy: THREE.Mesh[] = [];
-    const canopyTop = new THREE.Vector3(0.35, 3.6, 0.1);
-    for (let i = 0; i < 6; i++) {
-      const blob = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42 + (i % 3) * 0.12, 1), canopyMat);
-      blob.position.set(
-        canopyTop.x + Math.cos(i * 2.4) * (0.35 + (i % 2) * 0.25),
-        canopyTop.y + Math.sin(i * 1.9) * 0.28,
-        canopyTop.z + Math.sin(i * 2.4) * 0.3
-      );
-      tree.add(blob);
-      canopy.push(blob);
-    }
+    const clumpAnchors = [
+      [1.0, 2.8, 0.0, 0.52], [-0.95, 2.7, 0.05, 0.5], [0.0, 3.45, -0.5, 0.5],
+      [0.7, 3.0, 0.75, 0.4], [-0.45, 2.8, -0.75, 0.42], [1.3, 2.55, 0.35, 0.36],
+      [-1.25, 2.4, -0.05, 0.36], [0.4, 3.85, 0.05, 0.34], [-0.7, 3.7, 0.5, 0.3],
+    ];
+    clumpAnchors.forEach((a, i) => {
+      const g = new THREE.IcosahedronGeometry(a[3], 1);
+      const gp = g.attributes.position as THREE.BufferAttribute;
+      for (let k = 0; k < gp.count; k++) {
+        const j = 1 + ((Math.sin(k * 7.3 + i * 3.1) * 43758.5) % 1) * 0.16;
+        gp.setXYZ(k, gp.getX(k) * j, gp.getY(k) * j * 0.85, gp.getZ(k) * j);
+      }
+      g.computeVertexNormals();
+      const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({
+        color: leafTones[i % leafTones.length], roughness: 0.9, flatShading: true,
+      }));
+      m.position.set(a[0], a[1] + 0.92, a[2]);
+      tree.add(m);
+      canopy.push(m);
+    });
     islandCore.add(tree);
 
     // ---- mist sprites under the island ----
     const mistTex = makeGlowTexture('rgba(255,255,255,0.55)', 'rgba(230,240,245,0.2)');
     const mists: { s: THREE.Sprite; seed: number }[] = [];
-    for (let i = 0; i < (tier === 'low' ? 24 : tier === 'mid' ? 60 : 90); i++) {
-      const s = makeSoftSprite(mistTex, 0xf4f8f9, 3 + Math.random() * 3.5, 0.14 + Math.random() * 0.16);
+    for (let i = 0; i < (tier === 'low' ? 14 : tier === 'mid' ? 30 : 42); i++) {
+      const s = makeSoftSprite(mistTex, 0xf4f8f9, 5 + Math.random() * 4, 0.10 + Math.random() * 0.10);
       s.material.blending = THREE.NormalBlending;
       const a = Math.random() * Math.PI * 2;
-      s.position.set(Math.cos(a) * (1.5 + Math.random() * 2.2), -1.4 - Math.random() * 1.2, Math.sin(a) * (1.5 + Math.random() * 2.2));
+      s.position.set(Math.cos(a) * (2 + Math.random() * 3), -2.6 - Math.random() * 1.4, Math.sin(a) * (2 + Math.random() * 3));
       world.add(s);
       mists.push({ s, seed: Math.random() * 6.28 });
     }
 
-    // ---- hazy mountains ----
-    for (let i = 0; i < 8; i++) {
-      const haze = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(0x6a8f96).lerp(new THREE.Color(0x9fc0c8), i / 8),
-        roughness: 1, flatShading: true, transparent: true, opacity: 0.85 - i * 0.05,
-      });
-      const mtn = new THREE.Mesh(new THREE.ConeGeometry(4.5 + Math.random() * 3.5, 7 + Math.random() * 6, 5), haze);
-      const a = (i / 8) * Math.PI * 2 + 0.5;
-      mtn.position.set(Math.cos(a) * (17 + i * 1.5), -1.5 + Math.random() * 2, Math.sin(a) * (17 + i * 1.5) - 7);
+    // ---- real mountains: displaced ridged peaks with snowlines ----
+    // Each peak: cone base geometry, then radial ridging (alternate ring
+    // radii) + per-vertex jitter + vertex colors (rock strata below the
+    // snowline, bright snow above). flatShading keeps facets crisp and
+    // cheap — no textures, no normals work, potato-friendly.
+    const makeMountain = (h: number, base: number, seed: number) => {
+      const segs = tier === 'low' ? 9 : 12;
+      const geo = new THREE.ConeGeometry(base, h, segs, tier === 'low' ? 4 : 6);
+      const p = geo.attributes.position as THREE.BufferAttribute;
+      const colors: number[] = [];
+      const snowLine = h * 0.62;
+      const rockC = new THREE.Color(0x4a5563);
+      const rockD = new THREE.Color(0x333c47);
+      const snowC = new THREE.Color(0xf6fafc);
+      for (let i = 0; i < p.count; i++) {
+        const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+        // ridging: alternate radius by angle ring — jagged silhouette
+        const ang = Math.atan2(z, x);
+        const ring = Math.floor((y + h / 2) / (h / (segs / 1.5)));
+        const ridge = 1 + Math.sin(ang * segs + ring * 1.7 + seed) * 0.30
+          + Math.sin(ang * (segs * 2) + seed * 2) * 0.12;
+        const nx = x * ridge, nz = z * ridge;
+        // per-vertex jitter: no perfect cones in nature
+        const j = (Math.sin(i * 12.9898 + seed) * 43758.5453) % 1;
+        p.setXYZ(i, nx * (1 + j * 0.05), y, nz * (1 + j * 0.05));
+        // snow above the line, strata rock below
+        const vy = y + h / 2;
+        const c = vy > snowLine + j * h * 0.08
+          ? snowC
+          : rockC.clone().lerp(rockD, Math.abs(j));
+        colors.push(c.r, c.g, c.b);
+      }
+      geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
+      geo.computeVertexNormals();
+      return geo;
+    };
+    const mountainMat = new THREE.MeshStandardMaterial({
+      vertexColors: true, roughness: 0.96, flatShading: true,
+    });
+    const mountainDefs = [
+      { h: 16, b: 5.4, x: -7.0, z: -15, seed: 3.1 },
+      { h: 19, b: 6.2, x: 0.8, z: -19, seed: 7.7 },
+      { h: 15, b: 5.2, x: 8.0, z: -14, seed: 1.4 },
+    ];
+    mountainDefs.forEach((d, i) => {
+      const mtn = new THREE.Mesh(makeMountain(d.h, d.b, d.seed), mountainMat);
+      mtn.position.set(d.x, -5.6 + (i % 2) * 0.4, d.z);
+      mtn.scale.setScalar(1 - i * 0.03); // slight size falloff = depth
       world.add(mtn);
-    }
+    });
 
     // ---- water ----
     const water = new THREE.Mesh(
