@@ -405,7 +405,7 @@ function EditorialLandingInner({
 
                   <div className="space-y-0.5">
 
-                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 01 · Adversarial Harness</span>
+                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 01 · Adversarial Harness <span className="text-neutral-500">· 70ms live</span></span>
 
                     <span className="text-white font-semibold text-[11px]">Direct Prompt Injection Probe</span>
 
@@ -427,7 +427,7 @@ function EditorialLandingInner({
 
                   <div className="space-y-0.5">
 
-                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 02 · Blue Guardrail</span>
+                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 02 · Blue Guardrail <span className="text-neutral-500">· 2.76s live</span></span>
 
                     <span className="text-white font-semibold text-[11px]">Canary Token Exfiltration Scan</span>
 
@@ -449,7 +449,7 @@ function EditorialLandingInner({
 
                   <div className="space-y-0.5">
 
-                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 03 · Kernel Isolation</span>
+                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 03 · Kernel Isolation <span className="text-neutral-500">· 39ms live</span></span>
 
                     <span className="text-white font-semibold text-[11px]">Rootfs Write Denial (Docker EROFS)</span>
 
@@ -471,9 +471,9 @@ function EditorialLandingInner({
 
                   <div className="space-y-0.5">
 
-                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 04 · Hash-Chained Audit Ledger</span>
+                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 04 · Hash-Chained Audit Ledger <span className="text-neutral-500">· 70ms live</span></span>
 
-                    <span className="text-emerald-400 font-mono text-[10px]">Root: 25e1...98125</span>
+                    <span className="text-emerald-400 font-mono text-[10px]">#55 4a14faa6… → 2c67f744… → #56 sealed...98125</span>
 
                   </div>
 
