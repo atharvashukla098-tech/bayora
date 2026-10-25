@@ -113,7 +113,7 @@ const portfolioProjects = [
 
     title: 'Of The Oak : Hardware Filesystem Armor',
 
-    category: 'HARDWARE FILESYSTEM ARMOR',
+    category: 'KERNEL FILESYSTEM ARMOR',
 
     tag: 'DOCKER EROFS',
 
@@ -251,11 +251,11 @@ function EditorialLandingInner({
 
               <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[5.5vw] font-black tracking-[-0.035em] leading-[0.96] text-[#0a0a0e] select-none">
 
-                Proving AI <br />
+                Don't Trust AI. <br />
 
                 <span className="text-[#0a0a0e]">
 
-                  Beyond Doubt.
+                  Prove It.
 
                 </span>
 
@@ -263,7 +263,7 @@ function EditorialLandingInner({
 
               <p className="text-base sm:text-lg md:text-xl text-neutral-700 leading-relaxed max-w-xl font-normal pt-1">
 
-                Traditional safety benchmarks rely on fragile heuristic scorecards that fail under hostile exploitation. Bayora establishes deterministic zero-trust evaluation for frontier intelligence - coupling autonomous adversarial injection harnesses with synchronous hardware policy enforcement and tamper-evident SHA-256 hash-chained audit ledgers.
+                Safety benchmarks hand out scores. Bayora runs the attack instead. Every prompt crosses a policy broker before it reaches the target, enforced through container-level isolation (read-only rootfs, egress allowlists), and sealed into a tamper-evident SHA-256 hash-chained ledger with Ed25519-signed checkpoints.
 
               </p>
 
@@ -377,7 +377,7 @@ function EditorialLandingInner({
 
                 <span className="text-[10px] text-neutral-400 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10">
 
-                  AIR-GAPPED 120 FPS
+                  LOCAL RUNTIME · DETERMINISTIC ENFORCEMENT
 
                 </span>
 
@@ -403,7 +403,7 @@ function EditorialLandingInner({
 
                   <span className="px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 border border-rose-500/30 text-[10px] font-bold">
 
-                    QUARANTINED
+                    THREAT CONTAINED
 
                   </span>
 
@@ -425,7 +425,7 @@ function EditorialLandingInner({
 
                   <span className="px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold">
 
-                    [REDACTED]
+                    SCAN CLEAN · [REDACTED]
 
                   </span>
 
@@ -439,7 +439,7 @@ function EditorialLandingInner({
 
                   <div className="space-y-0.5">
 
-                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 03 · Hardware Isolation</span>
+                    <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 03 · Kernel Isolation</span>
 
                     <span className="text-white font-semibold text-[11px]">Rootfs Write Denial (Docker EROFS)</span>
 
@@ -463,7 +463,7 @@ function EditorialLandingInner({
 
                     <span className="text-[9px] text-neutral-400 uppercase tracking-wider block">Stage 04 · Hash-Chained Audit Ledger</span>
 
-                    <span className="text-emerald-400 font-mono text-[10px]">Root: 0x25e1...98125</span>
+                    <span className="text-emerald-400 font-mono text-[10px]">Root: 25e1...98125</span>
 
                   </div>
 
@@ -525,7 +525,7 @@ function EditorialLandingInner({
 
               <span className="font-mono text-[#00e5ff] text-[10px] font-bold">[DEFENSE]</span>
 
-              SURREAL 3D ARCHITECTURE · AIR-GAPPED EVALUATION
+              SURREAL 3D ARCHITECTURE · LOCAL-ONLY EVALUATION
 
             </span>
 
@@ -895,7 +895,7 @@ function EditorialLandingInner({
 
           <h2 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-none text-white uppercase drop-">
 
-            AIR-GAPPED BY DESIGN. <br />
+            LOCAL-ONLY BY DESIGN. <br />
 
             MATHEMATICALLY <br />
 
@@ -1160,7 +1160,7 @@ function EditorialLandingInner({
               <div>
                 <span className="text-[10px] text-neutral-400 uppercase tracking-widest block font-bold">LEGAL & REGULATORY ATTESTATION</span>
                 <h3 className="text-base font-bold text-white tracking-wide">
-                  {legalModal === 'tos' && 'TERMS OF SERVICE : AIR-GAPPED TESTING'}
+                  {legalModal === 'tos' && 'TERMS OF SERVICE : LOCAL-ONLY TESTING'}
                   {legalModal === 'privacy' && 'DATA PRIVACY & ZERO-RETENTION POLICY'}
                   {legalModal === 'compliance' && 'CRYPTOGRAPHIC ATTESTATION SPECIFICATION (v1.4)'}
                 </h3>

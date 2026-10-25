@@ -311,7 +311,7 @@ function CinematicExperienceInner({
 
             >
 
-              03 · HARDWARE RUNTIME
+              03 · KERNEL RUNTIME
 
             </button>
 
@@ -761,7 +761,7 @@ function CinematicExperienceInner({
 
       {/* =========================================================================
 
-          SCENE 4: HARDWARE RUNTIME SPECIFICATIONS (Minimalist Telemetry Ribbon)
+          SCENE 4: KERNEL RUNTIME SPECIFICATIONS (Minimalist Telemetry Ribbon)
 
           ========================================================================= */}
 
@@ -779,7 +779,7 @@ function CinematicExperienceInner({
 
             <span className="text-[11px] font-mono tracking-[0.25em] text-[#00e5ff] uppercase block font-semibold">
 
-              // 03 · HARDWARE RUNTIME SPECIFICATIONS
+              // 03 · KERNEL RUNTIME SPECIFICATIONS
 
             </span>
 
