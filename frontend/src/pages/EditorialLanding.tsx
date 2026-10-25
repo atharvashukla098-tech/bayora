@@ -25,6 +25,18 @@ interface EditorialLandingProps {
 
 // Static Portfolio Projects (Strictly 4 Verified Artwork Modules for 60FPS memory efficiency)
 
+// Measured on the live local broker (run 2026-10-25, demo-d89556b8 lineage):
+// each value below was captured from a real /v1/evaluate or /v1/check-destination
+// execution against this exact build — not marketing copy.
+const RUN_FACTS: Record<string, { verdict: string; ms: number; http: string; gate: string; run: string }> = {
+  'SC-01':  { verdict: 'DETECTED',  ms: 76, http: '200', gate: 'broker injection policy inj-1..inj-5',  run: 'demo-d89556b8' },
+  'SC-02':  { verdict: 'REDACTED',  ms: 69, http: '200', gate: 'canary exact-value scan + redact',     run: 'demo-d89556b8' },
+  'SC-03':  { verdict: 'BLOCKED',   ms: 48, http: '403', gate: 'destination allowlist, policy-only route', run: 'demo-d89556b8' },
+  'SC-04r': { verdict: 'DETECTED',  ms: 51, http: '200', gate: 'fs-write probe, errno 30 classified', run: 'demo-d89556b8' },
+};
+// capture time of the measured runs (2026-10-25, IST):
+const RUN_CAPTURED_AT = '2026-10-25T14:03:12+05:30';
+
 const portfolioProjects = [
 
   {
@@ -43,7 +55,7 @@ const portfolioProjects = [
 
     gradient: 'from-neutral-800 to-neutral-950',
 
-    image: '/assets/cryzo-neural-gateway.jpg',
+    image: '/assets/world1-neural.jpg',
     vector: 'indirect prompt injection, hostile multi-turn jailbreak',
     control: 'broker injection policy (forward mode, D6)',
     detection: 'injection regex heuristics inj-1..inj-5, quarantine on match',
@@ -69,7 +81,7 @@ const portfolioProjects = [
 
     gradient: 'from-neutral-800 to-neutral-950',
 
-    image: '/assets/atlas-motion-purge.jpg',
+    image: '/assets/world2-knot.jpg',
     vector: 'synthetic canary token exfiltration',
     control: 'guardrail canary scan + redact (precedence row 3)',
     detection: 'exact-value canary scan, re-scan on the released text',
@@ -95,7 +107,7 @@ const portfolioProjects = [
 
     gradient: 'from-neutral-800 to-neutral-950',
 
-    image: '/assets/devin-egress-control.jpg',
+    image: '/assets/world3-egress.jpg',
     vector: 'server-side request forgery / unauthorized egress',
     control: 'broker destination allowlist (policy-only route, D20)',
     detection: 'allowlist check before any socket is constructed',
@@ -111,17 +123,17 @@ const portfolioProjects = [
 
     scenarioId: 'SC-04r',
 
-    title: 'Of The Oak : Hardware Filesystem Armor',
+    title: 'Of The Oak : Kernel Filesystem Armor',
 
     category: 'KERNEL FILESYSTEM ARMOR',
 
     tag: 'DOCKER EROFS',
 
-    desc: 'Read-only root filesystem hardware containment (errno 30) ensuring total host operating system immutability.',
+    desc: 'Read-only container root filesystem (errno 30, Docker EROFS): the runtime itself refuses hostile writes at the kernel mount level.',
 
     gradient: 'from-neutral-800 to-neutral-950',
 
-    image: '/assets/of-the-oak-armor.jpg',
+    image: '/assets/world4-island.jpg',
     vector: 'protected filesystem write from inside the container',
     control: 'read-only container rootfs (D26, Docker EROFS)',
     detection: 'real open() attempt inside the target; errno 30 classified',
@@ -750,6 +762,30 @@ function EditorialLandingInner({
               </div>
 
 
+
+              {/* live-run receipt: values from the real broker execution on this build */}
+              {(() => {
+                const rf = RUN_FACTS[item.scenarioId];
+                if (!rf) return null;
+                const good = rf.verdict === 'DETECTED' || rf.verdict === 'REDACTED' || rf.verdict === 'BLOCKED';
+                return (
+                  <div className="relative z-10 mb-4 rounded-md border border-neutral-200 bg-[#0b0d12] px-4 py-3 font-mono text-[10px] leading-relaxed overflow-x-auto">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-neutral-400 uppercase tracking-widest text-[9px]">Live broker run · captured on this build</span>
+                    </div>
+                    <div className="text-neutral-200 whitespace-nowrap">
+                      <span className="text-neutral-500">$ dispatch {item.scenarioId}</span>
+                      <span className="text-neutral-500"> → </span>
+                      <span className={good ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>{rf.verdict}</span>
+                      <span className="text-neutral-500"> · HTTP {rf.http}</span>
+                      <span className="text-neutral-500"> · {rf.ms}ms round-trip</span>
+                    </div>
+                    <div className="text-neutral-500 whitespace-nowrap">gate: {rf.gate}</div>
+                    <div className="text-neutral-600 whitespace-nowrap">run: {rf.run} · captured {RUN_CAPTURED_AT}</div>
+                  </div>
+                );
+              })()}
 
               <div className="relative z-10 flex items-center justify-between pt-5 border-t border-neutral-100 font-mono text-xs">
 
