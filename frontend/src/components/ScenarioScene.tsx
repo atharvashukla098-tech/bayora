@@ -450,15 +450,77 @@ export function CanaryKnot({ mode = 'idle', onFirstGrab }: WorldProps) {
   useEffect(() => {
     const mount = mountRef.current!;
     const { renderer, scene, camera, ro, tier } = baseSetup(mount, 42, 8.6);
-    scene.fog = new THREE.FogExp2(0x07060c, 0.05);
+    scene.fog = new THREE.FogExp2(0x07060c, 0.028);
+
+    // ---- studio environment: softbox strips the chrome can actually reflect.
+    // PMREM bakes it once (~ms); runtime cost is zero. This is what makes
+    // metalness:1 read as liquid chrome instead of black rubber.
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const envScene = new THREE.Scene();
+    envScene.background = new THREE.Color(0x030308);
+    const strip = (color: number, intensity: number, w: number, h: number, x: number, y: number, z: number, ry = 0) => {
+      const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(w, h),
+        new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })
+      );
+      m.material.color.multiplyScalar(intensity);
+      m.position.set(x, y, z);
+      m.rotation.y = ry;
+      envScene.add(m);
+    };
+    strip(0xffffff, 6, 8, 1.2, 0, 4, 4);          // white key softbox above
+    strip(0x9d6bff, 4, 7, 1.0, -5, 1.5, -1, Math.PI / 2); // violet strip left
+    strip(0x22d3ee, 3, 6, 0.9, 5, 0.5, -1, -Math.PI / 2); // cyan strip right
+    strip(0xfff4e0, 1.5, 10, 0.8, 0, -3.5, -3);   // warm bounce below
+    scene.environment = pmrem.fromScene(envScene, 0.06).texture;
+    pmrem.dispose();
 
     const world = new THREE.Group();
     scene.add(world);
 
+    // ---- deep-space backdrop: starfield + twin nebulae (kills the black void) ----
+    const starN = tier === 'low' ? 350 : tier === 'mid' ? 900 : 1500;
+    const sPos = new Float32Array(starN * 3);
+    for (let i = 0; i < starN; i++) {
+      const d = new THREE.Vector3().randomDirection().multiplyScalar(38 + Math.random() * 42);
+      sPos.set([d.x, Math.abs(d.y) * 0.7 + 1.5, d.z], i * 3);
+    }
+    const sGeo = new THREE.BufferGeometry();
+    sGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
+    const stars = new THREE.Points(sGeo, new THREE.PointsMaterial({
+      color: 0xffffff, size: 0.35, sizeAttenuation: true,
+      transparent: true, opacity: 1.0, depthWrite: false,
+    }));
+    world.add(stars);
+    // standout beacons: 12 bright stars so the field has heroes, not just dust
+    const beaconTex = makeGlowTexture('rgba(255,255,255,0.95)', 'rgba(180,210,255,0.25)');
+    const starBeacons: THREE.Sprite[] = [];
+    for (let i = 0; i < (tier === 'low' ? 6 : 12); i++) {
+      const b = makeSoftSprite(beaconTex, 0xffffff, 1.6 + Math.random() * 1.4, 1.0);
+      const d = new THREE.Vector3().randomDirection();
+      b.position.set(d.x * 34, Math.abs(d.y) * 0.6 * 34 + 3, d.z * 34);
+      world.add(b);
+      starBeacons.push(b);
+    }
+    const nebTexA = makeGlowTexture('rgba(190,140,255,0.65)', 'rgba(100,50,200,0.22)');
+    const nebA = makeSoftSprite(nebTexA, 0xb478ff, 38, 1.0);
+    nebA.position.set(-12, 6, -20);
+    world.add(nebA);
+    const nebA2 = makeSoftSprite(nebTexA, 0x8a4dff, 22, 0.9);
+    nebA2.position.set(-9, 3.5, -16);
+    world.add(nebA2);
+    const nebTexB = makeGlowTexture('rgba(34,211,238,0.55)', 'rgba(20,120,160,0.2)');
+    const nebB = makeSoftSprite(nebTexB, 0x22d3ee, 34, 0.8);
+    nebB.position.set(13, 1, -19);
+    world.add(nebB);
+    const nebB2 = makeSoftSprite(nebTexB, 0x18b0d8, 18, 0.7);
+    nebB2.position.set(10, 4, -15);
+    world.add(nebB2);
+
     // ---- liquid chrome knot ----
     const knot = new THREE.Mesh(
       new THREE.TorusKnotGeometry(1.25, 0.4, tier === 'low' ? 200 : 340, tier === 'low' ? 26 : 36),
-      new THREE.MeshStandardMaterial({ color: 0xdfe3ec, metalness: 1.0, roughness: 0.09 })
+      new THREE.MeshStandardMaterial({ color: 0xdfe3ec, metalness: 1.0, roughness: 0.09, envMapIntensity: 1.6 })
     );
     knot.position.y = 0.55;
     world.add(knot);
@@ -484,14 +546,26 @@ export function CanaryKnot({ mode = 'idle', onFirstGrab }: WorldProps) {
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -1.79;
     world.add(floor);
+    // concentric floor rings: the stage reads against the void
+    const floorRings: THREE.Mesh[] = [];
+    for (let i = 0; i < 4; i++) {
+      const fr = new THREE.Mesh(
+        new THREE.TorusGeometry(3.2 + i * 2.1, 0.008, 6, 90),
+        new THREE.MeshBasicMaterial({ color: i === 1 ? 0xc084fc : 0x9d6bff, transparent: true, opacity: 0.5 - i * 0.09 })
+      );
+      fr.rotation.x = Math.PI / 2;
+      fr.position.y = -1.78;
+      world.add(fr);
+      floorRings.push(fr);
+    }
 
     const glowTex = makeGlowTexture('rgba(190,150,255,0.85)', 'rgba(120,60,255,0.2)');
-    const underGlow = makeSoftSprite(glowTex, 0x9d6bff, 6, 0.6);
+    const underGlow = makeSoftSprite(glowTex, 0x9d6bff, 8, 0.75);
     underGlow.position.y = -1.2;
     world.add(underGlow);
 
     // ---- chrome beads on elliptical orbits ----
-    const beadMat = new THREE.MeshStandardMaterial({ color: 0xe8ecf5, metalness: 1.0, roughness: 0.06 });
+    const beadMat = new THREE.MeshStandardMaterial({ color: 0xe8ecf5, metalness: 1.0, roughness: 0.06, envMapIntensity: 1.8 });
     const beads: { mesh: THREE.Mesh; tilt: number; r: number; speed: number; phase: number }[] = [];
     for (let i = 0; i < 5; i++) {
       const b = new THREE.Mesh(new THREE.SphereGeometry(0.09 + Math.random() * 0.05, 16, 16), beadMat);
