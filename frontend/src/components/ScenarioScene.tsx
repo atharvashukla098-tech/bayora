@@ -27,16 +27,22 @@ function useTier() {
 }
 
 function makeGlowTexture(inner: string, mid: string): THREE.CanvasTexture {
+  // 512px: smooth cinematic falloff, anisotropic-filtered. Generated once
+  // per world mount — a few ms — and the GPU handles the rest.
+  const SZ = 512;
   const c = document.createElement('canvas');
-  c.width = c.height = 128;
+  c.width = c.height = SZ;
   const ctx = c.getContext('2d')!;
-  const g = ctx.createRadialGradient(64, 64, 2, 64, 64, 64);
+  const g = ctx.createRadialGradient(SZ / 2, SZ / 2, 2, SZ / 2, SZ / 2, SZ / 2);
   g.addColorStop(0, inner);
-  g.addColorStop(0.35, mid);
+  g.addColorStop(0.28, mid);
+  g.addColorStop(0.62, 'rgba(0,0,0,0.18)');
   g.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 128, 128);
-  return new THREE.CanvasTexture(c);
+  ctx.fillRect(0, 0, SZ, SZ);
+  const tex = new THREE.CanvasTexture(c);
+  tex.anisotropy = 8;
+  return tex;
 }
 
 function makeSoftSprite(tex: THREE.Texture, color: number, scale: number, opacity = 1) {
@@ -99,9 +105,15 @@ function useOrbit(
 
 function baseSetup(mount: HTMLDivElement, fov = 45, camZ = 8) {
   const tier = useTier();
-  const PR = Math.min(window.devicePixelRatio, tier === 'low' ? 0.75 : tier === 'mid' ? 1 : 1.5);
+  // max-def within potato limits: low 1.0 (potato laptops are 1366x768 @1x —
+  // that's already native), mid up to 1.75, high up to 2. AA everywhere
+  // except low tier.
+  const PR_CAP = tier === 'low' ? 1.0 : tier === 'mid' ? 1.75 : 2.0;
+  const PR = Math.min(window.devicePixelRatio || 1, PR_CAP);
   const renderer = new THREE.WebGLRenderer({ antialias: tier !== 'low', alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(PR);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
   renderer.setClearColor(0x000000, 0);
   mount.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
@@ -151,7 +163,7 @@ export function NeuralGateway({ mode = 'idle', onFirstGrab }: WorldProps) {
     scene.add(world);
 
     // ---- filament brain: CURVED, BRANCHING neurons (not straight rays) ----
-    const filCount = tier === 'low' ? 34 : 64;
+    const filCount = tier === 'low' ? 34 : tier === 'mid' ? 84 : 110;
     const filPos: number[] = [];
     const segs = 7; // curve segments per filament
     for (let i = 0; i < filCount; i++) {
@@ -182,7 +194,7 @@ export function NeuralGateway({ mode = 'idle', onFirstGrab }: WorldProps) {
       }
     }
     // synapse nodes: tiny glow points at filament tips
-    const synapseCount = 40;
+    const synapseCount = tier === 'low' ? 18 : tier === 'mid' ? 56 : 80;
     const synPos = new Float32Array(synapseCount * 3);
     for (let i = 0; i < synapseCount; i++) {
       const d = new THREE.Vector3().randomDirection().multiplyScalar(0.55 + Math.random() * 0.65);
@@ -280,7 +292,7 @@ export function NeuralGateway({ mode = 'idle', onFirstGrab }: WorldProps) {
     }
 
     // ---- starfield atmosphere ----
-    const starCount = tier === 'low' ? 350 : 900;
+    const starCount = tier === 'low' ? 400 : tier === 'mid' ? 1400 : 2600;
     const starPos = new Float32Array(starCount * 3);
     for (let i = 0; i < starCount; i++) {
       const r = 16 + Math.random() * 26;
@@ -437,7 +449,7 @@ export function CanaryKnot({ mode = 'idle', onFirstGrab }: WorldProps) {
 
   useEffect(() => {
     const mount = mountRef.current!;
-    const { renderer, scene, camera, ro } = baseSetup(mount, 42, 8.6);
+    const { renderer, scene, camera, ro, tier } = baseSetup(mount, 42, 8.6);
     scene.fog = new THREE.FogExp2(0x07060c, 0.05);
 
     const world = new THREE.Group();
@@ -445,7 +457,7 @@ export function CanaryKnot({ mode = 'idle', onFirstGrab }: WorldProps) {
 
     // ---- liquid chrome knot ----
     const knot = new THREE.Mesh(
-      new THREE.TorusKnotGeometry(1.25, 0.4, 200, 26),
+      new THREE.TorusKnotGeometry(1.25, 0.4, tier === 'low' ? 200 : 340, tier === 'low' ? 26 : 36),
       new THREE.MeshStandardMaterial({ color: 0xdfe3ec, metalness: 1.0, roughness: 0.09 })
     );
     knot.position.y = 0.55;
@@ -595,6 +607,7 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
   useEffect(() => {
     const mount = mountRef.current!;
     const { renderer, scene, camera, ro, tier } = baseSetup(mount, 48, 11);
+    renderer.toneMapping = THREE.NoToneMapping; // authored palette, keep exact colors
     camera.position.set(0, 2.6, 10.5);
     camera.lookAt(0, 1.8, 0);
 
@@ -620,7 +633,7 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
     const softTex = makeGlowTexture('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.25)');
     const pastels = [0xffc4e0, 0xc4f0dc, 0xc4d0ff, 0xffe4c4, 0xd4f4ff];
     const cloudPuffs: { s: THREE.Sprite; seed: number; base: THREE.Vector3 }[] = [];
-    const puffCount = tier === 'low' ? 60 : 140;
+    const puffCount = tier === 'low' ? 60 : tier === 'mid' ? 140 : 200;
     for (let i = 0; i < puffCount; i++) {
       const dir = new THREE.Vector3().randomDirection();
       const r = Math.pow(Math.random(), 0.6) * 2.6;
@@ -640,7 +653,7 @@ export function EgressBoundary({ mode = 'idle', onFirstGrab }: WorldProps) {
     const ringGroup = new THREE.Group();
     world.add(ringGroup);
     const patrolOrbs: THREE.Sprite[] = [];
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < (tier === 'high' ? 3 : 2); i++) {
       const holder = new THREE.Group();
       holder.rotation.set(0.3 + i * 0.5, i * 1.4, 0.22 * (i + 1));
       const R = 4.4 + i * 1.2;
@@ -761,6 +774,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
   useEffect(() => {
     const mount = mountRef.current!;
     const { renderer, scene, camera, ro, tier } = baseSetup(mount, 40, 8.2);
+    renderer.toneMapping = THREE.NoToneMapping; // authored palette, keep exact colors
     camera.position.set(6.0, -1.4, 12.0);
     camera.lookAt(1.2, 1.9, 0);
     scene.fog = new THREE.Fog(0xcfe0e4, 34, 95);
@@ -786,7 +800,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     // ---- floating rock island (jittered icosahedron) ----
     const islandCore = new THREE.Group();
     world.add(islandCore);
-    const rockGeo = new THREE.IcosahedronGeometry(2.1, tier === 'low' ? 1 : 2);
+    const rockGeo = new THREE.IcosahedronGeometry(2.1, tier === 'low' ? 1 : tier === 'mid' ? 2 : 3);
     const pos = rockGeo.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < pos.count; i++) {
       const jitter = 1 + (Math.sin(i * 12.9898) * 43758.5453 % 1) * 0.22;
@@ -854,7 +868,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     // ---- mist sprites under the island ----
     const mistTex = makeGlowTexture('rgba(255,255,255,0.55)', 'rgba(230,240,245,0.2)');
     const mists: { s: THREE.Sprite; seed: number }[] = [];
-    for (let i = 0; i < (tier === 'low' ? 22 : 46); i++) {
+    for (let i = 0; i < (tier === 'low' ? 24 : tier === 'mid' ? 60 : 90); i++) {
       const s = makeSoftSprite(mistTex, 0xf4f8f9, 3 + Math.random() * 3.5, 0.14 + Math.random() * 0.16);
       s.material.blending = THREE.NormalBlending;
       const a = Math.random() * Math.PI * 2;
@@ -907,7 +921,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     islandCore.add(corruptShell);
     const fireTex = makeGlowTexture('rgba(255,120,60,0.95)', 'rgba(255,40,20,0.35)');
     const fireFlares: THREE.Sprite[] = [];
-    const flareCount = tier === 'low' ? 10 : 22;
+    const flareCount = tier === 'low' ? 10 : tier === 'mid' ? 22 : 34;
     for (let i = 0; i < flareCount; i++) {
       const f = makeSoftSprite(fireTex, 0xff6633, 0.6 + Math.random() * 0.9, 0);
       const d = new THREE.Vector3().randomDirection();

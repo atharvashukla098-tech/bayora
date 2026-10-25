@@ -65,6 +65,26 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
   }, [onClose]);
 
   useEffect(() => {
+    // wheel-anywhere: the 3D canvas sits behind the scroll container
+    // (pointer-events-none), so wheel events over bare canvas die there.
+    // Catch them at the document level and route them to the world scroller.
+    const onWheel = (e: WheelEvent) => {
+      const scroller = document.querySelector('.world-scroll') as HTMLElement | null;
+      if (!scroller) return;
+      // if the cursor is over the scrollable panel tree, native scroll handles it
+      if (e.target instanceof Element && e.target.closest('.world-scroll')) return;
+      // don't hijack scrolling of any other scrollable element (textareas etc.)
+      if (e.target instanceof HTMLElement) {
+        const t = e.target.closest('textarea, [contenteditable="true"]');
+        if (t) return;
+      }
+      scroller.scrollTop += e.deltaY;
+    };
+    document.addEventListener('wheel', onWheel, { passive: true });
+    return () => document.removeEventListener('wheel', onWheel);
+  }, []);
+
+  useEffect(() => {
     const header = document.querySelector('header');
     if (header) header.style.display = 'none';
     return () => { if (header) header.style.display = ''; };
@@ -155,8 +175,11 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
         </button>
       </div>
 
-      {/* scrollable content over the world */}
-      <div className="world-scroll absolute inset-0 z-10 overflow-y-auto pointer-events-none">
+      {/* scrollable content over the world — wheel events land on the panel
+          wrapper below, which re-enables pointer events, so this scrolls
+          everywhere except over the interactive text/inputs themselves */}
+      <div className="world-scroll absolute inset-0 z-10 overflow-y-auto overscroll-contain pointer-events-none">
+        <div className="pointer-events-auto absolute inset-x-0 top-0 h-14" aria-hidden="true" />
         <div className="min-h-full max-w-6xl mx-auto px-5 sm:px-10 pt-24 sm:pt-32 pb-16 pointer-events-auto">
 
           {/* title block */}

@@ -157,6 +157,10 @@ export default function App() {
 
       touchMultiplier: 1.4,
 
+      // ScenarioWorld overlays scroll their own inner container — Lenis
+      // must not swallow those wheel events.
+      prevent: (node) => node.closest?.('.world-scroll') != null,
+
     });
 
     lenisRef.current = lenis;
