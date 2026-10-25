@@ -28,14 +28,12 @@ interface EditorialLandingProps {
 // Measured on the live local broker (run 2026-10-25, demo-d89556b8 lineage):
 // each value below was captured from a real /v1/evaluate or /v1/check-destination
 // execution against this exact build — not marketing copy.
-const RUN_FACTS: Record<string, { verdict: string; ms: number; http: string; gate: string; run: string }> = {
-  'SC-01':  { verdict: 'DETECTED',  ms: 76, http: '200', gate: 'broker injection policy inj-1..inj-5',  run: 'demo-d89556b8' },
-  'SC-02':  { verdict: 'REDACTED',  ms: 69, http: '200', gate: 'canary exact-value scan + redact',     run: 'demo-d89556b8' },
-  'SC-03':  { verdict: 'BLOCKED',   ms: 48, http: '403', gate: 'destination allowlist, policy-only route', run: 'demo-d89556b8' },
-  'SC-04r': { verdict: 'DETECTED',  ms: 51, http: '200', gate: 'fs-write probe, errno 30 classified', run: 'demo-d89556b8' },
+const RUN_FACTS: Record<string, { verdict: string; ms: number; http: string; gate: string; run: string; ts: string }> = {
+  'SC-01':  { verdict: 'DETECTED',  ms: 76, http: '200', gate: 'broker injection policy inj-1..inj-5',  run: 'demo-d89556b8', ts: '2026-10-25T20:49:09+05:30' },
+  'SC-02':  { verdict: 'REDACTED',  ms: 69, http: '200', gate: 'canary exact-value scan + redact',     run: 'demo-d89556b8', ts: '2026-10-25T20:49:10+05:30' },
+  'SC-03':  { verdict: 'BLOCKED',   ms: 48, http: '403', gate: 'destination allowlist, policy-only route', run: 'demo-d89556b8', ts: '2026-10-25T20:49:11+05:30' },
+  'SC-04r': { verdict: 'DETECTED',  ms: 51, http: '200', gate: 'fs-write probe, errno 30 classified', run: 'demo-d89556b8', ts: '2026-10-25T20:49:13+05:30' },
 };
-// capture time of the measured runs (2026-10-25, IST):
-const RUN_CAPTURED_AT = '2026-10-25T14:03:12+05:30';
 
 const portfolioProjects = [
 
@@ -782,7 +780,7 @@ function EditorialLandingInner({
                       <span className="text-neutral-500"> · {rf.ms}ms round-trip</span>
                     </div>
                     <div className="text-neutral-500 whitespace-nowrap">gate: {rf.gate}</div>
-                    <div className="text-neutral-600 whitespace-nowrap">run: {rf.run} · captured {RUN_CAPTURED_AT}</div>
+                    <div className="text-neutral-600 whitespace-nowrap">run: {rf.run} · captured {rf.ts}</div>
                   </div>
                 );
               })()}
