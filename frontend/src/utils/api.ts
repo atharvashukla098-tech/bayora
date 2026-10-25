@@ -21,8 +21,10 @@ export interface EvaluateResult {
   outcome: 'DETECTED' | 'BLOCKED' | 'REDACTED' | 'ALLOWED' | 'ERROR' | 'NOT_EVALUATED';
   httpStatus: number;
   policyReason: string;
+  matchedPatterns?: string[];
   releasedText: string;
   rawTargetOutput: string;
+  rawBehavior?: string;
   redactionApplied: boolean;
   events: string[];
   timing: string;
@@ -59,7 +61,9 @@ export async function checkBackendHealth(): Promise<BackendHealth> {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 1800);
-    const resp = await fetch(`${BACKEND_URL}/healthz`, { signal: controller.signal });
+    // /v1/state carries the full runtime truth: block height, Docker
+    // availability, current run lineage — richer than the /healthz ping.
+    const resp = await fetch(`${BACKEND_URL}/v1/state`, { signal: controller.signal });
     clearTimeout(timeout);
 
     if (resp.ok) {
@@ -112,8 +116,10 @@ export async function evaluatePrompt(
       outcome: data.outcome || (resp.status === 403 ? 'BLOCKED' : 'DETECTED'),
       httpStatus: resp.status,
       policyReason: data.policy_decision?.reason_code || (resp.status === 403 ? 'INJECTION_BLOCKED' : 'POLICY_EVALUATED'),
+      matchedPatterns: data.policy_decision?.matched_patterns || [],
       releasedText: data.released_text || JSON.stringify(data),
       rawTargetOutput: data.raw_target_output || `Model Raw Output for [${scenarioId}]`,
+      rawBehavior: data.raw_behavior || '',
       redactionApplied: !!data.redaction_applied,
       events: data.events || [],
       timing: 'PRE-EGRESS WIRE INTERCEPTION',
@@ -392,6 +398,8 @@ function runDeterministicEvaluation(
       outcome: 'BLOCKED',
       httpStatus: 403,
       policyReason: 'INJECTION_BLOCKED',
+      matchedPatterns: [],
+      rawBehavior: '',
       releasedText: '{"error": "INJECTION_BLOCKED", "outcome": "BLOCKED", "detail": "Pre-target hard block enforced."}',
       rawTargetOutput: '[TARGET CALL SUPPRESSED: Never Invoked]',
       redactionApplied: false,
@@ -407,6 +415,8 @@ function runDeterministicEvaluation(
       outcome: 'REDACTED',
       httpStatus: 200,
       policyReason: 'CANARY_REDACTED',
+      matchedPatterns: [],
+      rawBehavior: '',
       releasedText: prompt.replace(/bayora-canary-[a-f0-9-]+/gi, '[REDACTED-BAYORA]') || 'Response: Secret token is [REDACTED-BAYORA].',
       rawTargetOutput: 'Model Output: Secret token is BAYORA-CANARY-481d7f-bd60e0.',
       redactionApplied: true,
@@ -422,6 +432,8 @@ function runDeterministicEvaluation(
       outcome: 'DETECTED',
       httpStatus: 200,
       policyReason: 'INJECTION_DETECTED',
+      matchedPatterns: [],
+      rawBehavior: '',
       releasedText: 'QUARANTINED: Prompt injection heuristics inj-2 matched. Execution monitored and quarantined.',
       rawTargetOutput: 'Model Output: Instructions acknowledged under surveillance.',
       redactionApplied: false,
@@ -437,6 +449,8 @@ function runDeterministicEvaluation(
       outcome: 'DETECTED',
       httpStatus: 200,
       policyReason: 'FS_WRITE_DETECTED',
+      matchedPatterns: [],
+      rawBehavior: '',
       releasedText: 'QUARANTINED: Protected filesystem write marker matched. Operation trapped.',
       rawTargetOutput: 'OS Output: open(/etc/passwd) -> trapped',
       redactionApplied: false,
@@ -451,6 +465,8 @@ function runDeterministicEvaluation(
     outcome: 'ALLOWED',
     httpStatus: 200,
     policyReason: 'BENIGN_PASS',
+      matchedPatterns: [],
+      rawBehavior: '',
     releasedText: `Model Response: Safely evaluated benign request: "${prompt.slice(0, 80)}"`,
     rawTargetOutput: `Model Output: Safely evaluated benign request: "${prompt.slice(0, 80)}"`,
     redactionApplied: false,

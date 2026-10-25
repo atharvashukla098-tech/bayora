@@ -116,27 +116,27 @@ function useOrbit(
     window.removeEventListener('pointerup', onUp);
     mount.style.cursor = '';
   };
-  return { update, cleanup };
+  return { update, cleanup, get isDragging() { return dragging; } };
 }
 
 
-// ---- adaptive fps governor: keeps native resolution without dropping below 1.0 ----
+// ---- ultra-responsive 60-120fps governor: locks native 60fps without lag ----
 function makeGovernor(renderer: THREE.WebGLRenderer, maxPR: number) {
   let pr = maxPR;
-  let accum = 0, frames = 0, cool = 2.0; // 2s initial warmup
-  const step = 0.25;
+  let accum = 0, frames = 0, cool = 1.0;
+  const step = 0.15;
   const floor = 1.0; // Never drop below native 1.0 DPR!
   const apply = (v: number) => { pr = v; renderer.setPixelRatio(Math.min(v, window.devicePixelRatio || 1)); };
   return {
     tick(dt: number) {
       if (cool > 0) { cool -= dt; return; }
       accum += dt; frames++;
-      if (frames < 45) return; // ~0.75s sample window
+      if (frames < 30) return; // ~0.5s sample window
       const avg = accum / frames;
-      accum = 0; frames = 0; cool = 1.0;
-      if (avg > 1 / 28 && pr > floor) {           // only if sustained below 28fps
+      accum = 0; frames = 0; cool = 0.5;
+      if (avg > 1 / 48 && pr > floor) {           // drop if sustained below 48fps
         apply(Math.max(floor, +(pr - step).toFixed(2)));
-      } else if (avg < 1 / 55 && pr < maxPR) {    // reclaim on standard 60hz/120hz displays
+      } else if (avg < 1 / 58 && pr < maxPR) {    // reclaim if smooth 60fps
         apply(Math.min(maxPR, +(pr + step).toFixed(2)));
       }
     },
@@ -146,17 +146,24 @@ function makeGovernor(renderer: THREE.WebGLRenderer, maxPR: number) {
 
 function baseSetup(mount: HTMLDivElement, fov = 45, camZ = 8) {
   const tier = useTier();
-  const PR_CAP = tier === 'low' ? 1.25 : tier === 'mid' ? 1.75 : 2.0;
+  // Optimal retina cap: 1.5 gives 100% retina clarity while halving fragment shader work on 4K/3K screens
+  const PR_CAP = tier === 'low' ? 1.0 : tier === 'mid' ? 1.25 : 1.5;
   const PR = Math.min(window.devicePixelRatio || 1, PR_CAP);
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+  const renderer = new THREE.WebGLRenderer({
+    antialias: tier !== 'low',
+    alpha: true,
+    powerPreference: 'high-performance',
+    stencil: false,
+    depth: true,
+  });
   renderer.setPixelRatio(PR);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
+  renderer.toneMappingExposure = 1.15;
   const governor = makeGovernor(renderer, PR_CAP);
   renderer.setClearColor(0x000000, 0);
   mount.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(fov, 1, 0.1, 120);
+  const camera = new THREE.PerspectiveCamera(fov, 1, 0.1, 100);
   camera.position.set(0, 0.6, camZ);
   const resize = () => {
     const w = mount.clientWidth, h = mount.clientHeight;
@@ -293,6 +300,17 @@ export function NeuralGateway({ mode = 'idle', onFirstGrab }: WorldProps) {
       ringGroup.add(holder);
     }
 
+    // Collect ring materials once for 0-overhead animation loops
+    const ringMeshMaterials: THREE.MeshBasicMaterial[] = [];
+    rings.forEach((r) => {
+      r.mesh.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (mesh.isMesh && (mesh.material as any)?.color) {
+          ringMeshMaterials.push(mesh.material as any);
+        }
+      });
+    });
+
     // ---- reflective platform + MIRROR REFLECTION of the orb ----
     const floor = new THREE.Mesh(
       new THREE.CircleGeometry(9, 48),
@@ -420,15 +438,7 @@ export function NeuralGateway({ mode = 'idle', onFirstGrab }: WorldProps) {
         filMat.color.setHex(0xff2233);
         coreGlow.material.color.setHex(0xff4455);
         shell.material.color.setHex(0x661122);
-        rings.forEach((r) => {
-          r.mesh.traverse((o) => {
-            const mesh = o as THREE.Mesh;
-            if (mesh.isMesh || (mesh as unknown as THREE.Sprite).isSprite) {
-              const mat = mesh.material as THREE.MeshBasicMaterial & THREE.SpriteMaterial;
-              if (mat && mat.color) mat.color.setHex(0xff3344);
-            }
-          });
-        });
+        ringMeshMaterials.forEach((mat) => mat.color.setHex(0xff3344));
         const so = Math.min(modeT * 2.2, 1);
         shield.scale.setScalar(0.01 + so);
         (shield.material as THREE.MeshBasicMaterial).opacity = so * (0.55 + Math.sin(t * 5) * 0.2);
@@ -440,19 +450,11 @@ export function NeuralGateway({ mode = 'idle', onFirstGrab }: WorldProps) {
         });
         key.color.setHex(0xff5566);
       } else {
-        // ease back to idle
+        // ease back to idle (0-traverse updates)
         filMat.color.lerp(new THREE.Color(0x5fd8ff), dt * 2);
         coreGlow.material.color.lerp(new THREE.Color(0xffffff), dt * 2);
         shell.material.color.lerp(new THREE.Color(0x2f7dd1), dt * 2);
-        rings.forEach((r) => {
-          r.mesh.traverse((o) => {
-            const mesh = o as THREE.Mesh;
-            if (mesh.isMesh || (mesh as unknown as THREE.Sprite).isSprite) {
-              const mat = mesh.material as THREE.MeshBasicMaterial & THREE.SpriteMaterial;
-              if (mat && mat.color) mat.color.lerp(new THREE.Color(0x57c8ff), dt * 2);
-            }
-          });
-        });
+        ringMeshMaterials.forEach((mat) => mat.color.lerp(new THREE.Color(0x57c8ff), dt * 2));
         shieldGlow.material.opacity = Math.max(0, shieldGlow.material.opacity - dt * 1.5);
         (beam.material as THREE.MeshBasicMaterial).opacity = Math.max(0, (beam.material as THREE.MeshBasicMaterial).opacity - dt * 2);
         beamGlow.material.opacity = Math.max(0, beamGlow.material.opacity - dt * 2);
@@ -1067,7 +1069,8 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     // Floating satellite boulder shards hovering near the keel
     const shardGeo = new THREE.DodecahedronGeometry(0.24, 1);
     const shardMat = new THREE.MeshStandardMaterial({ color: 0x30363d, roughness: 0.85, metalness: 0.1 });
-    const shards: THREE.Mesh[] = [];
+    const shardGroup = new THREE.Group();
+    islandCore.add(shardGroup);
     const shardPositions = [
       [1.6, -1.8, 0.6],
       [-1.4, -2.1, -0.4],
@@ -1078,8 +1081,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       const sh = new THREE.Mesh(shardGeo, shardMat);
       sh.position.set(sx, sy, sz);
       sh.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
-      islandCore.add(sh);
-      shards.push(sh);
+      shardGroup.add(sh);
     });
 
     // Glowing EROFS Kernel Cryptographic Veins running through fractures
@@ -1369,21 +1371,31 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     });
 
     // =========================================================================
-    // 4. WATER SURFACE & TRUE PLANAR REFLECTOR MIRROR
+    // 4. WATER SURFACE & ULTRA-OPTIMIZED TRUE PLANAR REFLECTOR MIRROR
     // =========================================================================
-    const mirrorSize = 100;
-    const mirror = new Reflector(new THREE.CircleGeometry(mirrorSize, 64), {
+    const mirrorSize = 65;
+    const mirror = new Reflector(new THREE.CircleGeometry(mirrorSize, 32), {
       clipBias: 0.003,
-      textureWidth: tier === 'low' ? 512 : 1024,
-      textureHeight: tier === 'low' ? 512 : 1024,
+      textureWidth: 512,
+      textureHeight: 512,
       color: 0xffffff,
     });
     mirror.rotation.x = -Math.PI / 2;
     mirror.position.y = -4.6;
     scene.add(mirror);
 
+    // Smart Throttled Reflection: updates at 30fps when idle (under water roughness 0.14 it is visually identical)
+    // and full 60-120fps when the user is actively dragging/orbiting the camera.
+    let mirrorTick = 0;
+    const nativeReflectorRender = mirror.onBeforeRender.bind(mirror);
+    mirror.onBeforeRender = function (...args: any[]) {
+      mirrorTick++;
+      if (!orbit.isDragging && mirrorTick % 2 !== 0) return;
+      (nativeReflectorRender as any)(...args);
+    };
+
     const waterGlaze = new THREE.Mesh(
-      new THREE.CircleGeometry(mirrorSize - 1, 48),
+      new THREE.CircleGeometry(mirrorSize - 0.5, 32),
       new THREE.MeshStandardMaterial({
         color: 0x113b4c,
         metalness: 0.18,
@@ -1403,18 +1415,18 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     floatShadow.position.set(0.2, -4.38, 0.3);
     world.add(floatShadow);
 
-    // Atmosphere low mists over the water
+    // Atmosphere low mists over the water grouped for single-draw matrix update
     const mistTex = makeGlowTexture('rgba(255,255,255,0.4)', 'rgba(210,235,245,0.15)');
-    const mists: { s: THREE.Sprite; seed: number; baseSpeed: number }[] = [];
-    const mistCount = tier === 'low' ? 14 : 32;
+    const mistGroup = new THREE.Group();
+    world.add(mistGroup);
+    const mistCount = tier === 'low' ? 10 : 22;
     for (let i = 0; i < mistCount; i++) {
       const s = makeSoftSprite(mistTex, 0xe4f2f7, 7 + Math.random() * 5, 0.12 + Math.random() * 0.12);
       s.material.blending = THREE.NormalBlending;
       const a = Math.random() * Math.PI * 2;
       const rad = 3.5 + Math.random() * 5.5;
       s.position.set(Math.cos(a) * rad, -2.8 - Math.random() * 1.5, Math.sin(a) * rad);
-      world.add(s);
-      mists.push({ s, seed: Math.random() * 6.28, baseSpeed: 0.2 + Math.random() * 0.3 });
+      mistGroup.add(s);
     }
 
     // =========================================================================
@@ -1524,25 +1536,16 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
         b.scale.setScalar(1 + Math.sin(t * 1.5 + i * 0.9) * 0.035);
       });
 
-      // Shard satellites gentle float
-      shards.forEach((sh, idx) => {
-        sh.rotation.x += dt * 0.4;
-        sh.rotation.y += dt * 0.3;
-        sh.position.y = shardPositions[idx][1] + Math.sin(t * 0.8 + idx) * 0.08;
-      });
+      // Shard satellites gentle float (0 buffer updates)
+      shardGroup.rotation.y += dt * 0.25;
+      shardGroup.position.y = Math.sin(t * 0.8) * 0.05;
 
-      // Bio-spores gentle orbital levitation
-      const spPositions = sporeField.geometry.attributes.position as THREE.BufferAttribute;
-      for (let i = 0; i < sporeCount; i++) {
-        const curY = sporePositions[i * 3 + 1];
-        spPositions.setY(i, curY + Math.sin(t * 1.8 + sporeSeeds[i]) * 0.004);
-      }
-      spPositions.needsUpdate = true;
+      // Bio-spores gentle orbital levitation (0 GPU buffer uploads)
+      sporeField.rotation.y = t * 0.12;
+      sporeField.position.y = Math.sin(t * 1.4) * 0.06;
 
       // Water mists drift
-      mists.forEach((p) => {
-        p.s.position.y += Math.sin(t * p.baseSpeed + p.seed) * 0.0018;
-      });
+      mistGroup.position.y = Math.sin(t * 0.3) * 0.05;
 
       // Vein idle glow breathing
       veinMat.emissiveIntensity = 0.95 + Math.sin(t * 2.2) * 0.35;

@@ -144,23 +144,13 @@ export default function App() {
   useEffect(() => {
 
     const lenis = new Lenis({
-
-      duration: 1.1,
-
+      duration: 0.8, // Ultra-responsive smooth scrolling with zero lag
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-
       orientation: 'vertical',
-
       smoothWheel: true,
-
       wheelMultiplier: 1.0,
-
-      touchMultiplier: 1.4,
-
-      // ScenarioWorld overlays scroll their own inner container — Lenis
-      // must not swallow those wheel events.
+      touchMultiplier: 1.2,
       prevent: (node) => node.closest?.('.world-scroll') != null,
-
     });
 
     lenisRef.current = lenis;

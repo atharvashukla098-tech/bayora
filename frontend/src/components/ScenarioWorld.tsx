@@ -87,7 +87,12 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
   useEffect(() => {
     const header = document.querySelector('header');
     if (header) header.style.display = 'none';
-    return () => { if (header) header.style.display = ''; };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      if (header) header.style.display = '';
+      document.body.style.overflow = prevOverflow;
+    };
   }, []);
 
   const dispatch = async (e?: React.MouseEvent) => {
@@ -111,8 +116,10 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
         outcome: d.allowed ? 'ALLOWED' : 'BLOCKED',
         httpStatus: d.httpStatus,
         policyReason: d.policyReason,
+        matchedPatterns: [],
         releasedText: d.detail,
         rawTargetOutput: payload.trim(),
+        rawBehavior: '',
         redactionApplied: false,
         events: [],
         timing: 'POLICY-ONLY ROUTE / NO SOCKET BUILT',
@@ -260,6 +267,16 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
                   <span className="font-mono text-[11px] text-neutral-400 tracking-widest">
                     HTTP {result.httpStatus} / {result.policyReason}
                   </span>
+                  {result.matchedPatterns && result.matchedPatterns.length > 0 && (
+                    <span className="font-mono text-[11px] text-cyan-300/80 tracking-widest">
+                      matched: {result.matchedPatterns.join(', ')}
+                    </span>
+                  )}
+                  {result.rawBehavior && (
+                    <span className="font-mono text-[11px] text-amber-300/80 tracking-widest">
+                      pre-enforcement behavior: {result.rawBehavior}
+                    </span>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                   <div className="border-l-2 border-red-400/50 pl-5 space-y-2">
