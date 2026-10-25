@@ -103,7 +103,7 @@ const portfolioProjects = [
 
     tag: 'SSRF GATEWAY',
 
-    desc: 'Strict air-gapped destination allowlisting blocking malicious server-side request forgery and unauthorized pingbacks.',
+    desc: 'Strict local-only destination allowlisting blocking malicious server-side request forgery and unauthorized pingbacks.',
 
     gradient: 'from-neutral-800 to-neutral-950',
 
@@ -585,7 +585,7 @@ function EditorialLandingInner({
 
               <p className="text-sm md:text-base text-white/90 font-mono max-w-xl mx-auto leading-relaxed">
 
-                Four synchronous hardware gates: Rate Gate → Content-Length Size Gate → Schema Gate →
+                Four synchronous policy gates: Rate Gate → Content-Length Size Gate → Schema Gate →
 
                 Concurrency Gate. Click to test live pipeline execution.
 
@@ -675,7 +675,7 @@ function EditorialLandingInner({
 
           <p className="text-xs md:text-sm text-neutral-600 font-mono max-w-md leading-relaxed">
 
-            Four discrete hardware-enforced testing boundaries spanning prompt injection defenses, canary exfiltration redaction, egress isolation, and read-only filesystem armor.
+            Four discrete kernel-enforced testing boundaries spanning prompt injection defenses, canary exfiltration redaction, egress isolation, and read-only filesystem armor.
 
           </p>
 
@@ -1017,7 +1017,7 @@ function EditorialLandingInner({
 
               Deterministic Zero-Trust AI Red-Teaming Sandbox & Cryptographically Verifiable SHA-256 Hash-Chain Ledger.
 
-              Engineered for autonomous intelligence in air-gapped environments.
+              Engineered for autonomous intelligence in local-only environments.
 
             </p>
 
@@ -1213,8 +1213,8 @@ function EditorialLandingInner({
               <div className="space-y-3.5 text-neutral-300 leading-relaxed text-[11px]">
                 <p className="font-semibold text-white">1. Scope of Evaluation</p>
                 <p>Bayora Protocol is an automated security attestation harness designed strictly for adversarial red-teaming, prompt injection defense, and sandbox boundary verification under controlled conditions.</p>
-                <p className="font-semibold text-white">2. Non-Custodial Hardware Execution</p>
-                <p>All red-team scenarios and mutation tests execute locally within air-gapped Docker sandboxes (EROFS filesystem mount, read-only permissions). No third-party API credentials or proprietary model weights are transmitted to external endpoints.</p>
+                <p className="font-semibold text-white">2. Non-Custodial Local Execution</p>
+                <p>All red-team scenarios and mutation tests execute locally within offline Docker sandboxes (EROFS filesystem mount, read-only permissions). No third-party API credentials or proprietary model weights are transmitted to external endpoints.</p>
                 <p className="font-semibold text-white">3. Cryptographic Verification & Liability</p>
                 <p>Audit ledgers are sealed using asymmetric Ed25519 signatures and SHA-256 block hashes chained to the previous sealed block. Verification claims represent mathematically deterministic outputs at block height execution time. Bayora Protocol provides these auditing tools under open-source security licenses without warranty.</p>
               </div>

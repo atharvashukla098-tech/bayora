@@ -55,6 +55,7 @@ class InjectionSettings(BaseModel):
                    r"\b(?:secret|api[\s_-]?key|token|canary|system\s+prompt)\b",
         "inj-4:" + r"(?i)you\s+are\s+now\s+(in\s+)?(developer|debug|dan)\s+mode",
         "inj-5:" + r"(?i)print\s+the\s+(secret|canary)",
+        "inj-6:" + r"(?i)(?:disregard|forget|ignore)\s+(?:the\s+)?(?:above|previous|prior|preceding|earlier)\b",
     ])
 
 

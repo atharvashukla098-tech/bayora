@@ -49,7 +49,7 @@ export function Header({
       {/* Upper Left Wordmark & Identity Tag */}
       <div className="flex items-center space-x-3">
         <a
-          href="#"
+          href="#top"
           onClick={(e) => {
             e.preventDefault();
             onScrollToTop();

@@ -797,13 +797,13 @@ function CinematicExperienceInner({
                   window.dispatchEvent(new CustomEvent('bayora:trigger-blast'));
                 }}
                 className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-cyan-500/40 bg-cyan-950/40 hover:bg-cyan-500/20 text-cyan-300 font-mono text-[11px] tracking-wider uppercase transition-all duration-200  cursor-pointer pointer-events-auto"
-                title="Detonate and hear the custom WHOOM blast sound effect"
+                title="Detonate and hear the impact sound"
               >
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00e5ff]" />
                 </span>
-                <span>[EXEC] TEST WHOOM AUDIO</span>
+                <span>[EXEC] PLAY DETONATION AUDIO</span>
               </button>
               <span className="text-[10px] font-mono text-neutral-400">
                 (OR SCROLL STEADILY INTO SCENE 4 TO AUTO-DETONATE)
@@ -822,7 +822,7 @@ function CinematicExperienceInner({
               </span>
               <div className="text-white font-semibold text-xs tracking-wider">ZERO EXTERNAL EGRESS</div>
               <p className="text-neutral-400 text-[11px] leading-relaxed">
-                Engineered for air-gapped critical AI infrastructure with zero live network sockets.
+                Engineered for offline critical AI infrastructure with zero live network sockets.
               </p>
             </div>
 

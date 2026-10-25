@@ -535,7 +535,7 @@ function SecOpsConsoleInner({
     sound.playClick();
     const reportData = {
       platform: 'Bayora Zero-Trust AI Red-Teaming Sandbox v1.0.0',
-      run_id: backendHealth?.currentRun || 'demo-20261024-151348-62f1f0',
+      run_id: backendHealth?.currentRun || 'live-session',
       timestamp: new Date().toISOString(),
       report_status: 'VERIFIED_WITH_LIMITATIONS',
       report_accepted: true,
@@ -574,7 +574,7 @@ function SecOpsConsoleInner({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ledger_${backendHealth?.currentRun || 'demo'}.jsonl`;
+    a.download = `ledger_${backendHealth?.currentRun || 'live-session'}.jsonl`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -872,7 +872,7 @@ function SecOpsConsoleInner({
             { id: 'pitch', label: '1. EXECUTIVE DEMO SEQUENCE', tag: '[DEMO]' },
             { id: 'scenarios', label: '2. 14-SCENARIO CATALOGUE', tag: '[CATALOG]' },
             { id: 'wire', label: '3. WIRE PAYLOAD DIFF', tag: '[DIFF]' },
-            { id: 'tamper', label: '4. 5-MODE TAMPER PROOF', tag: '[TAMPER]' },
+            { id: 'tamper', label: '4. 5-MODE TAMPER-EVIDENT TEST', tag: '[TAMPER]' },
             { id: 'ledger', label: '5. AUDIT LEDGER STREAM', tag: '[LEDGER]' },
             { id: 'report', label: '6. SIGNED AUDIT REPORT', tag: '[REPORT]' },
           ].map((tab) => {
@@ -1209,7 +1209,7 @@ function SecOpsConsoleInner({
         )}
 
         {/* =========================================================================
-            TAB 4: 5-MODE TAMPER PROOF & HASH-CHAIN EXPLORER
+            TAB 4: 5-MODE TAMPER-EVIDENT TEST & HASH-CHAIN EXPLORER
             ========================================================================= */}
         {activeTab === 'tamper' && (
           <div className="space-y-6 animate-in fade-in duration-200 font-mono">

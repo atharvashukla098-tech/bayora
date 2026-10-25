@@ -83,7 +83,7 @@ export async function checkBackendHealth(): Promise<BackendHealth> {
     online: false,
     service: 'in-browser-sandbox',
     targetMode: 'deterministic_mock',
-    currentRun: 'demo-20261024-151348',
+    currentRun: 'offline-fallback',
     blockHeight: 20,
     dockerAvailable: false,
     runtimeContainment: 'SKIPPED (Docker unavailable)',

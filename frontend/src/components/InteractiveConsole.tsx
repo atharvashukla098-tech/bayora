@@ -199,7 +199,7 @@ export function InteractiveConsole({
           {[
             { id: 'attacks', label: 'ATTACK SIMULATOR', tag: '[SIM]' },
             { id: 'ledger', label: 'AUDIT LEDGER STREAM', tag: '[LEDGER]' },
-            { id: 'tamper', label: '1-CLICK TAMPER PROOF', tag: '[TAMPER]' },
+            { id: 'tamper', label: '1-CLICK TAMPER-EVIDENT TEST', tag: '[TAMPER]' },
             { id: 'certificate', label: 'SIGNED AUDIT REPORT', tag: '[REPORT]' },
           ].map((tab) => {
             const active = activeTab === tab.id;
@@ -364,7 +364,7 @@ export function InteractiveConsole({
             </div>
           )}
 
-          {/* TAB 3: 1-CLICK TAMPER PROOF */}
+          {/* TAB 3: 1-CLICK TAMPER-EVIDENT TEST */}
           {activeTab === 'tamper' && (
             <div className="space-y-5">
               <div className="p-4 rounded-xl border border-white/10 bg-white/5 space-y-2">

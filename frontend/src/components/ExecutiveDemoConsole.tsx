@@ -104,10 +104,6 @@ export const JUDGE_SCENES: JudgeSceneData[] = [
     title: 'Ed25519 Sign Report',
     desc: 'Compile evaluation matrix and sign audit_report.json',
     evaluates: 'Aggregates all 16 security assertions into audit_report.json and seals the cryptographic certificate with an asymmetric Ed25519 signature.',
-    verification: {
-      title: 'Cryptographic Certificate & Audit Report Signed',
-      detail: 'Full evaluation matrix verified. Ed25519 asymmetric digital signature sealed. Conformance attested at 100%.',
-    },
   },
 ];
 
