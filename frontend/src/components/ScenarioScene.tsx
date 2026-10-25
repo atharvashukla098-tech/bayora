@@ -978,8 +978,8 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     strip(0x4a8ca0, 1.5, 10, 0.8, 0, -4, -4);      // teal water bounce below
     scene.environment = pmrem.fromScene(envScene, 0.08).texture;
     pmrem.dispose();
-    camera.position.set(2.6, 2.4, 12.8);
-    camera.lookAt(0, 2.2, 0);
+    camera.position.set(3.4, 3.0, 15.5);
+    camera.lookAt(0.6, 2.6, 0);
     scene.fog = new THREE.Fog(0xd8e4e8, 48, 110);
     // pastel sky gradient: pale blue -> warm peach at the horizon
     const skyC = document.createElement('canvas');
@@ -998,7 +998,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
 
     const world = new THREE.Group();
     scene.add(world);
-    world.position.x = 1.2; // island center-right; mountains read behind
+    world.position.x = 3.4; // island fully clear of the text column
 
     // ---- floating island: classic inverted-teardrop earth chunk ----
     // Lathe profile: flat grass-top rim, stone walls tapering DOWN to a
@@ -1151,8 +1151,8 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       const p = geo.attributes.position as THREE.BufferAttribute;
       const colors: number[] = [];
       const snowLine = h * 0.62;
-      const rockC = new THREE.Color(0x4a5563);
-      const rockD = new THREE.Color(0x333c47);
+      const rockC = new THREE.Color(0x5d6b7c);
+      const rockD = new THREE.Color(0x45525f);
       const snowC = new THREE.Color(0xf6fafc);
       for (let i = 0; i < p.count; i++) {
         const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
@@ -1177,7 +1177,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       return geo;
     };
     const mountainMat = new THREE.MeshStandardMaterial({
-      vertexColors: true, roughness: 0.96, flatShading: true,
+      vertexColors: true, roughness: 0.9, flatShading: true, envMapIntensity: 0.8, emissive: 0x1c222b, emissiveIntensity: 0.5,
     });
     const mountainDefs = [
       { h: 16, b: 5.4, x: -7.0, z: -15, seed: 3.1 },
@@ -1209,7 +1209,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(backdropCanvas), side: THREE.DoubleSide })
     );
     skyBackdrop.position.set(0, 10, -80);
-    world.add(skyBackdrop);
+    scene.add(skyBackdrop); // static backdrop
 
     const mirror = new Reflector(new THREE.CircleGeometry(46, 64), {
       clipBias: 0.003,
@@ -1218,15 +1218,15 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       color: 0xffffff, // pure mirror — the sky paints the water
     });
     mirror.rotation.x = -Math.PI / 2;
-    mirror.position.y = -4.42;
-    world.add(mirror);
+    mirror.position.y = -4.6;
+    scene.add(mirror); // NOT in `world`: Reflector's virtual camera must not inherit orbit rotation
     const water = new THREE.Mesh(
       new THREE.CircleGeometry(45, 48),
-      new THREE.MeshStandardMaterial({ color: 0xcfa887, metalness: 0.1, roughness: 0.25, transparent: true, opacity: 0.16, envMapIntensity: 0.6 })
+      new THREE.MeshStandardMaterial({ color: 0x1f7f96, metalness: 0.1, roughness: 0.2, transparent: true, opacity: 0.65, envMapIntensity: 1.2 })
     );
     water.rotation.x = -Math.PI / 2;
-    water.position.y = -4.38;
-    world.add(water);
+    water.position.y = -4.54;
+    scene.add(water); // above the mirror, below the island; stable under orbit
 
     // ---- float proof: soft shadow cast on the water + island tilt ----
     const shadowTex = makeGlowTexture('rgba(20,30,38,0.6)', 'rgba(20,30,38,0.12)');
@@ -1235,7 +1235,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     world.add(floatShadow);
     islandCore.rotation.z = 0.045; // slight flying tilt
     islandCore.rotation.x = 0.03;
-    islandCore.position.y = 2.2; // clear air gap: rock bottom ~0.1, water at -4.4
+    islandCore.position.y = 2.6; // clear air gap: rock bottom ~0.5, water at -4.6
 
     // ---- corruption (write attempt) + roots seal ----
     const corruptTex = makeGlowTexture('rgba(255,90,90,0.9)', 'rgba(200,20,20,0.3)');
