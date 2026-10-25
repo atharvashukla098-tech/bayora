@@ -9,6 +9,7 @@
 
 import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
+import { Reflector } from 'three/addons/objects/Reflector.js';
 
 export interface WorldProps {
   mode?: string; // 'idle' | 'dispatching' | 'detected' | 'blocked' | 'redacted' | 'allowed'
@@ -958,6 +959,25 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     const mount = mountRef.current!;
     const { renderer, scene, camera, ro, tier, governor } = baseSetup(mount, 40, 8.2);
     renderer.toneMapping = THREE.NoToneMapping; // authored palette, keep exact colors
+
+    // ---- PMREM studio environment: sky/water reflections on every material.
+    // Baked once per mount; zero runtime cost. Sells the 3D read instantly.
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const envScene = new THREE.Scene();
+    envScene.background = new THREE.Color(0x9db8cc);
+    const strip = (color: number, intensity: number, w: number, h: number, x: number, y: number, z: number, ry = 0) => {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide }));
+      m.material.color.multiplyScalar(intensity);
+      m.position.set(x, y, z);
+      m.rotation.y = ry;
+      envScene.add(m);
+    };
+    strip(0xfff2dc, 5, 9, 1.4, 0, 6, 6);            // warm sun softbox
+    strip(0xffc9a0, 2.5, 8, 1.0, -6, 2, -2, Math.PI / 2);  // peach horizon strip
+    strip(0x8fc4e8, 2, 7, 0.9, 6, 3, -2, -Math.PI / 2);   // sky-blue strip
+    strip(0x4a8ca0, 1.5, 10, 0.8, 0, -4, -4);      // teal water bounce below
+    scene.environment = pmrem.fromScene(envScene, 0.08).texture;
+    pmrem.dispose();
     camera.position.set(2.6, 2.4, 12.8);
     camera.lookAt(0, 2.2, 0);
     scene.fog = new THREE.Fog(0xd8e4e8, 48, 110);
@@ -985,6 +1005,8 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     // point (the iconic floating-island silhouette), gentle jitter only.
     const islandCore = new THREE.Group();
     world.add(islandCore);
+
+    // (contact shadow handled by the floatShadow further below)
     const rockProfile: THREE.Vector2[] = [];
     const RP = (h: number, r: number) => rockProfile.push(new THREE.Vector2(Math.max(r, 0.001), h));
     RP(0.9, 1.9);   // top rim (grass line)
@@ -1006,13 +1028,13 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     }
     rockGeo.computeVertexNormals();
     const rock = new THREE.Mesh(rockGeo, new THREE.MeshStandardMaterial({
-      color: 0x96876d, roughness: 0.92, metalness: 0.02, flatShading: true,
+      color: 0xa08a6c, roughness: 0.62, metalness: 0.08, flatShading: true, envMapIntensity: 1.2,
     }));
     islandCore.add(rock);
     // grass top: flat disc capping the island rim
     const grassTop = new THREE.Mesh(
       new THREE.CylinderGeometry(2.12, 1.92, 0.34, tier === 'low' ? 18 : 28),
-      new THREE.MeshStandardMaterial({ color: 0x6f9d4e, roughness: 0.95, flatShading: true })
+      new THREE.MeshStandardMaterial({ color: 0x7ab558, roughness: 0.8, flatShading: true, envMapIntensity: 0.9 })
     );
     grassTop.position.y = 0.92;
     islandCore.add(grassTop);
@@ -1021,7 +1043,7 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
 
     // ---- real oak: lathe trunk w/ root flare + taper, limbs, organic canopy ----
     const tree = new THREE.Group();
-    const barkMat = new THREE.MeshStandardMaterial({ color: 0x5a4632, roughness: 0.95, flatShading: true });
+    const barkMat = new THREE.MeshStandardMaterial({ color: 0x5a4632, roughness: 0.9, flatShading: true, envMapIntensity: 0.55 });
     // trunk profile: wide flared base -> slim waist -> thick shoulder -> tip.
     // Lathe gives one smooth, continuous, organic surface (no stacked cans).
     const profile: THREE.Vector2[] = [];
@@ -1077,13 +1099,20 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     // greens) + irregular jittered icosahedra — reads as leaf masses, not a ball
     const leafTones = [0x84b45e, 0x4c7a38, 0x9cc46e, 0x5c8d46, 0x6f9d4e, 0x87ae52];
     const canopy: THREE.Mesh[] = [];
-    const clumpAnchors = [
-      [1.0, 2.8, 0.0, 0.52], [-0.95, 2.7, 0.05, 0.5], [0.0, 3.45, -0.5, 0.5],
-      [0.7, 3.0, 0.75, 0.4], [-0.45, 2.8, -0.75, 0.42], [1.3, 2.55, 0.35, 0.36],
-      [-1.25, 2.4, -0.05, 0.36], [0.4, 3.85, 0.05, 0.34], [-0.7, 3.7, 0.5, 0.3],
+    // clumps anchored ON the limb tips / trunk top — nothing floats free.
+    // limb tips (from the limb() calls): R-limb ends ~ (1.9, +2.3), L-limb ~ (-1.7, +2.1), top ~ (0.5, +3.4)
+    const clumpAnchors: [number, number, number, number][] = [
+      [0.95, 2.72, 0.25, 0.52],   // right-limb tip mass (big)
+      [-0.85, 2.62, 0.15, 0.5],  // left-limb tip mass (big)
+      [0.12, 3.5, -0.3, 0.5],    // trunk-top crown
+      [1.35, 2.95, 0.35, 0.38],  // right outer satellite (overlaps limb mass)
+      [-1.2, 2.85, -0.2, 0.4],   // left outer satellite (overlaps limb mass)
+      [0.85, 3.4, 0.2, 0.34],    // crown right shoulder
+      [-0.75, 3.3, 0.1, 0.32],   // crown left shoulder
+      [0.25, 3.95, 0.0, 0.3],    // crown cap
     ];
-    clumpAnchors.forEach((a, i) => {
-      const g = new THREE.IcosahedronGeometry(a[3], 1);
+    clumpAnchors.forEach(([ax, ay, az, ar], i) => {
+      const g = new THREE.IcosahedronGeometry(ar, 1);
       const gp = g.attributes.position as THREE.BufferAttribute;
       for (let k = 0; k < gp.count; k++) {
         const j = 1 + ((Math.sin(k * 7.3 + i * 3.1) * 43758.5) % 1) * 0.16;
@@ -1091,9 +1120,9 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       }
       g.computeVertexNormals();
       const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({
-        color: leafTones[i % leafTones.length], roughness: 0.9, flatShading: true,
+        color: leafTones[i % leafTones.length], roughness: 0.85, flatShading: true, envMapIntensity: 0.55,
       }));
-      m.position.set(a[0], a[1] + 0.92, a[2]);
+      m.position.set(ax, ay + 0.92, az);
       tree.add(m);
       canopy.push(m);
     });
@@ -1162,18 +1191,46 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
       world.add(mtn);
     });
 
-    // ---- water ----
+    // ---- water: TRUE planar mirror (Reflector) under a tinted glass layer ----
+    // physical warm-horizon backdrop (the mirror reflects this -> peach folds onto water)
+    const backdropCanvas = document.createElement('canvas');
+    backdropCanvas.width = 4; backdropCanvas.height = 256;
+    const bdCtx = backdropCanvas.getContext('2d')!;
+    const bdG = bdCtx.createLinearGradient(0, 0, 0, 256);
+    bdG.addColorStop(0, '#7fa8cf');
+    bdG.addColorStop(0.45, '#bcd4de');
+    bdG.addColorStop(0.66, '#f7b98e');
+    bdG.addColorStop(0.8, '#f7ad7a');
+    bdG.addColorStop(1, '#e8c9a8');
+    bdCtx.fillStyle = bdG;
+    bdCtx.fillRect(0, 0, 4, 256);
+    const skyBackdrop = new THREE.Mesh(
+      new THREE.PlaneGeometry(220, 60),
+      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(backdropCanvas), side: THREE.DoubleSide })
+    );
+    skyBackdrop.position.set(0, 10, -80);
+    world.add(skyBackdrop);
+
+    const mirror = new Reflector(new THREE.CircleGeometry(46, 64), {
+      clipBias: 0.003,
+      textureWidth: tier === 'low' ? 512 : 1024,
+      textureHeight: tier === 'low' ? 512 : 1024,
+      color: 0xffffff, // pure mirror — the sky paints the water
+    });
+    mirror.rotation.x = -Math.PI / 2;
+    mirror.position.y = -4.42;
+    world.add(mirror);
     const water = new THREE.Mesh(
       new THREE.CircleGeometry(45, 48),
-      new THREE.MeshStandardMaterial({ color: 0x5e8c96, metalness: 0.55, roughness: 0.3 })
+      new THREE.MeshStandardMaterial({ color: 0xcfa887, metalness: 0.1, roughness: 0.25, transparent: true, opacity: 0.16, envMapIntensity: 0.6 })
     );
     water.rotation.x = -Math.PI / 2;
-    water.position.y = -4.4;
+    water.position.y = -4.38;
     world.add(water);
 
     // ---- float proof: soft shadow cast on the water + island tilt ----
     const shadowTex = makeGlowTexture('rgba(20,30,38,0.6)', 'rgba(20,30,38,0.12)');
-    const floatShadow = makeSoftSprite(shadowTex, 0x141e26, 7.0, 0.6);
+    const floatShadow = makeSoftSprite(shadowTex, 0x0d2028, 9.5, 0.66);
     floatShadow.position.set(0.3, -4.32, 0.4);
     world.add(floatShadow);
     islandCore.rotation.z = 0.045; // slight flying tilt
@@ -1218,9 +1275,11 @@ export function FilesystemIsland({ mode = 'idle', onFirstGrab }: WorldProps) {
     world.add(sealGlow);
 
     // ---- soft god-ray lighting ----
-    scene.add(new THREE.AmbientLight(0xd8e8e0, 1.2));
-    const sun = new THREE.DirectionalLight(0xfff2d8, 2.6); sun.position.set(6, 8, 4); scene.add(sun);
-    const fill = new THREE.DirectionalLight(0xa8c8d8, 0.7); fill.position.set(-5, 3, -4); scene.add(fill);
+    scene.add(new THREE.AmbientLight(0xe8ddd0, 1.0));
+    const sun = new THREE.DirectionalLight(0xffd7a0, 4.2); sun.position.set(-10, 12, 14); scene.add(sun); // low warm sun from front-left
+    const fill = new THREE.DirectionalLight(0xa8c8d8, 0.55); fill.position.set(-5, 3, -4); scene.add(fill);
+    const cyanRim = new THREE.DirectionalLight(0x7deeff, 0.5); cyanRim.position.set(8, 4, -6); scene.add(cyanRim); // cyan rim ties to UI accent
+    const bounce = new THREE.DirectionalLight(0xffc490, 0.5); bounce.position.set(2, -8, 8); scene.add(bounce); // water bounce up-light
     const sunGlowTex = makeGlowTexture('rgba(255,245,220,0.8)', 'rgba(255,230,180,0.15)');
     const sunGlow = makeSoftSprite(sunGlowTex, 0xfff2d8, 8, 0.5);
     sunGlow.position.set(7, 6, 4);
