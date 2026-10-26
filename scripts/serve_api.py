@@ -65,6 +65,34 @@ app.add_middleware(
 # Mount the broker routes
 app.mount("/broker", broker_core)
 
+# ---------------------------------------------------------------------------
+# SINGLE-ORIGIN DEPLOYMENT: serve the built frontend from THIS process so
+# one server + one tunnel carries both the API and the UI. Visitors hit
+# relative /v1/* paths — no hardcoded 127.0.0.1, no cross-origin failures,
+# no SIM-fallback lag when accessed through any tunnel or host.
+# ---------------------------------------------------------------------------
+from pathlib import Path as _P
+
+_DIST = _P(__file__).resolve().parents[1] / "frontend" / "dist"
+if _DIST.is_dir():
+    from fastapi.staticfiles import StaticFiles as _Static
+    from fastapi.responses import FileResponse as _FileResponse
+
+    @app.get("/")
+    async def _spa_root():
+        return _FileResponse(str(_DIST / "index.html"))
+
+    app.mount("/assets", _Static(directory=str(_DIST / "assets")), name="assets")
+
+    # favicon + any other root-level static files
+    for _static_file in _DIST.iterdir():
+        if _static_file.is_file() and _static_file.name != "index.html":
+            _name = _static_file.name
+
+            @app.get("/" + _name, include_in_schema=False)
+            async def _spa_static(_n: str = _name):
+                return _FileResponse(str(_DIST / _n))
+
 dashboard_state = DashboardState(config, run_id=run_id)
 
 @app.get("/healthz")
@@ -383,6 +411,11 @@ async def gate_test(body: GateTestInput):
         }
 
     return {"error": f"unknown gate {gate!r}"}
+
+if _DIST.is_dir():
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def _spa_catch_all(full_path: str):
+        return _FileResponse(str(_DIST / "index.html"))
 
 if __name__ == "__main__":
     import uvicorn
