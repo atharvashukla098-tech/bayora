@@ -1832,16 +1832,17 @@ function EditorialLandingInner({
 
           ========================================================================= */}
 
-      <section className="relative z-10 w-full min-h-[120vh] px-6 md:px-14 bg-[#06070a] text-white overflow-hidden flex flex-col justify-start">
+      <section className="relative z-10 w-full min-h-[145vh] lg:min-h-[160vh] px-6 md:px-14 bg-[#06070a] text-white overflow-hidden flex flex-col justify-start">
         {/* Iridescent Liquid WebGL Background Canvas with Giant Typographic Mask */}
         <IridescentTypographyCanvas paused={!isActive} />
 
         {/* Sharp Foreground Content : Positioned strictly in the text space between Line 0 (VERIFY.) and Line 1 (CONTAIN.) */}
         <div 
-          className="relative z-10 max-w-6xl mx-auto w-full flex flex-col justify-center"
+          className="relative z-10 max-w-6xl mx-auto w-full flex flex-col justify-start"
           style={{
-            paddingTop: 'calc(var(--dock-slot-top, 210px) + 26px)',
-            minHeight: 'var(--dock-slot-height, 220px)',
+            paddingTop: 'calc(var(--dock-slot-top, 170px) + 24px)',
+            minHeight: 'var(--dock-slot-height, 460px)',
+            marginBottom: '40px',
           }}
         >
           {/* Clean, Sculpted Headline */}
@@ -1914,18 +1915,18 @@ function EditorialLandingInner({
           </div>
 
           {/* Plain-language answers: what the technical terms mean */}
-          <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl">
-            <div className="border-t border-white/15 pt-4">
-              <span className="font-mono text-[10px] text-neutral-500 uppercase tracking-widest block mb-1.5">What is a canary token?</span>
-              <p className="text-[13px] text-neutral-400 leading-relaxed">A fake secret, like a decoy password, planted on purpose. If it ever shows up outside, someone leaked it — and we catch it.</p>
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-4xl">
+            <div className="rounded-xl border border-white/10 bg-[#070913]/80 backdrop-blur-md p-4 space-y-1 shadow-lg">
+              <span className="font-mono text-[10px] text-cyan-400 font-bold uppercase tracking-widest block">What is a canary token?</span>
+              <p className="text-[12.5px] text-neutral-300 leading-relaxed font-sans">A fake secret, like a decoy password, planted on purpose. If it ever shows up outside, someone leaked it — and we catch it.</p>
             </div>
-            <div className="border-t border-white/15 pt-4">
-              <span className="font-mono text-[10px] text-neutral-500 uppercase tracking-widest block mb-1.5">What is a hash chain?</span>
-              <p className="text-[13px] text-neutral-400 leading-relaxed">A log where each entry stores a fingerprint of the previous entry. Remove or edit anything and every later fingerprint stops matching.</p>
+            <div className="rounded-xl border border-white/10 bg-[#070913]/80 backdrop-blur-md p-4 space-y-1 shadow-lg">
+              <span className="font-mono text-[10px] text-cyan-400 font-bold uppercase tracking-widest block">What is a hash chain?</span>
+              <p className="text-[12.5px] text-neutral-300 leading-relaxed font-sans">A log where each entry stores a fingerprint of the previous entry. Remove or edit anything and every later fingerprint stops matching.</p>
             </div>
-            <div className="border-t border-white/15 pt-4">
-              <span className="font-mono text-[10px] text-neutral-500 uppercase tracking-widest block mb-1.5">What is Ed25519 signing?</span>
-              <p className="text-[13px] text-neutral-400 leading-relaxed">A digital signature only we can create, but anyone can verify. It proves the results came from the real Bayora engine.</p>
+            <div className="rounded-xl border border-white/10 bg-[#070913]/80 backdrop-blur-md p-4 space-y-1 shadow-lg">
+              <span className="font-mono text-[10px] text-cyan-400 font-bold uppercase tracking-widest block">What is Ed25519 signing?</span>
+              <p className="text-[12.5px] text-neutral-300 leading-relaxed font-sans">A digital signature only we can create, but anyone can verify. It proves the results came from the real Bayora engine.</p>
             </div>
           </div>
 

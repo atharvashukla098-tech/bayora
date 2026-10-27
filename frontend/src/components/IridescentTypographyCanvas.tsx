@@ -533,7 +533,7 @@ function render(now: number) {
       const maxMeasuredWidth = Math.max(...lines.map(line => maskCtx.measureText(line).width));
       const fittedFontSize = Math.floor((targetWidth / maxMeasuredWidth) * 100);
 
-      const targetFontSize = Math.min(fittedFontSize, Math.floor(mh / 4.8));
+      const targetFontSize = Math.min(fittedFontSize, Math.floor(mh / 5.2));
       maskCtx.font = `900 ${targetFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif`;
       maskCtx.textAlign = 'left';
       maskCtx.textBaseline = 'top';
@@ -541,13 +541,13 @@ function render(now: number) {
       const y0 = Math.max(Math.floor(mh * 0.02), 16 * dpr);
       const line0Bottom = y0 + targetFontSize;
 
-      // Safe clearance between Line 0 and Line 1 for foreground telemetry dock
-      const gap01 = Math.max(Math.floor(mh * 0.20), 180 * dpr);
+      // Safe clearance between Line 0 and Line 1 for foreground headline, dock, and explanation cards
+      const gap01 = Math.max(Math.floor(mh * 0.38), 440 * dpr);
       const y1 = line0Bottom + gap01;
       const line1Bottom = y1 + targetFontSize;
 
       // Tight cohesive leading between Line 1, 2, and 3
-      const gapBetween = Math.max(Math.floor(mh * 0.045), 38 * dpr);
+      const gapBetween = Math.max(Math.floor(mh * 0.04), 36 * dpr);
       const y2 = line1Bottom + gapBetween;
       const line2Bottom = y2 + targetFontSize;
       const y3 = line2Bottom + gapBetween;
