@@ -9,12 +9,12 @@ A 76-second festival cut of the BAYORA product demo. Every verdict on screen is 
 | # | Frame (t=) | Content |
 |---|-----------|---------|
 | f1 | 2s | Title card: A BAYORA PRODUCTION — "Don't Trust AI. Prove It." |
-| f2 | 6s | Hero: light landing scroll ("Don't Trust AI. Prove It." + live stages card) |
-| f3 | 15s | Dark hero: MATHEMATICAL ATTESTATION + Ed25519 / 0 BYTES / STRICT spec dock |
-| f4 | 25s | Four defense cards row (SC-01..04) |
-| f5 | 35s | SC-01 Neural Gateway 3D world — FIRED: red alarm state, DETECTED / 1 RUN |
-| f6 | 44s | SC-02 Canary Knot 3D world — FIRED: REDACTED / 1 RUN |
-| f7 | 53s | SC-04 island world — the EROFS seal |
+| f2 | 6s | Hero: light landing ("Don't Trust AI. Prove It." + live pipeline stages card) |
+| f3 | 15s | Four defense case cards (CASE // 01 Neural Safety Gateway, CASE // 02 Canary Exfiltration Purge visible) |
+| f4 | 25s | SC-01 Neural Gateway 3D world — FIRED: red alarm state, DETECTED / 1 RUN, FIRE AGAIN button |
+| f5 | 35s | SC-02 Canary Knot 3D world — idle (fires later in clip) → verdict REDACTED |
+| f6 | 44s | SC-03 Egress Boundary world — verdict BLOCKED (403) |
+| f7 | 53s | SC-04 Island world — the EROFS seal |
 | f8 | 57s | Iridescent typography beat (VERIFY EVERY PROMPT / CONTAIN AT THE ROOT) |
 | f9 | 60s | Defense sandbox console (attack-test tab) |
 | f10 | 68s | Tamper test result: [REJECTED - TAMPER FOUND], BAD_HASH at block #3, cryptographic fraud detected |
