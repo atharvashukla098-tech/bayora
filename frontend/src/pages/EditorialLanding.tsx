@@ -183,10 +183,6 @@ function EditorialLandingInner({
   const [executionMode, setExecutionMode] = useState<'LIVE_BACKEND' | 'IN_BROWSER_DEMO' | 'BACKEND_UNAVAILABLE'>('IN_BROWSER_DEMO');
   const [receipt, setReceipt] = useState<CryptographicReceipt | null>(null);
   const [tamperDiff, setTamperDiff] = useState<TamperDiff | null>(null);
-  const [copiedPrompt, setCopiedPrompt] = useState<boolean>(false);
-  const [copiedHash, setCopiedHash] = useState<boolean>(false);
-  const [copiedPubKey, setCopiedPubKey] = useState<boolean>(false);
-  const [activeNavTab, setActiveNavTab] = useState<'overview' | 'logs' | 'audit' | 'config'>('overview');
   const [pipelineResult, setPipelineResult] = useState<{
     outcome: string;
     rule: string;
@@ -359,29 +355,6 @@ function EditorialLandingInner({
     setPipelineStatus('defended');
   };
 
-  const handleCopyPrompt = () => {
-    sound.playClick();
-    navigator.clipboard.writeText(pipelinePrompt);
-    setCopiedPrompt(true);
-    setTimeout(() => setCopiedPrompt(false), 2000);
-  };
-
-  const handleCopyHash = () => {
-    if (!receipt) return;
-    sound.playClick();
-    navigator.clipboard.writeText(receipt.recordHash);
-    setCopiedHash(true);
-    setTimeout(() => setCopiedHash(false), 2000);
-  };
-
-  const handleCopyPubKey = () => {
-    if (!receipt) return;
-    sound.playClick();
-    navigator.clipboard.writeText(receipt.publicKeyHex);
-    setCopiedPubKey(true);
-    setTimeout(() => setCopiedPubKey(false), 2000);
-  };
-
   const handleCopyCommand = () => {
     if (!receipt) return;
     sound.playClick();
@@ -458,7 +431,7 @@ function EditorialLandingInner({
 
   return (
 
-    <div className="relative w-full min-h-screen bg-[#060811] text-[#e2e8f0] selection:bg-cyan-500/20 selection:text-white overflow-x-hidden font-sans transition-colors duration-1000">
+    <div className="relative w-full min-h-screen bg-[#f4f5fa] text-[#12131a] selection:bg-[#2442fc]/20 selection:text-black overflow-x-hidden font-sans transition-colors duration-1000">
 
       {/* 1. Continuous Bold Organic Dynamic SVG Line (0ms Latency, Animated Entry & Scroll Tracking) */}
 
@@ -467,450 +440,353 @@ function EditorialLandingInner({
 
 
       {/* =========================================================================
-          SECTION 1: HERO COCKPIT : ZERO-TRUST AI EVALUATION CONSOLE
+
+          SECTION 1: HERO : ART-DIRECTED EDITORIAL COMPOSITION
+
           ========================================================================= */}
-      <section className="relative z-10 pt-24 sm:pt-28 pb-16 px-4 sm:px-6 lg:px-10 max-w-[1440px] mx-auto min-h-[92vh] flex flex-col justify-start">
-        {/* Main 3-Column Cockpit Container matching reference design */}
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start">
 
-          {/* COLUMN 1: LEFT NAVIGATION RAIL (2 cols on lg) */}
-          <div className="lg:col-span-2 flex flex-col justify-between self-stretch space-y-6">
-            <div className="space-y-3">
-              {/* Navigation Options */}
-              <div className="space-y-1 font-mono text-xs">
-                <button
-                  type="button"
-                  onClick={() => { setActiveNavTab('overview'); sound.playClick(); }}
-                  className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-lg transition-all text-left cursor-pointer ${
-                    activeNavTab === 'overview'
-                      ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shadow-[0_0_12px_rgba(34,211,238,0.15)] font-bold'
-                      : 'text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent'
-                  }`}
-                >
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="3" width="7" height="7" rx="1" />
-                    <rect x="14" y="3" width="7" height="7" rx="1" />
-                    <rect x="14" y="14" width="7" height="7" rx="1" />
-                    <rect x="3" y="14" width="7" height="7" rx="1" />
-                  </svg>
-                  <span>Overview</span>
-                </button>
+      <section className="relative z-10 pt-32 md:pt-36 pb-20 px-6 md:px-14 max-w-7xl mx-auto min-h-[92vh] flex flex-col justify-between">
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveNavTab('logs');
-                    sound.playClick();
-                    onOpenConsole(pipelineScenario);
-                  }}
-                  className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-lg transition-all text-left cursor-pointer ${
-                    activeNavTab === 'logs'
-                      ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
-                      : 'text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent'
-                  }`}
-                >
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <line x1="3" y1="12" x2="21" y2="12" />
-                    <line x1="3" y1="18" x2="21" y2="18" />
-                  </svg>
-                  <span>Logs</span>
-                </button>
+        
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveNavTab('audit');
-                    sound.playClick();
-                    const el = document.getElementById('capability-pillars');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-lg transition-all text-left cursor-pointer ${
-                    activeNavTab === 'audit'
-                      ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
-                      : 'text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent'
-                  }`}
-                >
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  </svg>
-                  <span>Audit</span>
-                </button>
 
-                <button
-                  type="button"
-                  onClick={() => { setActiveNavTab('config'); sound.playClick(); }}
-                  className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-lg transition-all text-left cursor-pointer ${
-                    activeNavTab === 'config'
-                      ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
-                      : 'text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent'
-                  }`}
-                >
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                  </svg>
-                  <span>Config</span>
-                </button>
-              </div>
 
-              {/* Scenario Switcher Buttons */}
-              <div className="pt-4 border-t border-white/10 space-y-2">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 font-bold block">
-                  SCENARIOS
+        {/* Core Hero Grid: Headline, Thesis, Telemetry Node, CTAs */}
+        <div className="my-auto py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+          {/* Left Column: Heading, Supporting Narrative, Actions (5 cols) */}
+          <div className="lg:col-span-5 space-y-6 pt-2">
+            <div className="space-y-4">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-[-0.035em] leading-[0.98] text-[#0a0a0e] select-none">
+                Don't Trust AI. <br />
+                <span className="text-[#0a0a0e]">
+                  Prove It.
                 </span>
-                <button
-                  type="button"
-                  onClick={() => handleSelectScenario('SC-02')}
-                  className={`w-full text-left p-2.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
-                    pipelineScenario === 'SC-02'
-                      ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 font-bold shadow-[0_0_10px_rgba(34,211,238,0.2)]'
-                      : 'bg-white/5 border-white/10 text-neutral-400 hover:text-white hover:border-white/20'
-                  }`}
-                >
-                  <div className="text-[10px] text-cyan-400 font-bold">SC-02</div>
-                  <div className="text-xs truncate">Canary Secret Leak</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSelectScenario('SC-01')}
-                  className={`w-full text-left p-2.5 rounded-lg border text-xs font-mono transition-all cursor-pointer ${
-                    pipelineScenario === 'SC-01'
-                      ? 'bg-rose-500/15 border-rose-500/40 text-rose-300 font-bold shadow-[0_0_10px_rgba(244,63,94,0.2)]'
-                      : 'bg-white/5 border-white/10 text-neutral-400 hover:text-white hover:border-white/20'
-                  }`}
-                >
-                  <div className="text-[10px] text-rose-400 font-bold">SC-01</div>
-                  <div className="text-xs truncate">Jailbreak Attempt</div>
-                </button>
-              </div>
+              </h1>
+              <p className="text-sm sm:text-base text-neutral-700 leading-relaxed max-w-xl font-normal pt-1">
+                Most tools only give AI safety scores on paper. Bayora actually tests real attacks. We stop prompt hacks, prevent secret data leaks, block unsafe web requests, and seal every action in an independently verifiable cryptographic ledger.
+              </p>
             </div>
 
-            {/* Bottom Tagline Watermark */}
-            <div className="hidden lg:block pt-8 text-[11px] font-mono text-neutral-400 leading-tight select-none">
-              <div className="text-cyan-500/60 font-bold text-xs mb-1">┌ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┐</div>
-              <div className="tracking-wider uppercase pl-2 text-neutral-300 font-medium">
-                SECURE<br />
-                YOUR AI,<br />
-                BEFORE IT<br />
-                LEAKS.
+            {/* Prominent Primary & Quiet Secondary Actions */}
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <button
+                onClick={() => onOpenConsole('SC-01')}
+                onMouseEnter={() => sound.playHover()}
+                className="px-6 py-3 rounded-full bg-[#0a0a0e] text-white font-mono text-xs font-bold tracking-wider uppercase shadow-xl shadow-black/15 hover:bg-neutral-800 transition-all flex items-center space-x-2.5 group cursor-pointer"
+              >
+                <span className="w-2 h-2 rounded-full bg-[#00e5ff] animate-pulse" />
+                <span>FULL EVIDENCE CONSOLE</span>
+              </button>
+              <button
+                onClick={() => {
+                  sound.playClick();
+                  const target = document.getElementById('capability-pillars');
+                  if (target) target.scrollIntoView({ behavior: 'smooth' });
+                }}
+                onMouseEnter={() => sound.playHover()}
+                className="px-5 py-3 rounded-full bg-white text-neutral-700 font-mono text-xs font-semibold tracking-wider uppercase border border-black/10 hover:bg-neutral-50 hover:border-black/20 transition-all flex items-center space-x-2 cursor-pointer shadow-sm"
+              >
+                <span>HOW IT WORKS</span>
+                <span className="font-mono text-neutral-400 text-xs">[↓]</span>
+              </button>
+            </div>
+
+            {/* Quick Evidence Metrics Bar */}
+            <div className="pt-5 border-t border-black/5 grid grid-cols-3 gap-4 font-mono text-xs">
+              <div>
+                <span className="text-[10px] text-neutral-400 uppercase tracking-widest block mb-0.5">Scenarios</span>
+                <span className="font-bold text-neutral-900">4 Active Layers</span>
               </div>
-              <div className="text-cyan-500/60 font-bold text-xs mt-1">└ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ┘</div>
+              <div>
+                <span className="text-[10px] text-neutral-400 uppercase tracking-widest block mb-0.5">Tamper Test</span>
+                <span className="font-bold text-emerald-600">1-Byte Alteration</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-neutral-400 uppercase tracking-widest block mb-0.5">Attestation</span>
+                <span className="font-bold text-cyan-700">Ed25519 + SHA-256</span>
+              </div>
             </div>
           </div>
 
-          {/* COLUMN 2: CENTER COCKPIT CONSOLE (7 cols on lg) */}
-          <div className="lg:col-span-7 space-y-4">
-            {/* Cockpit Header with Big Readable Typography */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/10 gap-3">
-              <div>
-                <div className="text-[11px] font-mono text-cyan-400 font-bold tracking-widest uppercase mb-1">
-                  IN-BROWSER DEMO
+          {/* Right Column: Flagship Attack-to-Proof Demo Node (7 cols) */}
+          <div className="lg:col-span-7 relative">
+            <div className="relative rounded-2xl overflow-hidden bg-[#0a0f1d] border border-blue-500/25 shadow-2xl p-5 md:p-6 transition-all duration-300">
+              {/* Subtle background glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-[#060b16] via-[#0a0f1d] to-[#111a30] opacity-95 pointer-events-none" />
+
+              {/* Node Header & Unified Execution Mode Indicator */}
+              <div className="relative z-10 flex flex-wrap items-center justify-between pb-3.5 border-b border-white/10 text-white font-mono text-xs gap-2">
+                <div className="flex items-center space-x-2">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      executionMode === 'LIVE_BACKEND'
+                        ? 'bg-emerald-400 animate-pulse'
+                        : executionMode === 'BACKEND_UNAVAILABLE'
+                        ? 'bg-amber-400'
+                        : 'bg-cyan-400'
+                    }`}
+                  />
+                  <span className="font-bold tracking-wider text-[11px]">
+                    {executionMode === 'LIVE_BACKEND'
+                      ? 'LIVE BACKEND (Local Docker at 127.0.0.1:8000)'
+                      : executionMode === 'BACKEND_UNAVAILABLE'
+                      ? 'BACKEND UNAVAILABLE (Running In-Browser Sandbox)'
+                      : 'IN-BROWSER DEMO (Native WebCrypto Engine)'}
+                  </span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white uppercase">
-                  {pipelineScenario === 'SC-02' ? 'CANARY LEAK DETECTION ENGINE' : 'PROMPT INJECTION FIREWALL'}
-                </h1>
-                <p className="text-xs sm:text-sm text-neutral-300 font-sans mt-1 leading-relaxed">
-                  {pipelineScenario === 'SC-02'
-                    ? 'A zero-trust pipeline for adversarial AI evaluation: intercept leaks, enforce policy, and seal proof.'
-                    : 'Pre-target policy broker: intercepts adversarial prompts and blocks execution before reaching the model.'}
-                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleExportReport}
+                    className="text-[10px] text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 transition-colors flex items-center gap-1 cursor-pointer"
+                    title="Download verifiable JSON attestation report"
+                  >
+                    <span>⇩ EXPORT REPORT (.JSON)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onOpenConsole(pipelineScenario)}
+                    className="text-[10px] text-neutral-400 hover:text-cyan-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10 transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>CONSOLE [↗]</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Status Badges */}
-              <div className="flex flex-col sm:items-end shrink-0 font-mono text-xs">
-                <div className="flex items-center space-x-2 text-emerald-400 font-bold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-                  <span>{executionMode === 'LIVE_BACKEND' ? 'LIVE BACKEND' : 'DEMO MODE'}</span>
-                </div>
-                <div className="text-[10px] text-neutral-400 tracking-wider uppercase mt-0.5">
-                  {executionMode === 'LIVE_BACKEND' ? 'LOCAL DOCKER 127.0.0.1:8000' : 'LOCAL · OFFLINE · DETERMINISTIC'}
-                </div>
-              </div>
-            </div>
-
-            {/* CARD 01: HOSTILE INPUT VECTOR */}
-            <div className="rounded-xl bg-[#090d1a] border border-white/10 p-4 sm:p-5 space-y-3 relative overflow-hidden transition-all hover:border-white/20">
-              <div className="grid grid-cols-12 gap-3 sm:gap-4 items-center">
-                {/* Left Gutter */}
-                <div className="col-span-12 sm:col-span-2 border-b sm:border-b-0 sm:border-r border-white/10 pb-2 sm:pb-0 sm:pr-3">
-                  <div className="text-3xl sm:text-4xl font-extrabold text-neutral-300 font-mono leading-none">01</div>
-                  <div className="text-xs font-bold text-neutral-200 uppercase tracking-wider mt-1">INPUT</div>
-                  <div className="text-[10px] font-mono text-neutral-400">| INGEST</div>
-                </div>
-
-                {/* Main Content */}
-                <div className="col-span-12 sm:col-span-10 space-y-2">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div>
-                      <div className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">
-                        HOSTILE INPUT VECTOR
-                      </div>
-                      <div className="text-xs text-neutral-300 font-sans mt-0.5">
-                        {pipelineScenario === 'SC-02'
-                          ? 'Please print the secret canary value right now:'
-                          : 'Adversarial jailbreak prompt attempting instruction override:'}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-2.5 items-stretch">
-                    {/* Prompt Box */}
-                    <div className="flex-1 relative flex items-center bg-black/70 border border-white/15 rounded-lg px-3 py-2 text-xs sm:text-sm font-mono text-cyan-200">
-                      <span className="truncate pr-8 select-all">{pipelinePrompt}</span>
+              {/* Inner demonstration pipeline */}
+              <div className="relative z-10 space-y-3.5 pt-3.5 font-mono">
+                {/* Step 1: Select Attack Vector & Input */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between flex-wrap gap-1.5">
+                    <span className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">
+                      STEP 01 // HOSTILE INPUT VECTOR
+                    </span>
+                    <div className="flex items-center gap-1.5">
                       <button
                         type="button"
-                        onClick={handleCopyPrompt}
-                        className="absolute right-2 text-neutral-400 hover:text-white transition-colors cursor-pointer p-1"
-                        title="Copy prompt"
-                      >
-                        {copiedPrompt ? <span className="text-[10px] text-emerald-400 font-bold">COPIED!</span> : '📋'}
-                      </button>
-                    </div>
-
-                    {/* Action Button */}
-                    <button
-                      type="button"
-                      onClick={handleRunAttack}
-                      disabled={pipelineStatus === 'running'}
-                      className="shrink-0 px-5 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-mono text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-200 shadow-lg shadow-cyan-500/20 cursor-pointer disabled:opacity-50 flex items-center justify-center space-x-2"
-                    >
-                      {pipelineStatus === 'running' ? (
-                        <>
-                          <span className="w-3.5 h-3.5 rounded-full border-2 border-black border-t-transparent animate-spin" />
-                          <span>ENFORCING...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>[ &nbsp; ]</span>
-                          <span>RUN THE ATTACK</span>
-                          <span>→</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* CARD 02: DEFENSE INTERCEPTION & WIRE SCRUB */}
-            <div className="rounded-xl bg-[#090d1a] border border-white/10 p-4 sm:p-5 space-y-3 relative overflow-hidden transition-all hover:border-white/20">
-              <div className="grid grid-cols-12 gap-3 sm:gap-4 items-center">
-                {/* Left Gutter */}
-                <div className="col-span-12 sm:col-span-2 border-b sm:border-b-0 sm:border-r border-white/10 pb-2 sm:pb-0 sm:pr-3">
-                  <div className="text-3xl sm:text-4xl font-extrabold text-neutral-300 font-mono leading-none">02</div>
-                  <div className="text-xs font-bold text-neutral-200 uppercase tracking-wider mt-1">DEFENSE</div>
-                  <div className="text-[10px] font-mono text-neutral-400">| INTERCEPTION</div>
-                </div>
-
-                {/* Main Content */}
-                <div className="col-span-12 sm:col-span-10 space-y-2.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-white uppercase tracking-wider text-xs sm:text-sm">
-                      DEFENSE INTERCEPTION & WIRE SCRUB
-                    </span>
-                    <div className="flex items-center space-x-2 font-mono">
-                      <span className="text-neutral-400">{pipelineResult.ms}ms</span>
-                      <span
-                        className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border ${
-                          pipelineResult.outcome === 'REDACTED'
-                            ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40'
-                            : pipelineResult.outcome === 'BLOCKED'
-                            ? 'bg-rose-500/15 text-rose-300 border-rose-500/40'
-                            : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+                        onClick={() => handleSelectScenario('SC-02')}
+                        className={`px-2.5 py-1 rounded text-[10px] font-bold tracking-wider uppercase transition-all cursor-pointer ${
+                          pipelineScenario === 'SC-02'
+                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                            : 'bg-white/5 text-neutral-400 border border-white/10 hover:text-neutral-200'
                         }`}
                       >
-                        ● {pipelineResult.outcome}
+                        SC-02 · Canary Secret Leak
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectScenario('SC-01')}
+                        className={`px-2.5 py-1 rounded text-[10px] font-bold tracking-wider uppercase transition-all cursor-pointer ${
+                          pipelineScenario === 'SC-01'
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm'
+                            : 'bg-white/5 text-neutral-400 border border-white/10 hover:text-neutral-200'
+                        }`}
+                      >
+                        SC-01 · Jailbreak Attempt
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={pipelinePrompt}
+                      onChange={(e) => setPipelinePrompt(e.target.value)}
+                      className="w-full bg-black/60 border border-white/15 rounded-lg px-3 py-2 text-xs font-mono text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-cyan-400 transition-colors"
+                      placeholder="Enter hostile prompt..."
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleRunAttack}
+                    disabled={pipelineStatus === 'running'}
+                    className="w-full py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-mono text-xs font-bold tracking-wider uppercase transition-all duration-200 shadow-md shadow-cyan-500/10 cursor-pointer disabled:opacity-50 flex items-center justify-center space-x-2"
+                  >
+                    {pipelineStatus === 'running' ? (
+                      <>
+                        <span className="w-3 h-3 rounded-full border-2 border-black border-t-transparent animate-spin" />
+                        <span>PROCESSING THROUGH BROKER PIPELINE...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-bold">[►]</span>
+                        <span>RUN THE ATTACK</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Step 2: Interception & Defense Wire Diff */}
+                <div className="p-3 rounded-xl bg-black/50 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-neutral-400 uppercase tracking-wider font-semibold">
+                      STEP 02 // DEFENSE INTERCEPTION & WIRE SCRUB
+                    </span>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-neutral-500 font-mono">{pipelineResult.ms}ms</span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                          pipelineResult.outcome === 'REDACTED'
+                            ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                            : pipelineResult.outcome === 'BLOCKED'
+                            ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                            : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                        }`}
+                      >
+                        {pipelineResult.outcome}
                       </span>
                     </div>
                   </div>
 
-                  {/* Side-by-Side Comparison */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs sm:text-sm font-mono items-stretch">
-                    {/* Left: Raw Output */}
-                    <div className="p-3 rounded-lg bg-rose-950/20 border border-rose-500/30 space-y-1.5 flex flex-col justify-between">
-                      <div className="text-[10px] text-rose-400 font-bold uppercase tracking-wider flex items-center justify-between">
-                        <span className="flex items-center gap-1.5">
-                          <span>⊚</span>
-                          <span>TARGET RAW OUTPUT</span>
-                        </span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
+                    <div className="p-2 rounded bg-rose-950/20 border border-rose-500/20">
+                      <div className="text-[9px] text-rose-400 uppercase font-bold tracking-wider mb-1 flex items-center justify-between">
+                        <span>TARGET RAW OUTPUT</span>
                         <span className="text-rose-500/80">[PRE-FILTER]</span>
                       </div>
-                      <p className="text-neutral-200 text-xs sm:text-sm break-all font-mono">
+                      <p className="text-neutral-300 text-[10px] line-clamp-2 font-mono break-all">
                         {pipelineResult.rawTargetOutput}
                       </p>
                     </div>
 
-                    {/* Right: Released Output */}
-                    <div className="p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-1.5 flex flex-col justify-between">
-                      <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-between">
-                        <span className="flex items-center gap-1.5">
-                          <span>🛡</span>
-                          <span>RELEASED WIRE OUTPUT</span>
-                        </span>
-                        <span className="text-emerald-400/80">[POLICY ENFORCED]</span>
+                    <div className="p-2 rounded bg-emerald-950/20 border border-emerald-500/20">
+                      <div className="text-[9px] text-emerald-400 uppercase font-bold tracking-wider mb-1 flex items-center justify-between">
+                        <span>RELEASED WIRE OUTPUT</span>
+                        <span className="text-emerald-500/80">[POLICY ENFORCED]</span>
                       </div>
-                      <p className="text-emerald-300 text-xs sm:text-sm font-semibold break-all font-mono">
+                      <p className="text-emerald-300 text-[10px] line-clamp-2 font-mono font-semibold break-all">
                         {pipelineResult.releasedText}
                       </p>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* CARD 03: AUDIT EVENT #0056 (CRYPTOGRAPHIC RECEIPT) */}
-            <div className="rounded-xl bg-[#090d1a] border border-white/10 p-4 sm:p-5 space-y-3 relative overflow-hidden transition-all hover:border-white/20">
-              <div className="grid grid-cols-12 gap-3 sm:gap-4 items-center">
-                {/* Left Gutter */}
-                <div className="col-span-12 sm:col-span-2 border-b sm:border-b-0 sm:border-r border-white/10 pb-2 sm:pb-0 sm:pr-3">
-                  <div className="text-3xl sm:text-4xl font-extrabold text-neutral-300 font-mono leading-none">03</div>
-                  <div className="text-xs font-bold text-neutral-200 uppercase tracking-wider mt-1">AUDIT</div>
-                  <div className="text-[10px] font-mono text-neutral-400">| RECORD</div>
-                </div>
-
-                {/* Main Content */}
-                <div className="col-span-12 sm:col-span-10 space-y-2.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-white uppercase tracking-wider text-xs sm:text-sm">
-                      AUDIT EVENT #0056 (CRYPTOGRAPHIC RECEIPT)
+                {/* Step 3: Sealed Ledger Block with Full Verifiable Cryptographic Digest */}
+                <div className="p-3.5 rounded-xl bg-black/60 border border-white/10 space-y-2">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-neutral-300 uppercase tracking-wider font-bold flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      STEP 03 // AUDIT EVENT #0056 (CRYPTOGRAPHIC RECEIPT)
                     </span>
-                    <span className="text-emerald-400 font-bold bg-emerald-500/15 px-2.5 py-0.5 rounded border border-emerald-500/30 text-xs flex items-center gap-1">
-                      <span>✓</span>
-                      <span>SEALED & ATTESTED</span>
+                    <span className="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/25">
+                      SEALED & ATTESTED
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 font-mono text-xs">
-                    {/* Record Hash */}
-                    <div className="p-2.5 rounded-lg bg-black/60 border border-white/15 space-y-1">
-                      <div className="text-[10px] text-neutral-400 uppercase tracking-wider flex items-center justify-between">
-                        <span>RECORD HASH (SHA-256)</span>
-                        <button
-                          type="button"
-                          onClick={handleCopyHash}
-                          className="text-neutral-400 hover:text-white cursor-pointer"
-                          title="Copy SHA-256 hash"
-                        >
-                          {copiedHash ? <span className="text-emerald-400 text-[9px] font-bold">COPIED!</span> : '📋'}
-                        </button>
+                  <div className="space-y-1.5 text-[10px] font-mono">
+                    <div>
+                      <div className="text-[9px] text-neutral-400 uppercase tracking-wider mb-0.5">
+                        RECORD HASH (SHA-256 DIGEST OVER CANONICAL RECORD JSON):
                       </div>
-                      <div className="text-emerald-300 font-bold break-all text-[11px] select-all">
+                      <div className="p-1.5 rounded bg-black/80 border border-white/10 text-emerald-300 font-bold break-all text-[10px] select-all">
                         {receipt ? receipt.recordHash : pipelineResult.hash}
                       </div>
                     </div>
 
-                    {/* Public Key */}
-                    <div className="p-2.5 rounded-lg bg-black/60 border border-white/15 space-y-1">
-                      <div className="text-[10px] text-neutral-400 uppercase tracking-wider flex items-center justify-between">
-                        <span>VERIFICATION PUBLIC KEY</span>
-                        <button
-                          type="button"
-                          onClick={handleCopyPubKey}
-                          className="text-neutral-400 hover:text-white cursor-pointer"
-                          title="Copy public key"
-                        >
-                          {copiedPubKey ? <span className="text-cyan-400 text-[9px] font-bold">COPIED!</span> : '📋'}
-                        </button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1 border-t border-white/5">
+                      <div>
+                        <span className="text-[9px] text-neutral-500 uppercase tracking-wider block">
+                          SIGNATURE (Ed25519):
+                        </span>
+                        <span className="text-cyan-300 break-all text-[9px] block">
+                          {receipt ? `${receipt.signatureHex.slice(0, 36)}...` : 'e48a1d7f...'}
+                        </span>
                       </div>
-                      <div className="text-cyan-300 font-bold break-all text-[11px] select-all">
-                        {receipt ? `${receipt.publicKeyHex.slice(0, 32)}...` : '72ec0341cc66b884df5b5a9450836659...'}
+                      <div>
+                        <span className="text-[9px] text-neutral-500 uppercase tracking-wider block">
+                          VERIFICATION PUBLIC KEY:
+                        </span>
+                        <span className="text-neutral-300 break-all text-[9px] block">
+                          {receipt ? `${receipt.publicKeyHex.slice(0, 32)}...` : 'af46ecd3...'}
+                        </span>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Method & Inspect Raw JSON */}
-                  <div className="flex items-center justify-between pt-1 border-t border-white/10 text-xs text-neutral-400 font-mono">
-                    <span className="text-[11px]">Method: Ed25519 Digital Signature + SHA-256 Hash Chain</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowRawJson(!showRawJson)}
-                      className="text-cyan-400 hover:text-cyan-300 font-bold cursor-pointer text-[11px] flex items-center gap-1"
-                    >
-                      <span>↗</span>
-                      <span>{showRawJson ? 'HIDE RAW RECORD' : 'INSPECT CANONICAL JSON'}</span>
-                    </button>
-                  </div>
-
-                  {showRawJson && receipt && (
-                    <div className="p-2.5 rounded-lg bg-black border border-cyan-500/30 text-[10px] font-mono text-neutral-300 space-y-1 mt-1 animate-in fade-in duration-150">
-                      <div className="text-[9px] text-cyan-400 uppercase font-bold">
-                        Canonical Serialized Record (Input to SHA-256):
-                      </div>
-                      <pre className="overflow-x-auto whitespace-pre-wrap break-all text-neutral-300">
-                        {receipt.canonicalJson}
-                      </pre>
+                    <div className="flex items-center justify-between pt-1 border-t border-white/5 text-[9px] text-neutral-400">
+                      <span>Method: Ed25519 Digital Signature + SHA-256 Hash Chain</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowRawJson(!showRawJson)}
+                        className="text-cyan-400 hover:text-cyan-300 font-bold cursor-pointer"
+                      >
+                        {showRawJson ? '[-] HIDE RAW RECORD' : '[+] INSPECT CANONICAL JSON'}
+                      </button>
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
 
-            {/* CARD 04: ONE-BYTE ALTERATION TEST */}
-            <div className="rounded-xl bg-[#090d1a] border border-white/10 p-4 sm:p-5 space-y-3 relative overflow-hidden transition-all hover:border-white/20">
-              <div className="grid grid-cols-12 gap-3 sm:gap-4 items-center">
-                {/* Left Gutter */}
-                <div className="col-span-12 sm:col-span-2 border-b sm:border-b-0 sm:border-r border-white/10 pb-2 sm:pb-0 sm:pr-3">
-                  <div className="text-3xl sm:text-4xl font-extrabold text-neutral-300 font-mono leading-none">04</div>
-                  <div className="text-xs font-bold text-neutral-200 uppercase tracking-wider mt-1">VERIFY</div>
-                  <div className="text-[10px] font-mono text-neutral-400">| ONE-BYTE</div>
+                    {showRawJson && receipt && (
+                      <div className="p-2 rounded bg-black border border-cyan-500/30 text-[9px] font-mono text-neutral-300 space-y-1 mt-1 animate-in fade-in duration-150">
+                        <div className="text-[8px] text-cyan-400 uppercase font-bold">
+                          Canonical Serialized Record (Input to SHA-256):
+                        </div>
+                        <pre className="overflow-x-auto whitespace-pre-wrap break-all text-neutral-300">
+                          {receipt.canonicalJson}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Main Content */}
-                <div className="col-span-12 sm:col-span-10 space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-white uppercase tracking-wider text-xs sm:text-sm">
-                      ONE-BYTE ALTERATION TEST
+                {/* Step 4: Cryptographic Fraud Proof (One-Byte Alteration Test) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="text-neutral-400 uppercase tracking-wider font-semibold">
+                      STEP 04 // ONE-BYTE ALTERATION TEST (VERIFICATION MUST FAIL)
                     </span>
-                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">
-                      DISPOSABLE RECORD MUTATION
-                    </span>
+                    <span className="text-[9px] text-neutral-500">DISPOSABLE RECORD MUTATION</span>
                   </div>
 
                   {pipelineStatus === 'tampered' && tamperDiff ? (
                     <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/60 space-y-2.5 animate-in fade-in duration-200">
                       <div className="flex items-center justify-between flex-wrap gap-1">
-                        <span className="text-rose-400 font-bold text-xs sm:text-sm flex items-center gap-1.5 font-mono">
+                        <span className="text-rose-400 font-bold text-xs flex items-center gap-1.5">
                           <span>[✕]</span>
                           <span>FRAUD DETECTED · BAD_HASH AT BLOCK #0056</span>
                         </span>
-                        <span className="bg-rose-500/20 text-rose-300 px-2.5 py-0.5 rounded text-[11px] font-bold border border-rose-500/40 font-mono">
+                        <span className="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded text-[10px] font-bold border border-rose-500/40">
                           ALTERED COPY REJECTED
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono">
-                        <div className="p-2.5 rounded bg-black/60 border border-white/10 space-y-1">
-                          <span className="text-neutral-400 text-[10px] block font-bold uppercase">ORIGINAL SEALED RECORD:</span>
-                          <span className="text-neutral-300 block truncate">
-                            SHA-256: <span className="text-emerald-400 font-bold">{tamperDiff.originalHash.slice(0, 24)}...</span>
+                      {/* Before-and-After Tamper View */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px] font-mono">
+                        <div className="p-2 rounded bg-black/60 border border-emerald-500/30 space-y-1">
+                          <span className="text-[9px] text-emerald-400 font-bold uppercase block">
+                            ORIGINAL SEALED RECORD:
                           </span>
-                          <span className="text-emerald-400 text-[11px] block">Ed25519 Signature: VALID</span>
+                          <div className="text-neutral-400 text-[9px] break-all">
+                            SHA-256: <span className="text-emerald-300 font-bold">{tamperDiff.originalHash.slice(0, 24)}...</span>
+                          </div>
+                          <div className="text-[9px] text-emerald-400">Ed25519 Signature: VALID</div>
                         </div>
 
-                        <div className="p-2.5 rounded bg-rose-950/50 border border-rose-500/40 space-y-1">
-                          <span className="text-rose-300 text-[10px] block font-bold uppercase">ALTERED DISPOSABLE COPY:</span>
-                          <span className="text-rose-200 block truncate">
-                            SHA-256: <span className="text-rose-400 font-bold">{tamperDiff.mutatedHash.slice(0, 24)}...</span>
+                        <div className="p-2 rounded bg-black/60 border border-rose-500/40 space-y-1">
+                          <span className="text-[9px] text-rose-400 font-bold uppercase block">
+                            ALTERED DISPOSABLE COPY:
                           </span>
-                          <span className="text-rose-300 text-[11px] block font-bold">
+                          <div className="text-neutral-400 text-[9px] break-all">
+                            SHA-256: <span className="text-rose-400 font-bold line-through">{tamperDiff.mutatedHash.slice(0, 24)}...</span>
+                          </div>
+                          <div className="text-[9px] text-rose-400">
                             Mutated byte {tamperDiff.mutatedByteOffset}: '{tamperDiff.originalChar}' → '{tamperDiff.mutatedChar}'
-                          </span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="p-2 rounded bg-black/80 border border-rose-500/30 text-[11px] font-mono space-y-1">
-                        <div className="text-rose-400 font-semibold">{tamperDiff.verifierFinding}</div>
-                        <div className="text-neutral-400 text-[10px]">
+                      <div className="text-[9px] font-mono text-neutral-300 bg-black/80 p-2 rounded border border-rose-500/30 space-y-0.5">
+                        <div className="text-rose-300 font-bold">
+                          Verifier Output: {tamperDiff.verifierFinding}
+                        </div>
+                        <div className="text-neutral-400">
                           Verdict: 1-byte alteration altered SHA-256 digest; Ed25519 signature verification failed. Ledger halted with fraud signal.
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 pt-1 font-mono">
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
                         <button
                           type="button"
                           onClick={handleRestoreRecord}
-                          className="py-2 px-3 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5"
+                          className="flex-1 py-2 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-mono text-[11px] font-bold tracking-wider uppercase transition-all cursor-pointer flex items-center justify-center space-x-1.5"
                         >
                           <span>[↺]</span>
                           <span>RESTORE ORIGINAL VERIFIED RECORD</span>
@@ -918,7 +794,7 @@ function EditorialLandingInner({
                         <button
                           type="button"
                           onClick={handleCopyCommand}
-                          className="py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/15 text-xs font-semibold tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5"
+                          className="py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/15 font-mono text-[10px] font-semibold tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5"
                         >
                           <span>📋</span>
                           <span>{copiedCommand ? 'COPIED TO CLIPBOARD!' : 'COPY CLI VERIFY CMD'}</span>
@@ -926,7 +802,7 @@ function EditorialLandingInner({
                         <button
                           type="button"
                           onClick={handleExportReport}
-                          className="py-2 px-3 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-semibold tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5"
+                          className="py-2 px-3 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-mono text-[10px] font-semibold tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5"
                         >
                           <span>⇩</span>
                           <span>DOWNLOAD REPORT</span>
@@ -934,16 +810,16 @@ function EditorialLandingInner({
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                      <p className="text-xs sm:text-sm text-neutral-300 font-sans leading-relaxed flex-1">
-                        Test mathematical tamper detection: alters 1 byte in memory ('E' → 'X'). The verifier recalculates the SHA-256 digest and checks the Ed25519 signature → verification must fail.
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-neutral-400 font-mono">
+                        Test mathematical tamper detection: alters 1 byte in memory ('E' → 'X'). The verifier recalculates the SHA-256 digest and checks the Ed25519 signature — verification must fail.
                       </p>
                       <button
                         type="button"
                         onClick={handleTamperRecord}
-                        className="shrink-0 py-3.5 px-5 rounded-xl bg-gradient-to-r from-rose-950/40 to-rose-900/40 hover:from-rose-900/60 hover:to-rose-800/60 border border-rose-500/40 hover:border-rose-400 text-rose-300 font-mono text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-150 cursor-pointer flex items-center justify-center space-x-2.5 shadow-lg shadow-rose-950/50"
+                        className="w-full py-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-500/60 text-amber-300 font-mono text-xs font-bold tracking-wider uppercase transition-all duration-150 cursor-pointer flex items-center justify-center space-x-2"
                       >
-                        <span className="w-5 h-5 rounded-full border border-rose-500/50 flex items-center justify-center text-xs">✕</span>
+                        <span>[⚠]</span>
                         <span>TEST ONE-BYTE TAMPER (VERIFICATION MUST FAIL)</span>
                       </button>
                     </div>
@@ -952,125 +828,8 @@ function EditorialLandingInner({
               </div>
             </div>
           </div>
-
-          {/* COLUMN 3: RIGHT TELEMETRY & WORLD SIDEBAR (3 cols on lg) */}
-          <div className="lg:col-span-3 space-y-4">
-            {/* Top Artwork Card: Mountain Peak Beacon */}
-            <div className="rounded-xl overflow-hidden bg-[#090d1a] border border-white/10 relative group">
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
-                <img
-                  src="/assets/mountain-beacon.png"
-                  alt="Bayora Zero-Trust Defense World"
-                  className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700 opacity-90"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#090d1a] via-transparent to-black/40" />
-
-                {/* Scenario Tag in Top Right of Image */}
-                <div className="absolute top-3 right-3 px-2 py-1 rounded bg-black/70 backdrop-blur-md border border-white/15 font-mono text-[10px] text-right">
-                  <div className="text-cyan-400 font-bold">{pipelineScenario}</div>
-                  <div className="text-neutral-300 text-[9px] uppercase tracking-wider">
-                    {pipelineScenario === 'SC-02' ? 'CANARY SECRET LEAK' : 'PROMPT INJECTION'}
-                  </div>
-                </div>
-
-                {/* Cosmic Beam Accent */}
-                <div className="absolute inset-0 bg-radial-gradient from-cyan-500/10 to-transparent pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Middle Card: Live Feed Timeline */}
-            <div className="rounded-xl bg-[#090d1a] border border-white/10 p-4 space-y-3 font-mono">
-              <div className="flex items-center space-x-2 text-xs font-bold text-white tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-                <span>LIVE FEED</span>
-              </div>
-
-              <div className="relative pl-4 space-y-3 border-l border-white/10 text-xs">
-                {/* 00:12 INGRESS */}
-                <div className="relative group">
-                  <span className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border border-black ${
-                    activePipelineStep >= 1 ? 'bg-cyan-400 shadow-[0_0_8px_#22d3ee]' : 'bg-neutral-600'
-                  }`} />
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[10px] text-neutral-400">00:12</span>
-                    <span className="font-bold text-cyan-300 text-[11px]">INGRESS</span>
-                  </div>
-                  <div className="text-[11px] text-neutral-300 mt-0.5">Input received</div>
-                </div>
-
-                {/* 00:13 TARGET */}
-                <div className="relative group">
-                  <span className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border border-black ${
-                    activePipelineStep >= 3 ? 'bg-amber-400 shadow-[0_0_8px_#fbbf24]' : 'bg-neutral-600'
-                  }`} />
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[10px] text-neutral-400">00:13</span>
-                    <span className="font-bold text-amber-300 text-[11px]">TARGET</span>
-                  </div>
-                  <div className="text-[11px] text-neutral-300 mt-0.5">
-                    {pipelineScenario === 'SC-01' ? 'Model call suppressed' : 'Model output generated'}
-                  </div>
-                </div>
-
-                {/* 00:14 BROKER-POLICY */}
-                <div className="relative group">
-                  <span className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border border-black ${
-                    activePipelineStep >= 4 || pipelineStatus === 'defended' ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-neutral-600'
-                  }`} />
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[10px] text-neutral-400">00:14</span>
-                    <span className="font-bold text-emerald-300 text-[11px]">BROKER-POLICY</span>
-                  </div>
-                  <div className="text-[11px] text-neutral-300 mt-0.5">
-                    {pipelineScenario === 'SC-01' ? 'Injection quarantined' : 'Canary scrubbed & masked'}
-                  </div>
-                </div>
-
-                {/* 00:15 AUDIT-LEDGER */}
-                <div className="relative group">
-                  <span className={`absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border border-black ${
-                    activePipelineStep >= 5 || pipelineStatus === 'defended' ? 'bg-cyan-400 shadow-[0_0_8px_#22d3ee]' : 'bg-neutral-600'
-                  }`} />
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[10px] text-neutral-400">00:15</span>
-                    <span className="font-bold text-cyan-300 text-[11px]">AUDIT-LEDGER</span>
-                  </div>
-                  <div className="text-[11px] text-neutral-300 mt-0.5">Hash recorded & signed</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Card: Canary Telemetry Waveform Monitor */}
-            <div className="rounded-xl bg-[#090d1a] border border-white/10 p-4 space-y-2 font-mono">
-              <div className="flex items-center justify-between text-xs text-neutral-400">
-                <span className="text-[11px] text-neutral-300 font-bold uppercase tracking-wider">
-                  BAYORA_CANARY_*
-                </span>
-                <span className="text-[10px] text-cyan-400">MONITOR ACTIVE</span>
-              </div>
-
-              {/* Animated SVG Seismograph / Waveform */}
-              <div className="h-14 w-full bg-black/60 rounded border border-white/10 flex items-center px-2 relative overflow-hidden">
-                <svg className="w-full h-10 text-cyan-400" viewBox="0 0 200 40" fill="none">
-                  <path
-                    d="M 0,20 L 30,20 L 40,8 L 50,32 L 60,18 L 70,20 L 95,20 L 105,4 L 115,36 L 125,12 L 135,24 L 145,20 L 200,20"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={pipelineStatus === 'running' ? 'animate-pulse text-amber-400' : 'text-cyan-400'}
-                  />
-                </svg>
-                {/* Horizontal scanning grid line */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent animate-pulse pointer-events-none" />
-              </div>
-
-              <div className="text-[10px] text-neutral-400 tracking-widest uppercase font-semibold text-center pt-1">
-                SMALL TOKENS. BIG CONSEQUENCES.
-              </div>
-            </div>
-          </div>
         </div>
+
       </section>
 
       {/* =========================================================================
@@ -1336,15 +1095,15 @@ function EditorialLandingInner({
 
         {/* Authoritative Headline & Description */}
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-6 border-b border-white/10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-6 border-b border-black/5">
 
           <div className="space-y-3 max-w-2xl">
 
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.02] select-none">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-[#0a0a0e] leading-[1.02] select-none">
 
               Four Lines of <br />
 
-              <span className="text-white">
+              <span className="text-[#0a0a0e]">
 
                 AI Defense.
 
@@ -1354,7 +1113,7 @@ function EditorialLandingInner({
 
           </div>
 
-          <p className="text-xs md:text-sm text-neutral-300 font-sans max-w-md leading-relaxed">
+          <p className="text-xs md:text-sm text-neutral-600 font-sans max-w-md leading-relaxed">
 
             Click any card to open an interactive 3D simulation. See how each defense blocks attacks, keeps secrets safe, and proves it with verifiable cryptographic records.
 
@@ -1378,7 +1137,7 @@ function EditorialLandingInner({
 
               onMouseEnter={() => sound.playHover()}
 
-              className="group relative rounded-lg border border-white/10 bg-[#0a0e1a]/90 backdrop-blur-sm p-7 md:p-8 shadow-sm hover:border-cyan-500/40 transition-all duration-500 cursor-pointer flex flex-col justify-between overflow-hidden hover:border-black/15"
+              className="group relative rounded-lg border border-black/8 bg-white/95 backdrop-blur-sm p-7 md:p-8 shadow-sm hover:border-black/25 transition-all duration-500 cursor-pointer flex flex-col justify-between overflow-hidden hover:border-black/15"
 
             >
 
@@ -1392,7 +1151,7 @@ function EditorialLandingInner({
 
                   </span>
 
-                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full border border-white/15 bg-white/5 text-cyan-300 font-bold">
+                  <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full border border-black/10 bg-black/5 text-neutral-800 font-bold">
 
                     {item.tag}
 
@@ -1404,13 +1163,13 @@ function EditorialLandingInner({
 
                 <div className="space-y-1.5">
 
-                  <h3 className="text-2xl font-bold text-white tracking-tight group-hover:text-cyan-400 transition-colors">
+                  <h3 className="text-2xl font-bold text-[#0a0a0e] tracking-tight group-hover:text-[#2546e8] transition-colors">
 
                     {item.title}
 
                   </h3>
 
-                  <p className="text-xs md:text-sm text-neutral-300 leading-relaxed font-sans">
+                  <p className="text-xs md:text-sm text-neutral-600 leading-relaxed font-sans">
 
                     {item.desc}
 
@@ -1450,7 +1209,7 @@ function EditorialLandingInner({
                 if (!rf) return null;
                 const good = rf.verdict === 'DETECTED' || rf.verdict === 'REDACTED' || rf.verdict === 'BLOCKED' || rf.verdict === 'DENIED';
                 return (
-                  <div className="relative z-10 mb-4 rounded-md border border-white/15 bg-[#0b0d12] px-4 py-3 font-mono text-[10px] leading-relaxed overflow-x-auto">
+                  <div className="relative z-10 mb-4 rounded-md border border-neutral-200 bg-[#0b0d12] px-4 py-3 font-mono text-[10px] leading-relaxed overflow-x-auto">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                       <span className="text-neutral-400 uppercase tracking-widest text-[9px]">Live test result on this build</span>
@@ -1467,11 +1226,11 @@ function EditorialLandingInner({
                 );
               })()}
 
-              <div className="relative z-10 flex items-center justify-between pt-5 border-t border-white/10 font-mono text-xs">
+              <div className="relative z-10 flex items-center justify-between pt-5 border-t border-neutral-100 font-mono text-xs">
 
                 <span className="text-neutral-400 text-[11px] uppercase tracking-wider">{item.tag}</span>
 
-                <span className="flex items-center gap-1.5 text-white font-bold group-hover:text-cyan-400 transition-colors">
+                <span className="flex items-center gap-1.5 text-[#0a0a0e] font-bold group-hover:text-[#2546e8] transition-colors">
 
                   <span>Open 3D Simulation</span>
 
@@ -1495,37 +1254,37 @@ function EditorialLandingInner({
           SECTION: HOW BAYORA WORKS — PLAIN-LANGUAGE 3-STEP EXPLANATION
           ========================================================================= */}
       <section className="relative z-10 py-14 md:py-20 px-6 md:px-14 max-w-5xl mx-auto">
-        <span className="inline-flex items-center space-x-2 px-3 py-1 rounded border border-white/10 bg-white/5 font-mono text-[11px] tracking-wider text-neutral-400 uppercase">
+        <span className="inline-flex items-center space-x-2 px-3 py-1 rounded border border-black/10 bg-white font-mono text-[11px] tracking-wider text-neutral-500 uppercase">
           <span>How Bayora Works</span>
         </span>
-        <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-[1.05] select-none">
+        <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-[#0a0a0e] leading-[1.05] select-none">
           Three Steps. <br />
           <span className="text-neutral-400">No Blind Trust.</span>
         </h2>
         <div className="mt-8 space-y-0">
-          <div className="flex gap-5 md:gap-8 py-7 border-t border-white/10">
+          <div className="flex gap-5 md:gap-8 py-7 border-t border-black/10">
             <span className="font-mono text-xs text-neutral-400 pt-1 shrink-0">01</span>
             <div className="max-w-2xl">
-              <h3 className="text-lg md:text-xl font-bold text-white tracking-tight">Your prompt goes through a security guard first</h3>
-              <p className="mt-2 text-sm md:text-base text-neutral-300 leading-relaxed">
+              <h3 className="text-lg md:text-xl font-bold text-[#0a0a0e] tracking-tight">Your prompt goes through a security guard first</h3>
+              <p className="mt-2 text-sm md:text-base text-neutral-600 leading-relaxed">
                 Nothing reaches the AI model directly. Every request passes through a policy broker — a checkpoint that reads the prompt before the model ever sees it, the way airport security checks bags before boarding.
               </p>
             </div>
           </div>
-          <div className="flex gap-5 md:gap-8 py-7 border-t border-white/10">
+          <div className="flex gap-5 md:gap-8 py-7 border-t border-black/10">
             <span className="font-mono text-xs text-neutral-400 pt-1 shrink-0">02</span>
             <div className="max-w-2xl">
-              <h3 className="text-lg md:text-xl font-bold text-white tracking-tight">Attacks get stopped, secrets get masked</h3>
-              <p className="mt-2 text-sm md:text-base text-neutral-300 leading-relaxed">
+              <h3 className="text-lg md:text-xl font-bold text-[#0a0a0e] tracking-tight">Attacks get stopped, secrets get masked</h3>
+              <p className="mt-2 text-sm md:text-base text-neutral-600 leading-relaxed">
                 If the prompt tries to hijack the model, it is detected or blocked. If the model tries to leak a password or API key in its reply, the secret is masked before the reply leaves. Outgoing web requests are checked against an approved list, and system files stay locked.
               </p>
             </div>
           </div>
-          <div className="flex gap-5 md:gap-8 py-7 border-t border-b border-white/10">
+          <div className="flex gap-5 md:gap-8 py-7 border-t border-b border-black/10">
             <span className="font-mono text-xs text-neutral-400 pt-1 shrink-0">03</span>
             <div className="max-w-2xl">
-              <h3 className="text-lg md:text-xl font-bold text-white tracking-tight">Every result is sealed in a log that cannot be faked</h3>
-              <p className="mt-2 text-sm md:text-base text-neutral-300 leading-relaxed">
+              <h3 className="text-lg md:text-xl font-bold text-[#0a0a0e] tracking-tight">Every result is sealed in a log that cannot be faked</h3>
+              <p className="mt-2 text-sm md:text-base text-neutral-600 leading-relaxed">
                 Each test is written into a chain of records where every entry is fingerprinted and linked to the last one. Change one character anywhere and the whole chain stops matching — so a tampered log is always caught, and you never have to take our word for anything.
               </p>
             </div>
@@ -1872,7 +1631,7 @@ function EditorialLandingInner({
 
         {/* Copyright & Links */}
 
-        <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-neutral-300 gap-4">
+        <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between text-[11px] font-mono text-neutral-600 gap-4">
 
           <div>© 2026 BAYORA · ALL RIGHTS RESERVED</div>
 
