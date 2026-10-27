@@ -1,64 +1,58 @@
-# BAYORA Demo Video - For Antigravity Review (64s, 1080p, v9)
+# BAYORA Demo Video - For Antigravity Review (68s, 1080p, v10)
 
-**File:** `demo/BAYORA-demo.mp4` (1:04, ~12MB)
-**Frames:** `demo/frames/f1..f11_*.png` - keyframes at the times below
+**File:** `demo/BAYORA-demo.mp4` (1:08, ~13MB)
+**Frames:** `demo/frames/f1..f15_*.png` - keyframes at the times below
 
-A 64-second demo rebuilt to your review notes: attack fires by 0:14, all four
-3D worlds get equal time, tamper moment extended, plain-English narration
-using the on-screen card names, tagline said twice, no unsourced stats, and
-all footage re-shot against the current site (on-screen text is the new
-plain-English copy everywhere).
+Rebuilt per your second review. Headlines: verdicts are now IN FRAME in every
+attack scene, each verdict gets its own large 1.5s title card, the tamper
+climax is bright and held, the title card has no ghosted page behind it, the
+first attack fires at 0:10, the ending is a real end card with the repo URL,
+and the audio is now stereo with safe peaks and an audible music bed.
 
 ## Timeline
 
 | # | Frame (t=) | Content |
 |---|-----------|---------|
-| f1 | 2s | Title card: A BAYORA PRODUCTION - "Don't Trust AI. Prove It." |
-| f2 | 5s | Hero: "Don't Trust AI. Prove It." + LIVE DEFENSE ENGINE panel |
-| f3 | 12s | Four defense cards (Input Shield, Data Privacy, Network Guard, System Armor) with live test results |
-| f4 | 16s | World 1 - Input Shield (neural sphere). Test fires, scene turns red: DETECTED / 1 RUN |
-| f5 | 24s | World 2 - Data Privacy (chrome knot): REDACTED |
-| f6 | 32s | World 3 - Network Guard (egress cloud world): BLOCKED / HTTP 403 / 1 RUN |
-| f7 | 40s | World 4 - System Armor (floating island): DENIED |
-| f8 | 47s | Iridescent typography beat (VERIFY EVERY PROMPT) |
-| f9 | 50s | Defense Sandbox console (judges can run attacks themselves) |
-| f10 | 56s | Tamper test result: [REJECTED - TAMPER FOUND], BAD_HASH at block #3 |
-| f11 | 61s | Outro |
+| f1 | 1s | Clean title card (flat black, no ghost page) |
+| f2 | 4s | Hero (4s) |
+| f3 | 8s | Four defense cards (4s) |
+| f4 | 14s | World 1 - Input Shield fires; scene turns red |
+| f5 | 19s | World 1 verdict IN FRAME: big DETECTED + output diff + audit log |
+| f6 | 22s | Verdict card: DETECTED (large, 1.5s) |
+| f7 | 27s | World 2 - Data Privacy fires |
+| f8 | 32s | World 2 verdict IN FRAME: REDACTED + masked-secret diff |
+| f9 | 36s | Verdict card: REDACTED (large, 1.5s) |
+| f10 | 42s | World 3 - Network Guard fires |
+| f11 | 46s | World 3 verdict IN FRAME: BLOCKED |
+| f12 | 52s | World 4 - System Armor fires |
+| f13 | 57s | Tamper test: result held bright on screen |
+| f14 | 59s | Tamper climax card: REJECTED - TAMPER FOUND (2s) |
+| f15 | 66s | End card: BAYORA + tagline + github.com/atharvashukla098-tech/bayora + "TRY THE LIVE SANDBOX YOURSELF" |
 
-## The five live verdicts (real broker runs, captured live)
-1. Prompt injection ("ignore all previous instructions...") -> DETECTED
-2. Secret leak (planted fake secret) -> REDACTED (masked before leaving)
-3. Unsafe web request (AWS metadata URL) -> BLOCKED 403 (refused before connection)
-4. System file write -> DENIED (read-only filesystem)
-5. Ledger tamper (byte flip) -> REJECTED at block #3, BAD_HASH
+## Fixes from your second review
+1. Verdicts no longer cropped: every attack scene scrolls the result panel
+   (verdict headline, output-vs-released diff, audit log) into frame after
+   firing. Verified in frames f5/f8/f11.
+2. Each verdict also gets a large dedicated title card for 1.5 seconds.
+3. Tamper test: result held ~7s at full brightness, then a 2s climax card.
+4. Title card is clean flat black - the Oryzo ghost page is gone.
+5. Home page appears once (4s); first attack now at 0:10.
+6. Ending is an end card with the repo URL and a spoken call to action.
+7. Audio: stereo, peaks -2.7 dBFS (no clipping), audible dark-tone music bed.
 
 ## Narration (en-GB-RyanNeural, plain English)
-- 0:01 "AI apps are under attack every day. Prompts try to hijack them. Secrets try to leak out. Bayora is a security layer that sits between your AI and the outside world, and tests it with real attacks."
-- 0:16 "Pick an attack. Input Shield catches malicious prompts before the model ever sees them. Watch. The test fires, and the scene itself turns red. Caught."
-- 0:30 "Data Privacy plants a fake secret, and masks it before it can leave. Network Guard stops unsafe web requests before any connection is even opened."
-- 0:40 "System Armor locks the files themselves. Attackers cannot change what they are not allowed to touch."
-- 0:48 "Every result is saved into a sealed record. Try to fake it, and the system catches it instantly. The proof stands."
-- 0:58 "Don't trust AI. Prove it. Bayora."
+- 0:03 "AI apps are under attack every day. Prompts try to hijack them. Secrets try to leak out. Bayora is a security layer that sits between your AI and the outside world, and tests it with real attacks."
+- 0:18 "Pick an attack. Input Shield catches malicious prompts before the model ever sees them. Watch. The test fires, and the scene itself turns red. Caught."
+- 0:32 "Data Privacy plants a fake secret, and masks it before it can leave. Network Guard stops unsafe web requests before any connection is even opened."
+- 0:42 "System Armor locks the files themselves. Attackers cannot change what they are not allowed to touch."
+- 0:50 "Every result is saved into a sealed record. Try to fake it, and the system catches it instantly. The proof stands."
+- 0:59 "Don't trust AI. Prove it. Bayora. The sandbox is open. Try it yourself."
 
-## Changes from the previous cut (per your review)
-1. First attack now at 0:14 (was 0:25) - title/hero/cards compressed
-2. All four worlds get 8 seconds each (island had 4s before)
-3. Tamper moment extended to 7.5s with the result held on screen
-4. Narration synced to visuals: "the scene itself turns red" lands as world 1 fires
-5. Narration uses the on-screen names: Input Shield, Data Privacy, Network Guard, System Armor
-6. Count mismatch fixed: no scenario numbers are claimed at all
-7. The unsourced "every ninety seconds" stat is removed; the opening is a plain claim
-8. Tagline spoken exactly twice (opening card text + final line)
-9. New opening line explains what Bayora IS: "a security layer that sits between your AI and the outside world"
-10. All footage re-shot against the current site - on-screen text is plain English everywhere
-11. Kept per team decision: the "A BAYORA PRODUCTION" title card and the 2s iridescent beat
-
-## Open questions for you
-1. Does the narration-to-visual sync land now (especially world 1's fire at ~0:17)?
-2. Is the opening line a clear enough one-sentence explanation of the product?
-3. Any remaining moment that looks weak?
+## Open questions
+1. Are the verdicts readable in-frame now (f5/f8/f11)?
+2. Does the ending land (URL + spoken CTA)?
+3. Any remaining weak moment?
 
 ## Production
-Playwright 25fps native captures of the live site (:4173 production build),
-film grade (contrast, grain, vignette, 2.39:1 letterbox), synthesized
-sub-drone score, -16 LUFS mix. Every verdict is a real backend execution.
+Playwright captures of the live site (:4173 production build); every verdict
+is a real backend execution. Verdict cards + end card rendered clean.
