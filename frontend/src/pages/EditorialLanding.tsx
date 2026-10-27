@@ -481,27 +481,27 @@ function EditorialLandingInner({
         <div className="my-auto py-1 sm:py-2 grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start w-full">
           
 {/* Left Column: Heading, Supporting Narrative, Actions, & Clear Explanations (6 cols) */}
-          <div className="lg:col-span-6 min-w-0 space-y-5 pt-1">
-            <div className="space-y-3">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-[-0.035em] leading-[0.98] text-[#0a0a0e] select-none">
+          <div className="lg:col-span-6 min-w-0 space-y-3 pt-0">
+            <div className="space-y-2">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.035em] leading-[0.98] text-[#0a0a0e] select-none">
                 Don't Trust AI. <br />
                 <span className="text-[#0a0a0e]">
                   Prove It.
                 </span>
               </h1>
-              <p className="text-base sm:text-lg md:text-xl text-neutral-800 leading-relaxed font-normal">
+              <p className="text-sm sm:text-base md:text-lg text-neutral-800 leading-relaxed font-normal">
                 Most tools only give AI safety scores on paper. Bayora actually tests real attacks. We stop prompt hacks, prevent secret data leaks, block unsafe web requests, and seal every action in an independently verifiable cryptographic ledger.
               </p>
             </div>
 
             {/* Primary & Secondary Actions */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
               <button
                 onClick={() => onOpenConsole('SC-01')}
                 onMouseEnter={() => sound.playHover()}
-                className="px-6 py-3 rounded-full bg-[#0a0a0e] text-white font-mono text-xs sm:text-sm font-bold tracking-wider uppercase shadow-lg shadow-black/15 hover:bg-neutral-800 transition-all flex items-center space-x-2.5 group cursor-pointer"
+                className="px-6 py-2.5 rounded-full bg-[#0a0a0e] text-white font-mono text-xs sm:text-sm font-bold tracking-wider uppercase shadow-lg shadow-black/15 hover:bg-neutral-800 transition-all flex items-center space-x-2 group cursor-pointer"
               >
-                <span className="w-2.5 h-2.5 rounded-full bg-[#00e5ff] animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-[#00e5ff] animate-pulse" />
                 <span>FULL EVIDENCE CONSOLE</span>
               </button>
               <button
@@ -511,7 +511,7 @@ function EditorialLandingInner({
                   if (target) target.scrollIntoView({ behavior: 'smooth' });
                 }}
                 onMouseEnter={() => sound.playHover()}
-                className="px-5 py-3 rounded-full bg-white text-neutral-800 font-mono text-xs sm:text-sm font-semibold tracking-wider uppercase border border-black/15 hover:bg-neutral-50 hover:border-black/25 transition-all flex items-center space-x-2 cursor-pointer shadow-sm"
+                className="px-4 py-2.5 rounded-full bg-white text-neutral-800 font-mono text-xs sm:text-sm font-semibold tracking-wider uppercase border border-black/15 hover:bg-neutral-50 hover:border-black/25 transition-all flex items-center space-x-1.5 cursor-pointer shadow-sm"
               >
                 <span>HOW IT WORKS</span>
                 <span className="font-mono text-neutral-500 text-xs sm:text-sm">[↓]</span>
@@ -519,67 +519,71 @@ function EditorialLandingInner({
             </div>
 
             {/* Quick Evidence Metrics Bar */}
-            <div className="pt-4 border-t border-black/10 grid grid-cols-3 gap-3 font-mono">
+            <div className="pt-2.5 border-t border-black/10 grid grid-cols-3 gap-2 font-mono">
               <div>
-                <span className="text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-1">Scenarios</span>
-                <span className="font-black text-neutral-950 text-sm sm:text-base md:text-lg">4 Active Layers</span>
+                <span className="text-[10px] sm:text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Scenarios</span>
+                <span className="font-black text-neutral-950 text-xs sm:text-sm md:text-base">4 Active Layers</span>
               </div>
               <div>
-                <span className="text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-1">Tamper Test</span>
-                <span className="font-black text-emerald-600 text-sm sm:text-base md:text-lg">1-Byte Alteration</span>
+                <span className="text-[10px] sm:text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Tamper Test</span>
+                <span className="font-black text-emerald-600 text-xs sm:text-sm md:text-base">1-Byte Alteration</span>
               </div>
               <div>
-                <span className="text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-1">Attestation</span>
-                <span className="font-black text-cyan-700 text-sm sm:text-base md:text-lg">Ed25519 + SHA-256</span>
+                <span className="text-[10px] sm:text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Attestation</span>
+                <span className="font-black text-cyan-700 text-xs sm:text-sm md:text-base">Ed25519 + SHA-256</span>
               </div>
             </div>
 
-            {/* Educational Proof Walkthrough Guide (Large, Legible, Easy to Read) */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-white/95 backdrop-blur-md border border-black/10 space-y-3.5 font-sans shadow-md">
-              <div className="flex items-center justify-between text-xs sm:text-sm font-mono">
+            {/* Educational Proof Walkthrough Guide (2x2 Grid: Big Text & 100% Viewport Fit) */}
+            <div className="p-3.5 sm:p-4 rounded-xl bg-white/95 backdrop-blur-md border border-black/10 space-y-2.5 font-sans shadow-md">
+              <div className="flex items-center justify-between font-mono">
                 <span className="text-neutral-900 font-black uppercase tracking-wider text-xs sm:text-sm flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-cyan-500" />
                   HOW TO READ THE INTERACTIVE PROOF
                 </span>
-                <span className="text-emerald-700 bg-emerald-50 px-3 py-1 rounded-md text-xs font-bold border border-emerald-300">
+                <span className="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded text-[10px] sm:text-xs font-bold border border-emerald-300">
                   REAL WEBCRYPTO
                 </span>
               </div>
 
-              <div className="space-y-3 text-sm sm:text-[15px] md:text-base text-neutral-800 leading-relaxed">
-                <div className="flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-cyan-100 text-cyan-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-[13px] text-neutral-800 leading-snug">
+                <div className="flex items-start gap-2 p-2 rounded-lg bg-neutral-50/80 border border-black/5">
+                  <span className="w-5 h-5 rounded-full bg-cyan-100 text-cyan-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
                     1
                   </span>
                   <div>
-                    <span className="font-bold text-neutral-950">Hostile Attack Ingress:</span> A real exploit payload queries the model to extract a confidential canary secret token.
+                    <span className="font-bold text-neutral-950 block">1. Hostile Ingress</span>
+                    Exploit payload queries model for secret canary token.
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                <div className="flex items-start gap-2 p-2 rounded-lg bg-neutral-50/80 border border-black/5">
+                  <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
                     2
                   </span>
                   <div>
-                    <span className="font-bold text-neutral-950">Pre-Egress Wire Scrub:</span> The model leaks the secret in raw output, but Bayora masks it with <code className="bg-neutral-200 text-neutral-900 font-bold px-1.5 py-0.5 rounded font-mono text-xs sm:text-sm">[REDACTED]</code> before wire release.
+                    <span className="font-bold text-neutral-950 block">2. Wire Scrub</span>
+                    Leaked token is masked with <code className="bg-neutral-200 text-neutral-900 font-bold px-1 rounded font-mono text-[11px]">[REDACTED]</code> before release.
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                <div className="flex items-start gap-2 p-2 rounded-lg bg-neutral-50/80 border border-black/5">
+                  <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
                     3
                   </span>
                   <div>
-                    <span className="font-bold text-neutral-950">Cryptographic Seal:</span> Every event is hashed with SHA-256 and signed with Ed25519 directly in your browser.
+                    <span className="font-bold text-neutral-950 block">3. Crypto Seal</span>
+                    Event is hashed (SHA-256) & signed (Ed25519) in your browser.
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-rose-100 text-rose-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                <div className="flex items-start gap-2 p-2 rounded-lg bg-neutral-50/80 border border-black/5">
+                  <span className="w-5 h-5 rounded-full bg-rose-100 text-rose-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
                     4
                   </span>
                   <div>
-                    <span className="font-bold text-neutral-950">Fraud Detection:</span> Click <span className="font-bold text-rose-700">"Test One-Byte Tamper"</span> to modify 1 letter in memory and prove the verifier immediately rejects it.
+                    <span className="font-bold text-neutral-950 block">4. Fraud Detection</span>
+                    Click <span className="font-bold text-rose-700">"Test Tamper"</span>: modifies 1 byte → verifier instantly rejects.
                   </div>
                 </div>
               </div>
