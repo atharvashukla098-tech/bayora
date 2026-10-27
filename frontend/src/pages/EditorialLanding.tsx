@@ -471,17 +471,17 @@ function EditorialLandingInner({
 
           ========================================================================= */}
 
-      <section className="relative z-10 pt-32 md:pt-36 pb-20 px-6 md:px-14 max-w-7xl mx-auto min-h-[92vh] flex flex-col justify-between">
+      <section className="relative z-10 pt-32 md:pt-36 pb-20 px-6 md:px-14 max-w-7xl mx-auto min-h-[92vh] flex flex-col justify-between overflow-x-clip">
 
         
 
 
 
 {/* Core Hero Grid: Headline, Thesis, Explanations, Telemetry Node */}
-        <div className="my-auto py-4 sm:py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+        <div className="my-auto py-4 sm:py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start w-full">
           
           {/* Left Column: Heading, Supporting Narrative, Actions, & Clear Explanations (5 cols) */}
-          <div className="lg:col-span-5 space-y-4 pt-1">
+          <div className="lg:col-span-5 min-w-0 space-y-4 pt-1">
             <div className="space-y-3">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.035em] leading-[0.98] text-[#0a0a0e] select-none">
                 Don't Trust AI. <br />
@@ -587,7 +587,7 @@ function EditorialLandingInner({
           </div>
 
           {/* Right Column: Compact, High-Density Zero-Trust Cockpit Console (7 cols) */}
-          <div className="lg:col-span-7 relative">
+          <div className="lg:col-span-7 min-w-0 w-full relative">
             <div className="relative rounded-2xl overflow-hidden bg-[#090d1a] border border-blue-500/25 shadow-xl p-3.5 sm:p-4 transition-all duration-300">
               {/* Subtle background glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#060b16] via-[#090d1a] to-[#10172c] opacity-95 pointer-events-none" />
@@ -684,7 +684,7 @@ function EditorialLandingInner({
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-2 items-stretch">
-                    <div className="flex-1 relative flex items-center bg-black/80 border border-white/15 rounded-md px-2 py-1.5 text-xs font-mono text-cyan-200">
+                    <div className="flex-1 min-w-0 relative flex items-center bg-black/80 border border-white/15 rounded-md px-2 py-1.5 text-xs font-mono text-cyan-200">
                       <span className="truncate pr-7 select-all">{pipelinePrompt}</span>
                       <button
                         type="button"
@@ -856,11 +856,6 @@ function EditorialLandingInner({
 
                   {pipelineStatus === 'tampered' && tamperDiff ? (
                     <div
-                      ref={(el) => {
-                        // The proof renders below the fold on short screens —
-                        // bring the tamper result into view when it appears.
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }}
                       className="p-2.5 rounded-lg bg-rose-950/40 border border-rose-500/60 space-y-1.5 animate-in fade-in duration-200"
                     >
                       <div className="flex items-center justify-between flex-wrap gap-1 font-mono">
@@ -894,7 +889,7 @@ function EditorialLandingInner({
                       </div>
 
                       <div className="p-1 rounded bg-black/80 border border-rose-500/30 text-[9px] font-mono">
-                        <div className="text-rose-400 font-semibold">{tamperDiff.verifierFinding}</div>
+                        <div className="text-rose-400 font-semibold break-all">{tamperDiff.verifierFinding}</div>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-1.5 pt-0.5 font-mono">
@@ -926,7 +921,7 @@ function EditorialLandingInner({
                     </div>
                   ) : (
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
-                      <p className="text-[10px] text-neutral-300 font-sans leading-tight flex-1">
+                      <p className="text-[10px] text-neutral-300 font-sans leading-tight flex-1 min-w-0">
                         Mutates 1 byte in memory ('E' → 'X'). The verifier recalculates the SHA-256 digest and checks the Ed25519 signature → verification must fail.
                       </p>
                       <button
