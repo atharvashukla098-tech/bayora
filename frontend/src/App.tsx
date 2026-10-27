@@ -20,23 +20,8 @@ import { sound } from './utils/audio';
 
 export default function App() {
 
-  const [activeView, setActiveView] = useState<'editorial' | 'cinematic' | 'secops'>(() => {
-
-    if (typeof window !== 'undefined') {
-
-      const hash = window.location.hash;
-
-      if (hash === '#secops' || hash === '#console') return 'secops';
-
-      if (hash === '#cinematic') return 'cinematic';
-
-      return 'editorial';
-
-    }
-
-    return 'editorial';
-
-  });
+  // Strictly start on the first page ('editorial') on every entry
+  const [activeView, setActiveView] = useState<'editorial' | 'cinematic' | 'secops'>('editorial');
 
   const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -72,20 +57,6 @@ export default function App() {
 
   useEffect(() => {
     activeViewRef.current = activeView;
-    // On a deep-link load (#secops), land the user AT the secops section
-    // instead of scrollY=0 with a mismatched header state.
-    if (activeView === 'secops') {
-      const t = window.setTimeout(() => {
-        const el = document.getElementById('secops-console-section');
-        if (el && window.scrollY < 10) {
-          el.scrollIntoView({ behavior: 'instant' });
-          if (lenisRef.current) {
-            lenisRef.current.scrollTo(el, { immediate: true });
-          }
-        }
-      }, 120);
-      return () => window.clearTimeout(t);
-    }
   }, [activeView]);
 
 
@@ -97,11 +68,22 @@ export default function App() {
 
     }
 
-    if (!window.location.hash || window.location.hash === '#editorial') {
+    const resetToFirstPageStart = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       document.documentElement.scrollTop = 0;
       document.body.scrollTop = 0;
-    }
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(0, { immediate: true });
+      }
+    };
+
+    resetToFirstPageStart();
+    window.addEventListener('load', resetToFirstPageStart);
+    window.addEventListener('pageshow', resetToFirstPageStart);
+
+    const t1 = setTimeout(resetToFirstPageStart, 50);
+    const t2 = setTimeout(resetToFirstPageStart, 150);
+    const t3 = setTimeout(resetToFirstPageStart, 300);
 
     const onHashChange = () => {
 
@@ -141,7 +123,14 @@ export default function App() {
 
     window.addEventListener('hashchange', onHashChange);
 
-    return () => window.removeEventListener('hashchange', onHashChange);
+    return () => {
+      window.removeEventListener('load', resetToFirstPageStart);
+      window.removeEventListener('pageshow', resetToFirstPageStart);
+      window.removeEventListener('hashchange', onHashChange);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
 
   }, []);
 
@@ -163,6 +152,12 @@ export default function App() {
 
     lenisRef.current = lenis;
     (window as any).__lenis = lenis;
+
+    // Strictly enforce starting at top of the first page
+    lenis.scrollTo(0, { immediate: true });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
 
 
 

@@ -456,18 +456,28 @@ function EditorialLandingInner({
   // USER NAVIGATION: PAGE 1 (START/END) <-> PAGE 2 (START) BIDIRECTIONAL REDIRECT
   // =========================================================================
   useEffect(() => {
+    let t0: any = null;
+    let t1: any = null;
+    const resetToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      const lenis = (window as any).__lenis;
+      if (lenis && typeof lenis.scrollTo === 'function') {
+        lenis.scrollTo(0, { immediate: true });
+      }
+    };
+
     // 1. Initial link entry: strictly redirect to the very top (starting of first page)
     if (typeof window !== 'undefined') {
       if ('scrollRestoration' in window.history) {
         window.history.scrollRestoration = 'manual';
       }
-      if (!window.location.hash || window.location.hash === '#editorial') {
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-        const lenis = (window as any).__lenis;
-        if (lenis && typeof lenis.scrollTo === 'function') {
-          lenis.scrollTo(0, { immediate: true });
-        }
-      }
+      resetToTop();
+      t0 = setTimeout(resetToTop, 50);
+      t1 = setTimeout(resetToTop, 150);
+      window.addEventListener('load', resetToTop);
+      window.addEventListener('pageshow', resetToTop);
     }
 
     let isRedirecting = false;
@@ -485,10 +495,10 @@ function EditorialLandingInner({
       const s2 = document.getElementById('pipeline-flowchart');
       if (!s2 || isRedirecting) return;
       setLock(950);
-      const targetY = s2.offsetTop - 80;
+      const targetY = s2.offsetTop - 75;
       const lenis = (window as any).__lenis;
       if (lenis && typeof lenis.scrollTo === 'function') {
-        lenis.scrollTo(targetY, { duration: 0.85 });
+        lenis.scrollTo(targetY, { duration: 0.85, lock: true });
       } else {
         window.scrollTo({ top: targetY, behavior: 'smooth' });
       }
@@ -499,10 +509,11 @@ function EditorialLandingInner({
       if (!s1 || isRedirecting) return;
       setLock(950);
 
-      const targetY = Math.max(0, s1.offsetTop + s1.offsetHeight - window.innerHeight);
+      const s1Bottom = s1.offsetTop + s1.offsetHeight;
+      const targetY = Math.max(0, s1Bottom - window.innerHeight);
       const lenis = (window as any).__lenis;
       if (lenis && typeof lenis.scrollTo === 'function') {
-        lenis.scrollTo(targetY, { duration: 0.85 });
+        lenis.scrollTo(targetY, { duration: 0.85, lock: true });
       } else {
         window.scrollTo({ top: targetY, behavior: 'smooth' });
       }
@@ -522,12 +533,12 @@ function EditorialLandingInner({
       const scrollY = window.scrollY;
       const s1Bottom = s1.offsetTop + s1.offsetHeight;
       const page1End = Math.max(0, s1Bottom - window.innerHeight);
-      const page2Start = s2.offsetTop - 80;
+      const page2Start = s2.offsetTop - 75;
 
-      // SCROLL DOWN: from first page towards second page
-      if (e.deltaY > 15) {
-        if (scrollY < page2Start - 100) {
-          if (scrollY >= page1End - 30 || page1End === 0) {
+      // 1. SCROLL DOWN: from first page towards second page
+      if (e.deltaY > 10) {
+        if (scrollY < page2Start - 80) {
+          if (scrollY >= page1End - 35) {
             e.preventDefault();
             e.stopPropagation();
             scrollToPage2Start();
@@ -535,9 +546,9 @@ function EditorialLandingInner({
         }
       }
 
-      // SCROLL UP: from second page towards first page
-      if (e.deltaY < -15) {
-        if (scrollY >= page2Start - 80 && scrollY <= page2Start + 450) {
+      // 2. SCROLL UP: from second page towards first page
+      if (e.deltaY < -10) {
+        if (scrollY >= page2Start - 80 && scrollY <= page2Start + 400) {
           e.preventDefault();
           e.stopPropagation();
           scrollToPage1End();
@@ -566,18 +577,16 @@ function EditorialLandingInner({
       const scrollY = window.scrollY;
       const s1Bottom = s1.offsetTop + s1.offsetHeight;
       const page1End = Math.max(0, s1Bottom - window.innerHeight);
-      const page2Start = s2.offsetTop - 80;
+      const page2Start = s2.offsetTop - 75;
 
-      if (deltaY > 35) { // swipe up -> scroll down
-        if (scrollY < page2Start - 100) {
-          if (scrollY >= page1End - 30 || page1End === 0) {
-            e.preventDefault();
-            e.stopPropagation();
-            scrollToPage2Start();
-          }
+      if (deltaY > 30) { // swipe up -> scroll down
+        if (scrollY >= page1End - 35 && scrollY < page2Start - 80) {
+          e.preventDefault();
+          e.stopPropagation();
+          scrollToPage2Start();
         }
-      } else if (deltaY < -35) { // swipe down -> scroll up
-        if (scrollY >= page2Start - 80 && scrollY <= page2Start + 450) {
+      } else if (deltaY < -30) { // swipe down -> scroll up
+        if (scrollY >= page2Start - 80 && scrollY <= page2Start + 400) {
           e.preventDefault();
           e.stopPropagation();
           scrollToPage1End();
@@ -594,15 +603,15 @@ function EditorialLandingInner({
       const scrollY = window.scrollY;
       const s1Bottom = s1.offsetTop + s1.offsetHeight;
       const page1End = Math.max(0, s1Bottom - window.innerHeight);
-      const page2Start = s2.offsetTop - 80;
+      const page2Start = s2.offsetTop - 75;
 
       if (['ArrowDown', 'PageDown', ' '].includes(e.key)) {
-        if (scrollY < page2Start - 100 && (scrollY >= page1End - 30 || page1End === 0)) {
+        if (scrollY >= page1End - 35 && scrollY < page2Start - 80) {
           e.preventDefault();
           scrollToPage2Start();
         }
       } else if (['ArrowUp', 'PageUp'].includes(e.key)) {
-        if (scrollY >= page2Start - 80 && scrollY <= page2Start + 450) {
+        if (scrollY >= page2Start - 80 && scrollY <= page2Start + 400) {
           e.preventDefault();
           scrollToPage1End();
         }
@@ -619,10 +628,10 @@ function EditorialLandingInner({
       const currentY = window.scrollY;
       const s1Bottom = s1.offsetTop + s1.offsetHeight;
       const page1End = Math.max(0, s1Bottom - window.innerHeight);
-      const page2Start = s2.offsetTop - 80;
+      const page2Start = s2.offsetTop - 75;
 
       // In the threshold gap between end of Section 1 and start of Section 2:
-      if (currentY > page1End + 50 && currentY < page2Start - 50) {
+      if (currentY > page1End + 35 && currentY < page2Start - 40) {
         if (currentY > lastScrollY) {
           scrollToPage2Start();
         } else if (currentY < lastScrollY) {
@@ -639,12 +648,16 @@ function EditorialLandingInner({
     window.addEventListener('scroll', handleScrollSnap, { passive: true });
 
     return () => {
+      window.removeEventListener('load', resetToTop);
+      window.removeEventListener('pageshow', resetToTop);
       window.removeEventListener('wheel', handleWheel, { capture: true });
       window.removeEventListener('touchstart', handleTouchStart, { capture: true });
       window.removeEventListener('touchmove', handleTouchMove, { capture: true });
       window.removeEventListener('keydown', handleKeyDown, { capture: true });
       window.removeEventListener('scroll', handleScrollSnap);
       if (redirectTimer) clearTimeout(redirectTimer);
+      if (t0) clearTimeout(t0);
+      if (t1) clearTimeout(t1);
     };
   }, []);
 
@@ -669,7 +682,7 @@ function EditorialLandingInner({
 
           ========================================================================= */}
 
-      <section id="hero-section" className="relative z-10 pt-16 md:pt-20 pb-4 px-4 md:px-10 max-w-7xl mx-auto min-h-[85vh] flex flex-col justify-between overflow-x-clip">
+      <section id="hero-section" className="relative z-10 pt-16 md:pt-20 pb-12 px-4 md:px-10 max-w-7xl mx-auto min-h-[105vh] md:min-h-[110vh] flex flex-col justify-between overflow-x-clip">
 
         
 
