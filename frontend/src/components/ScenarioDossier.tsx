@@ -175,7 +175,7 @@ export function ScenarioDossier({ scenario, onBack }: ScenarioDossierProps) {
             <span className="text-[9px] text-neutral-500 font-bold tracking-widest block">
               SEALED EVENTS FOR {scenario.id} / {events.length} IN LEDGER
             </span>
-            <div className="max-h-32 overflow-y-auto space-y-1 pr-1">
+            <div className="max-h-32 overflow-y-auto space-y-1 pr-1 overscroll-contain">
               {events.length === 0 && (
                 <span className="text-[10px] text-neutral-600 italic">none yet — dispatch to seal some</span>
               )}

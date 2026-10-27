@@ -224,7 +224,7 @@ export function InteractiveConsole({
         </div>
 
         {/* Body content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto overscroll-contain console-scroll p-6 space-y-6">
           {/* TAB 1: ATTACK SIMULATOR — grid view, or the drill-in dossier
               for the clicked scenario (each scenario gets its own page) */}
           {activeTab === 'attacks' && dossier ? (

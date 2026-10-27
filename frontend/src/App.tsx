@@ -150,7 +150,7 @@ export default function App() {
       smoothWheel: true,
       wheelMultiplier: 1.0,
       touchMultiplier: 1.2,
-      prevent: (node) => node.closest?.('.world-scroll') != null,
+      prevent: (node) => node.closest?.('.world-scroll, .console-scroll, [data-hijack-scroll]') != null,
     });
 
     lenisRef.current = lenis;

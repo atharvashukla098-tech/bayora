@@ -650,7 +650,7 @@ export function ExecutiveDemoConsole({ onDownloadReport }: ExecutiveDemoConsoleP
                   })()}
                 </div>
 
-                <div className="text-[#e8e6e1] space-y-1 max-h-[140px] overflow-y-auto leading-relaxed text-[11px]">
+                <div className="text-[#e8e6e1] space-y-1 max-h-[140px] overflow-y-auto leading-relaxed text-[11px] overscroll-contain">
                   {(() => {
                     const res = sceneResults[selectedScene.key];
                     const isRunning = sceneStatus[selectedScene.key] === 'RUNNING';
@@ -799,7 +799,7 @@ export function ExecutiveDemoConsole({ onDownloadReport }: ExecutiveDemoConsoleP
                   </span>
                 </div>
 
-                <div className="space-y-1.5 max-h-[150px] overflow-y-auto pr-1">
+                <div className="space-y-1.5 max-h-[150px] overflow-y-auto pr-1 overscroll-contain">
                   {realLedger.length === 0 && (
                     <div className="p-2.5 rounded-xl bg-[#16181d] border border-[#2a2e37]/30 text-[10px] text-[#9a9891]/60 italic">
                       No live ledger events yet : run a scene and the real sealed events appear here.
@@ -857,7 +857,7 @@ export function ExecutiveDemoConsole({ onDownloadReport }: ExecutiveDemoConsoleP
                 </button>
               </div>
               {sceneResults[selectedScene.key] ? (
-                <pre className="text-[#e8e6e1] whitespace-pre-wrap text-[11px] leading-relaxed max-h-[300px] overflow-y-auto">
+                <pre className="text-[#e8e6e1] whitespace-pre-wrap text-[11px] leading-relaxed max-h-[300px] overflow-y-auto overscroll-contain">
                   {sceneResults[selectedScene.key].stdout || sceneResults[selectedScene.key].stderr || '(no output captured)'}
                 </pre>
               ) : (
@@ -874,7 +874,7 @@ export function ExecutiveDemoConsole({ onDownloadReport }: ExecutiveDemoConsoleP
               <p className="text-[11px] text-[#9a9891]">
                 Sealed evidence events from the live fsynced ledger on this machine. Every hash below is reproducible with scripts/verify_ledger.py.
               </p>
-              <div className="space-y-1.5 max-h-[320px] overflow-y-auto pr-1">
+              <div className="space-y-1.5 max-h-[320px] overflow-y-auto pr-1 overscroll-contain">
                 {realLedger.length === 0 && (
                   <p className="text-[#9a9891]/60 italic">No live events yet : run a scene first.</p>
                 )}
@@ -997,7 +997,7 @@ export function ExecutiveDemoConsole({ onDownloadReport }: ExecutiveDemoConsoleP
               </div>
             </div>
 
-            <pre className="p-4 rounded-xl bg-[#101216] border border-white/5 text-[11px] text-[#e8e6e1] max-h-[360px] overflow-auto leading-relaxed">
+            <pre className="p-4 rounded-xl bg-[#101216] border border-white/5 text-[11px] text-[#e8e6e1] max-h-[360px] overflow-auto leading-relaxed overscroll-contain">
               {typeof viewingEvidence.content === 'object'
                 ? JSON.stringify(viewingEvidence.content, null, 2)
                 : viewingEvidence.content}

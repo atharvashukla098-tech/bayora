@@ -1472,7 +1472,7 @@ function SecOpsConsoleInner({
               </div>
 
               {/* Event Block List */}
-              <div className="space-y-2 text-xs max-h-[600px] overflow-y-auto pr-1">
+              <div className="space-y-2 text-xs max-h-[600px] overflow-y-auto pr-1 overscroll-contain">
                 {filteredLedgerBlocks.slice().reverse().map((b) => (
                   <div
                     key={b.seq}
