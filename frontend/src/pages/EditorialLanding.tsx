@@ -803,6 +803,47 @@ function EditorialLandingInner({
 
 
       {/* =========================================================================
+          SECTION: HOW BAYORA WORKS — PLAIN-LANGUAGE 3-STEP EXPLANATION
+          ========================================================================= */}
+      <section className="relative z-10 py-14 md:py-20 px-6 md:px-14 max-w-5xl mx-auto">
+        <span className="inline-flex items-center space-x-2 px-3 py-1 rounded border border-black/10 bg-white font-mono text-[11px] tracking-wider text-neutral-500 uppercase">
+          <span>How Bayora Works</span>
+        </span>
+        <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-[#0a0a0e] leading-[1.05] select-none">
+          Three Steps. <br />
+          <span className="text-neutral-400">No Blind Trust.</span>
+        </h2>
+        <div className="mt-8 space-y-0">
+          <div className="flex gap-5 md:gap-8 py-7 border-t border-black/10">
+            <span className="font-mono text-xs text-neutral-400 pt-1 shrink-0">01</span>
+            <div className="max-w-2xl">
+              <h3 className="text-lg md:text-xl font-bold text-[#0a0a0e] tracking-tight">Your prompt goes through a security guard first</h3>
+              <p className="mt-2 text-sm md:text-base text-neutral-600 leading-relaxed">
+                Nothing reaches the AI model directly. Every request passes through a policy broker — a checkpoint that reads the prompt before the model ever sees it, the way airport security checks bags before boarding.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-5 md:gap-8 py-7 border-t border-black/10">
+            <span className="font-mono text-xs text-neutral-400 pt-1 shrink-0">02</span>
+            <div className="max-w-2xl">
+              <h3 className="text-lg md:text-xl font-bold text-[#0a0a0e] tracking-tight">Attacks get stopped, secrets get masked</h3>
+              <p className="mt-2 text-sm md:text-base text-neutral-600 leading-relaxed">
+                If the prompt tries to hijack the model, it is detected or blocked. If the model tries to leak a password or API key in its reply, the secret is masked before the reply leaves. Outgoing web requests are checked against an approved list, and system files stay locked.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-5 md:gap-8 py-7 border-t border-b border-black/10">
+            <span className="font-mono text-xs text-neutral-400 pt-1 shrink-0">03</span>
+            <div className="max-w-2xl">
+              <h3 className="text-lg md:text-xl font-bold text-[#0a0a0e] tracking-tight">Every result is sealed in a log that cannot be faked</h3>
+              <p className="mt-2 text-sm md:text-base text-neutral-600 leading-relaxed">
+                Each test is written into a chain of records where every entry is fingerprinted and linked to the last one. Change one character anywhere and the whole chain stops matching — so a tampered log is always caught, and you never have to take our word for anything.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* =========================================================================
 
           ATMOSPHERIC TRANSITION: GRADUAL SCROLL DESCENT FROM WHITE TO OBSIDIAN BLACK
 
@@ -896,6 +937,22 @@ function EditorialLandingInner({
               >
                 <span>TEST PROMPT INJECTION</span>
               </button>
+            </div>
+          </div>
+
+          {/* Plain-language answers: what the technical terms mean */}
+          <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl">
+            <div className="border-t border-white/15 pt-4">
+              <span className="font-mono text-[10px] text-neutral-500 uppercase tracking-widest block mb-1.5">What is a canary token?</span>
+              <p className="text-[13px] text-neutral-400 leading-relaxed">A fake secret, like a decoy password, planted on purpose. If it ever shows up outside, someone leaked it — and we catch it.</p>
+            </div>
+            <div className="border-t border-white/15 pt-4">
+              <span className="font-mono text-[10px] text-neutral-500 uppercase tracking-widest block mb-1.5">What is a hash chain?</span>
+              <p className="text-[13px] text-neutral-400 leading-relaxed">A log where each entry stores a fingerprint of the previous entry. Remove or edit anything and every later fingerprint stops matching.</p>
+            </div>
+            <div className="border-t border-white/15 pt-4">
+              <span className="font-mono text-[10px] text-neutral-500 uppercase tracking-widest block mb-1.5">What is Ed25519 signing?</span>
+              <p className="text-[13px] text-neutral-400 leading-relaxed">A digital signature only we can create, but anyone can verify. It proves the results came from the real Bayora engine.</p>
             </div>
           </div>
 
