@@ -1,33 +1,33 @@
-# BAYORA Demo Video — Production Notes (76s festival cut)
+# BAYORA Demo Video — Production Notes (68s festival cut, v11)
 
 ## Files
-- `BAYORA-demo.mp4` (~19MB) — 76s master, 1080p30, film-graded
-- `BAYORA-demo-1080p.mp4` (~16MB) — upload version
-- Runtime: 1:16 (cap: 60–90s)
+- `BAYORA-demo.mp4` (~4.4MB) — 68s master, 1080p30, stereo
+- Same file serves as the upload version (single clean encode)
+- Runtime: 1:08 (target: 65–75s per review)
 
-## Structure
-| Time | Content |
-|------|---------|
-| 0:00 | Title card — A BAYORA PRODUCTION |
-| 0:04 | Hero scroll (light → dark) |
-| 0:13 | Four defense cards |
-| 0:18 | SC-01 Neural Gateway fires → DETECTED (red alarm) |
-| 0:29 | SC-02 Canary Knot fires → REDACTED |
-| 0:39 | SC-03 Egress Boundary → BLOCKED |
-| 0:48 | SC-04 Island → EROFS seal |
-| 0:57 | Iridescent typography beat (2s) |
-| 0:59 | Sandbox console |
-| 1:03 | Tamper test → REJECTED, BAD_HASH at block #3 |
-| 1:13 | Outro — BAYORA |
+## 7-scene structure (per third review)
+1. 0:00 Threat — matte card: "AI CAN BE ATTACKED. CAN ITS DEFENSES BE VERIFIED?"
+2. 0:05 Attack — real canary leak, raw output shows the exposed secret
+3. 0:15 Interception — broker scrub, released output shows [REDACTED-BAYORA]
+4. 0:22 Containment — 5-stage architecture (Red Harness → Policy Broker →
+   Target Model → Blue Guardrail → Audit Ledger)
+5. 0:35 Evidence — SHA-256 record hash + Ed25519 receipt, SEALED & ATTESTED
+6. 0:44 The proof — one-byte tamper: FRAUD DETECTED, BAD_HASH, ALTERED COPY
+   REJECTED — the climax, held ~10s, real WebCrypto failure
+7. 1:00 Takeaway — "TEST THE ATTACK. ENFORCE THE POLICY. VERIFY THE EVIDENCE."
+   + BAYORA + github.com/atharvashukla098-tech/bayora
+
+## The blocker fix
+The one-byte tamper test previously rendered its result below the fold —
+the test worked but the proof was invisible (looked like an execution
+failure). Fixed: result auto-scrolls into view (commit 427091e). All
+tamper footage in this cut shows the actual verifier output.
 
 ## Voice
-en-GB-RyanNeural (Edge TTS), rate -4%, pitch -2Hz, light low-end boost,
-loudness -16 LUFS. 6 narration blocks, continuous through the ending.
+en-GB-RyanNeural, plain English, no scenario counts, names match on-screen
+labels, continuous narration (~0.2s gaps max).
 
-## Score
-Synthesized sub-drone (D1 + A1 sines, tremolo, dark reverb) fading out.
-
-## Source footage
-User's own screen recordings (lag-free) for hero/cards/console;
-Playwright 25fps native captures for the four fired worlds.
-Every verdict on screen is a real broker execution.
+## Look
+Matte, restrained: no neon glows, no grain, no letterbox bars. Red for
+detected threats, muted teal for policy, white for verified evidence —
+per the review's visual direction.
