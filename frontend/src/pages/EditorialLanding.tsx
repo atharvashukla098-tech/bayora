@@ -471,7 +471,7 @@ function EditorialLandingInner({
 
           ========================================================================= */}
 
-      <section className="relative z-10 pt-20 md:pt-24 pb-6 px-4 md:px-10 max-w-7xl mx-auto min-h-[88vh] flex flex-col justify-between overflow-x-clip">
+      <section className="relative z-10 pt-16 md:pt-20 pb-4 px-4 md:px-10 max-w-7xl mx-auto min-h-[85vh] flex flex-col justify-between overflow-x-clip">
 
         
 
@@ -586,113 +586,102 @@ function EditorialLandingInner({
             </div>
           </div>
 
-{/* Right Column: High-Legibility Zero-Trust Cockpit Console (7 cols) */}
+{/* Right Column: Compact High-Density Zero-Trust Cockpit Console (7 cols) */}
           <div className="lg:col-span-7 min-w-0 w-full relative">
-            <div className="relative rounded-2xl overflow-hidden bg-[#090d1a] border border-blue-500/30 shadow-2xl p-4 sm:p-5 transition-all duration-300 w-full">
+            <div className="relative rounded-2xl overflow-hidden bg-[#090d1a] border border-blue-500/30 shadow-2xl p-3 sm:p-3.5 transition-all duration-300 w-full">
               {/* Subtle deep background glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#060b16] via-[#090d1a] to-[#10172c] opacity-98 pointer-events-none" />
 
-              {/* Node Header & Unified Execution Mode Indicator */}
-              <div className="relative z-10 pb-3 border-b border-white/10 font-mono space-y-2.5">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center space-x-2.5">
-                    <span
-                      className={`w-2.5 h-2.5 rounded-full ${
-                        executionMode === 'LIVE_BACKEND'
-                          ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]'
-                          : executionMode === 'BACKEND_UNAVAILABLE'
-                          ? 'bg-amber-400'
-                          : 'bg-cyan-400 shadow-[0_0_8px_#22d3ee]'
-                      }`}
-                    />
-                    <span className="font-bold tracking-wider text-xs sm:text-sm text-white uppercase">
-                      {pipelineScenario === 'SC-02' ? 'CANARY LEAK DETECTION ENGINE' : 'PROMPT INJECTION FIREWALL'}
-                    </span>
-                  </div>
+              {/* Single-Row Header: Title, Scenario Tabs, Mode, and Export Actions */}
+              <div className="relative z-10 pb-2 border-b border-white/10 font-mono flex flex-wrap items-center justify-between gap-1.5">
+                <div className="flex items-center space-x-2">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      executionMode === 'LIVE_BACKEND'
+                        ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]'
+                        : executionMode === 'BACKEND_UNAVAILABLE'
+                        ? 'bg-amber-400'
+                        : 'bg-cyan-400 shadow-[0_0_8px_#22d3ee]'
+                    }`}
+                  />
+                  <span className="font-bold tracking-wider text-xs sm:text-sm text-white uppercase">
+                    {pipelineScenario === 'SC-02' ? 'CANARY LEAK ENGINE' : 'PROMPT FIREWALL'}
+                  </span>
 
-                  {/* Actions & Mode Badge */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleExportReport}
-                      className="text-[10px] sm:text-xs text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/25 transition-colors flex items-center gap-1 cursor-pointer font-bold"
-                      title="Download verifiable JSON attestation report"
-                    >
-                      <span>⇩ REPORT (.JSON)</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onOpenConsole(pipelineScenario)}
-                      className="text-[10px] sm:text-xs text-neutral-300 hover:text-cyan-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10 transition-colors flex items-center gap-1 cursor-pointer font-medium"
-                    >
-                      <span>CONSOLE [↗]</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Scenario Selection Tabs & Mode Info */}
-                <div className="flex flex-wrap items-center justify-between pt-1 gap-2 border-t border-white/5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-neutral-400 uppercase tracking-widest font-bold">MODE:</span>
+                  {/* Compact Scenario Tabs */}
+                  <div className="inline-flex rounded bg-black/50 border border-white/15 p-0.5 text-[9.5px]">
                     <button
                       type="button"
                       onClick={() => handleSelectScenario('SC-02')}
-                      className={`px-2.5 py-1 rounded text-[10px] sm:text-xs font-bold tracking-wider uppercase transition-all cursor-pointer ${
+                      className={`px-1.5 py-0.5 rounded font-bold uppercase transition-all cursor-pointer ${
                         pipelineScenario === 'SC-02'
-                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-[0_0_8px_rgba(34,211,238,0.2)]'
-                          : 'bg-white/5 text-neutral-400 border border-white/10 hover:text-neutral-200'
+                          ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/40'
+                          : 'text-neutral-400 hover:text-white'
                       }`}
                     >
-                      SC-02 · Canary Secret Leak
+                      SC-02
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSelectScenario('SC-01')}
-                      className={`px-2.5 py-1 rounded text-[10px] sm:text-xs font-bold tracking-wider uppercase transition-all cursor-pointer ${
+                      className={`px-1.5 py-0.5 rounded font-bold uppercase transition-all cursor-pointer ${
                         pipelineScenario === 'SC-01'
-                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.2)]'
-                          : 'bg-white/5 text-neutral-400 border border-white/10 hover:text-neutral-200'
+                          ? 'bg-rose-500/25 text-rose-300 border border-rose-500/40'
+                          : 'text-neutral-400 hover:text-white'
                       }`}
                     >
-                      SC-01 · Jailbreak Attempt
+                      SC-01
                     </button>
                   </div>
+                </div>
 
-                  <div className="text-[10px] sm:text-[11px] text-neutral-400">
-                    <span className="text-emerald-400 font-bold">● {executionMode === 'LIVE_BACKEND' ? 'LIVE BACKEND' : 'DEMO MODE'}</span>
-                    <span className="text-neutral-600 mx-1">·</span>
-                    <span>LOCAL · OFFLINE · DETERMINISTIC</span>
-                  </div>
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <span className="text-emerald-400 font-bold hidden sm:inline">● DEMO</span>
+                  <button
+                    type="button"
+                    onClick={handleExportReport}
+                    className="text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/25 font-bold cursor-pointer transition-colors"
+                    title="Download verifiable JSON attestation report"
+                  >
+                    ⇩ REPORT
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onOpenConsole(pipelineScenario)}
+                    className="text-neutral-300 hover:text-cyan-400 bg-white/5 px-2 py-0.5 rounded border border-white/10 cursor-pointer transition-colors"
+                  >
+                    CONSOLE ↗
+                  </button>
                 </div>
               </div>
 
-              {/* 4 Highly Legible Cockpit Modules */}
-              <div className="relative z-10 space-y-2.5 pt-2.5">
+              {/* 4 Ultra-Compact Cockpit Modules */}
+              <div className="relative z-10 space-y-1.5 pt-1.5">
                 
                 {/* 01: HOSTILE INPUT VECTOR */}
-                <div className="rounded-xl bg-black/60 border border-white/10 p-3 space-y-2 transition-all hover:border-white/20">
+                <div className="rounded-lg bg-black/60 border border-white/10 p-2 space-y-1 transition-all hover:border-white/20">
                   <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-mono text-xs sm:text-sm font-extrabold text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30">01</span>
-                      <span className="font-bold text-white uppercase tracking-wider text-xs sm:text-[13px]">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="font-mono text-xs font-extrabold text-cyan-400 bg-cyan-950/60 px-1.5 py-0.2 rounded border border-cyan-500/30">01</span>
+                      <span className="font-bold text-white uppercase tracking-wider text-xs">
                         HOSTILE INPUT VECTOR
                       </span>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-mono text-cyan-400/80 font-medium">
+                    <span className="text-[10px] font-mono text-cyan-400/80 font-medium">
                       {pipelineScenario === 'SC-02' ? 'SECRET CANARY QUERY' : 'JAILBREAK HEURISTICS'}
                     </span>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-2 items-stretch">
-                    <div className="flex-1 min-w-0 relative flex items-center bg-black/80 border border-white/15 rounded-lg px-3 py-2 text-xs sm:text-[13px] font-mono text-cyan-200">
-                      <span className="truncate pr-7 select-all">{pipelinePrompt}</span>
+                  <div className="flex gap-2 items-center">
+                    <div className="flex-1 min-w-0 relative flex items-center bg-black/80 border border-white/15 rounded px-2.5 py-1 text-xs font-mono text-cyan-200">
+                      <span className="truncate pr-6 select-all">{pipelinePrompt}</span>
                       <button
                         type="button"
                         onClick={handleCopyPrompt}
-                        className="absolute right-2 text-neutral-400 hover:text-white cursor-pointer transition-colors"
+                        className="absolute right-1.5 text-neutral-400 hover:text-white cursor-pointer transition-colors"
                         title="Copy prompt"
                       >
-                        {copiedPrompt ? <span className="text-[9px] text-emerald-400 font-bold">COPIED!</span> : '📋'}
+                        {copiedPrompt ? <span className="text-[9px] text-emerald-400 font-bold">✓</span> : '📋'}
                       </button>
                     </div>
 
@@ -700,18 +689,17 @@ function EditorialLandingInner({
                       type="button"
                       onClick={handleRunAttack}
                       disabled={pipelineStatus === 'running'}
-                      className="shrink-0 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-mono text-xs font-extrabold tracking-wider uppercase transition-all duration-200 shadow-md shadow-cyan-500/20 cursor-pointer disabled:opacity-50 flex items-center justify-center space-x-1.5"
+                      className="shrink-0 px-3 py-1 rounded bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-mono text-xs font-extrabold tracking-wider uppercase transition-all shadow-sm cursor-pointer disabled:opacity-50 flex items-center space-x-1"
                     >
                       {pipelineStatus === 'running' ? (
                         <>
-                          <span className="w-3.5 h-3.5 rounded-full border-2 border-black border-t-transparent animate-spin" />
+                          <span className="w-2.5 h-2.5 rounded-full border-2 border-black border-t-transparent animate-spin" />
                           <span>ENFORCING...</span>
                         </>
                       ) : (
                         <>
-                          <span>[ &nbsp; ]</span>
-                          <span>RUN THE ATTACK</span>
-                          <span>→</span>
+                          <span>[ ]</span>
+                          <span>RUN ATTACK →</span>
                         </>
                       )}
                     </button>
@@ -719,18 +707,18 @@ function EditorialLandingInner({
                 </div>
 
                 {/* 02: DEFENSE INTERCEPTION & WIRE SCRUB */}
-                <div className="rounded-xl bg-black/60 border border-white/10 p-3 space-y-2 transition-all hover:border-white/20">
+                <div className="rounded-lg bg-black/60 border border-white/10 p-2 space-y-1 transition-all hover:border-white/20">
                   <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-mono text-xs sm:text-sm font-extrabold text-teal-400 bg-teal-950/60 px-2 py-0.5 rounded border border-teal-500/30">02</span>
-                      <span className="font-bold text-white uppercase tracking-wider text-xs sm:text-[13px]">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="font-mono text-xs font-extrabold text-teal-400 bg-teal-950/60 px-1.5 py-0.2 rounded border border-teal-500/30">02</span>
+                      <span className="font-bold text-white uppercase tracking-wider text-xs">
                         DEFENSE INTERCEPTION & WIRE SCRUB
                       </span>
                     </div>
-                    <div className="flex items-center space-x-2 font-mono">
-                      <span className="text-neutral-300 text-xs">{pipelineResult.ms}ms</span>
+                    <div className="flex items-center space-x-1.5 font-mono text-[10px]">
+                      <span className="text-neutral-300">{pipelineResult.ms}ms</span>
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold uppercase tracking-wider border ${
+                        className={`px-1.5 py-0.2 rounded font-bold uppercase tracking-wider border ${
                           pipelineResult.outcome === 'REDACTED'
                             ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
                             : pipelineResult.outcome === 'BLOCKED'
@@ -743,24 +731,23 @@ function EditorialLandingInner({
                     </div>
                   </div>
 
-                  {/* Side-by-Side Comparison */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs font-mono items-stretch">
-                    <div className="p-2.5 rounded-lg bg-rose-950/25 border border-rose-500/30 space-y-1">
-                      <div className="text-[10px] text-rose-400 font-bold uppercase tracking-wider flex items-center justify-between">
-                        <span>⊚ TARGET RAW OUTPUT</span>
-                        <span className="text-rose-400/90 font-mono">[PRE-FILTER]</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono items-stretch">
+                    <div className="p-1.5 rounded bg-rose-950/25 border border-rose-500/30 space-y-0.5">
+                      <div className="text-[9px] text-rose-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                        <span>⊚ RAW MODEL OUTPUT</span>
+                        <span className="text-rose-400/80">[PRE-FILTER]</span>
                       </div>
-                      <p className="text-neutral-200 text-xs font-mono break-words leading-relaxed">
+                      <p className="text-neutral-200 text-xs font-mono break-words leading-tight">
                         {pipelineResult.rawTargetOutput}
                       </p>
                     </div>
 
-                    <div className="p-2.5 rounded-lg bg-emerald-950/25 border border-emerald-500/30 space-y-1">
-                      <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-between">
-                        <span>🛡 RELEASED WIRE OUTPUT</span>
-                        <span className="text-emerald-400/90 font-mono">[POLICY ENFORCED]</span>
+                    <div className="p-1.5 rounded bg-emerald-950/25 border border-emerald-500/30 space-y-0.5">
+                      <div className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-between">
+                        <span>🛡 SCRUBBED WIRE EGRESS</span>
+                        <span className="text-emerald-400/80">[ENFORCED]</span>
                       </div>
-                      <p className="text-emerald-300 text-xs font-semibold font-mono break-words leading-relaxed">
+                      <p className="text-emerald-300 text-xs font-semibold font-mono break-words leading-tight">
                         {pipelineResult.releasedText}
                       </p>
                     </div>
@@ -768,74 +755,71 @@ function EditorialLandingInner({
                 </div>
 
                 {/* 03: AUDIT EVENT #0056 (CRYPTOGRAPHIC RECEIPT) */}
-                <div className="rounded-xl bg-black/60 border border-white/10 p-3 space-y-2 transition-all hover:border-white/20">
+                <div className="rounded-lg bg-black/60 border border-white/10 p-2 space-y-1 transition-all hover:border-white/20">
                   <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-mono text-xs sm:text-sm font-extrabold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">03</span>
-                      <span className="font-bold text-white uppercase tracking-wider text-xs sm:text-[13px]">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="font-mono text-xs font-extrabold text-emerald-400 bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-500/30">03</span>
+                      <span className="font-bold text-white uppercase tracking-wider text-xs">
                         AUDIT EVENT #0056 (CRYPTOGRAPHIC RECEIPT)
                       </span>
                     </div>
-                    <span className="text-emerald-400 font-bold bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/30 text-[10px] sm:text-xs flex items-center gap-1 font-mono">
-                      <span>✓</span>
-                      <span>SEALED & ATTESTED</span>
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-mono text-xs">
-                    <div className="p-2 rounded-lg bg-black/80 border border-white/10 space-y-1">
-                      <div className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wider flex items-center justify-between">
-                        <span>RECORD HASH (SHA-256)</span>
-                        <button
-                          type="button"
-                          onClick={handleCopyHash}
-                          className="text-neutral-400 hover:text-white cursor-pointer transition-colors"
-                          title="Copy SHA-256 hash"
-                        >
-                          {copiedHash ? <span className="text-emerald-400 text-[9px] font-bold">COPIED!</span> : '📋'}
-                        </button>
-                      </div>
-                      <div className="text-emerald-300 font-bold break-all text-xs select-all">
-                        {receipt ? receipt.recordHash : pipelineResult.hash}
-                      </div>
-                    </div>
-
-                    <div className="p-2 rounded-lg bg-black/80 border border-white/10 space-y-1">
-                      <div className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wider flex items-center justify-between">
-                        <span>VERIFICATION PUBLIC KEY</span>
-                        <button
-                          type="button"
-                          onClick={handleCopyPubKey}
-                          className="text-neutral-400 hover:text-white cursor-pointer transition-colors"
-                          title="Copy public key"
-                        >
-                          {copiedPubKey ? <span className="text-cyan-400 text-[9px] font-bold">COPIED!</span> : '📋'}
-                        </button>
-                      </div>
-                      <div className="text-cyan-300 font-bold break-all text-xs select-all">
-                        {receipt ? `${receipt.publicKeyHex.slice(0, 30)}...` : '72ec0341cc66b884df5b5a94...'}
-                      </div>
+                    <div className="flex items-center space-x-1.5 font-mono text-[9.5px]">
+                      <span className="text-emerald-400 font-bold bg-emerald-500/15 px-1.5 py-0.2 rounded border border-emerald-500/30 text-[10px] flex items-center gap-1">
+                        <span>✓</span>
+                        <span>SEALED</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowRawJson(!showRawJson)}
+                        className="text-cyan-400 hover:text-cyan-300 cursor-pointer"
+                        title="Toggle canonical raw JSON record"
+                      >
+                        {showRawJson ? '[-] HIDE' : '[+] RAW'}
+                      </button>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-0.5 text-[10px] sm:text-[11px] text-neutral-400 font-mono">
-                    <span>Method: Ed25519 Signature + SHA-256 Hash Chain</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowRawJson(!showRawJson)}
-                      className="text-cyan-400 hover:text-cyan-300 font-bold cursor-pointer flex items-center gap-1 transition-colors"
-                    >
-                      <span>↗</span>
-                      <span>{showRawJson ? 'HIDE RAW RECORD' : 'INSPECT CANONICAL JSON'}</span>
-                    </button>
-                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 font-mono text-xs">
+                    <div className="p-1.5 rounded bg-black/80 border border-white/10 flex items-center justify-between gap-1">
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[9px] text-neutral-400 font-semibold block uppercase">RECORD HASH (SHA-256)</span>
+                        <div className="text-emerald-300 font-bold truncate text-xs select-all">
+                          {receipt ? receipt.recordHash : pipelineResult.hash}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCopyHash}
+                        className="text-neutral-400 hover:text-white p-1 cursor-pointer transition-colors shrink-0"
+                        title="Copy SHA-256 hash"
+                      >
+                        {copiedHash ? <span className="text-emerald-400 text-[9px] font-bold">✓</span> : '📋'}
+                      </button>
+                    </div>
 
+                    <div className="p-1.5 rounded bg-black/80 border border-white/10 flex items-center justify-between gap-1">
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[9px] text-neutral-400 font-semibold block uppercase">VERIFICATION PUBLIC KEY</span>
+                        <div className="text-cyan-300 font-bold truncate text-xs select-all">
+                          {receipt ? `${receipt.publicKeyHex.slice(0, 24)}...` : '72ec0341cc66b884df5b5a94...'}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCopyPubKey}
+                        className="text-neutral-400 hover:text-white p-1 cursor-pointer transition-colors shrink-0"
+                        title="Copy public key"
+                      >
+                        {copiedPubKey ? <span className="text-cyan-400 text-[9px] font-bold">✓</span> : '📋'}
+                      </button>
+                    </div>
+                  </div>
                   {showRawJson && receipt && (
-                    <div className="p-2.5 rounded-lg bg-black border border-cyan-500/30 text-[10px] sm:text-xs font-mono text-neutral-300 space-y-1 mt-1 animate-in fade-in duration-150">
-                      <div className="text-[10px] text-cyan-400 uppercase font-bold">
-                        Canonical Serialized Record (Input to SHA-256):
+                    <div className="p-1.5 rounded bg-black border border-cyan-500/30 text-[9px] font-mono text-neutral-300 space-y-0.5 animate-in fade-in duration-100">
+                      <div className="text-[8px] text-cyan-400 uppercase font-bold">
+                        Canonical Serialized Record:
                       </div>
-                      <pre className="overflow-x-auto whitespace-pre-wrap break-all text-neutral-300 leading-relaxed">
+                      <pre className="overflow-x-auto whitespace-pre-wrap break-all text-neutral-300 max-h-20 leading-tight">
                         {receipt.canonicalJson}
                       </pre>
                     </div>
@@ -843,127 +827,97 @@ function EditorialLandingInner({
                 </div>
 
                 {/* 04: ONE-BYTE ALTERATION TEST */}
-                <div className="rounded-xl bg-black/60 border border-white/10 p-3 space-y-2 transition-all hover:border-white/20">
+                <div className="rounded-lg bg-black/60 border border-white/10 p-2 space-y-1 transition-all hover:border-white/20">
                   <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-mono text-xs sm:text-sm font-extrabold text-rose-400 bg-rose-950/60 px-2 py-0.5 rounded border border-rose-500/30">04</span>
-                      <span className="font-bold text-white uppercase tracking-wider text-xs sm:text-[13px]">
+                    <div className="flex items-center space-x-1.5">
+                      <span className="font-mono text-xs font-extrabold text-rose-400 bg-rose-950/60 px-1.5 py-0.2 rounded border border-rose-500/30">04</span>
+                      <span className="font-bold text-white uppercase tracking-wider text-xs">
                         ONE-BYTE ALTERATION TEST
                       </span>
                     </div>
-                    <span className="text-[10px] sm:text-xs font-mono text-neutral-400">DISPOSABLE RECORD MUTATION</span>
+                    <span className="text-[10px] font-mono text-neutral-400">DISPOSABLE RECORD MUTATION</span>
                   </div>
 
                   {pipelineStatus === 'tampered' && tamperDiff ? (
-                    <div
-                      className="p-2.5 rounded-lg bg-rose-950/40 border border-rose-500/60 space-y-2 animate-in fade-in duration-200"
-                    >
-                      <div className="flex items-center justify-between flex-wrap gap-1 font-mono">
-                        <span className="text-rose-400 font-extrabold text-xs sm:text-[13px] flex items-center gap-1">
+                    <div className="p-2 rounded bg-rose-950/40 border border-rose-500/60 space-y-1 animate-in fade-in duration-150">
+                      <div className="flex items-center justify-between flex-wrap gap-1 font-mono text-xs">
+                        <span className="text-rose-400 font-extrabold flex items-center gap-1">
                           <span>[✕]</span>
-                          <span>FRAUD DETECTED · BAD_HASH AT BLOCK #0056</span>
+                          <span>FRAUD DETECTED · BAD_HASH #0056</span>
                         </span>
-                        <span className="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border border-rose-500/40">
+                        <span className="bg-rose-500/20 text-rose-300 px-1.5 py-0.2 rounded text-[10px] font-bold border border-rose-500/40">
                           ALTERED COPY REJECTED
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px] sm:text-xs font-mono">
-                        <div className="p-2 rounded-lg bg-black/70 border border-white/10 space-y-0.5">
-                          <span className="text-neutral-400 block font-bold uppercase text-[9.5px]">ORIGINAL RECORD:</span>
-                          <span className="text-neutral-200 block truncate">
-                            SHA-256: <span className="text-emerald-400 font-bold">{tamperDiff.originalHash.slice(0, 22)}...</span>
-                          </span>
-                          <span className="text-emerald-400 block font-bold">Ed25519: VALID</span>
+                      <div className="grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+                        <div className="p-1 rounded bg-black/70 border border-white/10">
+                          <span className="text-neutral-400 block uppercase text-[8.5px]">ORIGINAL:</span>
+                          <span className="text-emerald-400 block font-bold truncate">SHA-256: {tamperDiff.originalHash.slice(0, 16)}...</span>
                         </div>
-
-                        <div className="p-2 rounded-lg bg-rose-950/60 border border-rose-500/40 space-y-0.5">
-                          <span className="text-rose-300 block font-bold uppercase text-[9.5px]">ALTERED COPY:</span>
-                          <span className="text-rose-200 block truncate">
-                            SHA-256: <span className="text-rose-400 font-bold">{tamperDiff.mutatedHash.slice(0, 22)}...</span>
-                          </span>
-                          <span className="text-rose-300 block font-bold">
-                            Byte {tamperDiff.mutatedByteOffset}: '{tamperDiff.originalChar}' → '{tamperDiff.mutatedChar}'
-                          </span>
+                        <div className="p-1 rounded bg-rose-950/60 border border-rose-500/40">
+                          <span className="text-rose-300 block uppercase text-[8.5px]">ALTERED ('E'→'X'):</span>
+                          <span className="text-rose-300 block font-bold truncate">SHA-256: {tamperDiff.mutatedHash.slice(0, 16)}...</span>
                         </div>
                       </div>
 
-                      <div className="p-2 rounded-lg bg-black/90 border border-rose-500/30 text-xs font-mono">
-                        <div className="text-rose-300 font-semibold break-words leading-relaxed">{tamperDiff.verifierFinding}</div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2 pt-1 font-mono">
+                      <div className="flex flex-wrap items-center gap-1.5 pt-0.5 font-mono text-[10px]">
                         <button
                           type="button"
                           onClick={handleRestoreRecord}
-                          className="py-1.5 px-3 rounded-md bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                          className="py-1 px-2.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold uppercase transition-all cursor-pointer flex items-center gap-1"
                         >
-                          <span>[↺]</span>
-                          <span>RESTORE ORIGINAL RECORD</span>
+                          <span>[↺] RESTORE</span>
                         </button>
                         <button
                           type="button"
                           onClick={handleCopyCommand}
-                          className="py-1.5 px-3 rounded-md bg-white/5 hover:bg-white/10 text-neutral-200 border border-white/15 text-xs font-semibold tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5"
+                          className="py-1 px-2.5 rounded bg-white/5 hover:bg-white/10 text-neutral-200 border border-white/15 font-semibold uppercase transition-all cursor-pointer flex items-center gap-1"
                         >
-                          <span>📋</span>
-                          <span>{copiedCommand ? 'COPIED!' : 'CLI VERIFY CMD'}</span>
+                          <span>📋 {copiedCommand ? 'COPIED!' : 'CLI VERIFY'}</span>
                         </button>
                         <button
                           type="button"
                           onClick={handleExportReport}
-                          className="py-1.5 px-3 rounded-md bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-semibold tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5"
+                          className="py-1 px-2.5 rounded bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-semibold uppercase transition-all cursor-pointer flex items-center gap-1"
                         >
-                          <span>⇩</span>
-                          <span>DOWNLOAD REPORT</span>
+                          <span>⇩ REPORT</span>
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                      <p className="text-xs sm:text-[13px] text-neutral-200 font-sans leading-relaxed flex-1 min-w-0">
-                        Mutates 1 byte in memory ('E' → 'X'). The verifier recalculates the SHA-256 digest and checks the Ed25519 signature → verification must fail.
+                    <div className="flex items-center justify-between gap-2 p-0.5">
+                      <p className="text-xs text-neutral-300 font-sans leading-tight flex-1 min-w-0">
+                        Mutates 1 byte in memory ('E' → 'X'). The verifier checks the SHA-256 & Ed25519 signature → fails instantly.
                       </p>
                       <button
                         type="button"
                         onClick={handleTamperRecord}
-                        className="shrink-0 py-2 px-3.5 rounded-lg bg-gradient-to-r from-rose-950/50 to-rose-900/50 hover:from-rose-900/70 hover:to-rose-800/70 border border-rose-500/40 hover:border-rose-400 text-rose-200 font-mono text-xs font-bold tracking-wider uppercase transition-all duration-150 cursor-pointer flex items-center justify-center space-x-1.5 shadow-md shadow-rose-950/40"
+                        className="shrink-0 py-1.5 px-3 rounded-lg bg-gradient-to-r from-rose-950/50 to-rose-900/50 hover:from-rose-900/70 hover:to-rose-800/70 border border-rose-500/40 hover:border-rose-400 text-rose-200 font-mono text-xs font-bold tracking-wider uppercase transition-all cursor-pointer flex items-center justify-center space-x-1"
                       >
-                        <span className="w-4 h-4 rounded-full border border-rose-500/50 flex items-center justify-center text-xs">✕</span>
-                        <span>TEST ONE-BYTE TAMPER (MUST FAIL)</span>
+                        <span>✕</span>
+                        <span>TEST 1-BYTE TAMPER</span>
                       </button>
                     </div>
                   )}
                 </div>
 
                 {/* Integrated Telemetry Strip */}
-                <div className="pt-2 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[10px] sm:text-[11px] font-mono text-neutral-400">
-                  <div className="flex items-center space-x-2">
-                    <span className="flex items-center gap-1 text-neutral-200 font-bold uppercase">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      LIVE FEED:
-                    </span>
-                    <span className={activePipelineStep >= 1 ? 'text-cyan-300 font-bold' : 'text-neutral-500'}>
-                      00:12 INGRESS
-                    </span>
+                <div className="pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-neutral-400">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-neutral-300 font-bold uppercase">FEED:</span>
+                    <span className={activePipelineStep >= 1 ? 'text-cyan-300 font-bold' : 'text-neutral-500'}>00:12 INGRESS</span>
                     <span className="text-neutral-600">→</span>
-                    <span className={activePipelineStep >= 3 ? 'text-amber-300 font-bold' : 'text-neutral-500'}>
-                      00:13 TARGET
-                    </span>
+                    <span className={activePipelineStep >= 3 ? 'text-amber-300 font-bold' : 'text-neutral-500'}>00:13 TARGET</span>
                     <span className="text-neutral-600">→</span>
-                    <span className={activePipelineStep >= 4 || pipelineStatus === 'defended' ? 'text-emerald-300 font-bold' : 'text-neutral-500'}>
-                      00:14 BROKER
-                    </span>
+                    <span className={activePipelineStep >= 4 || pipelineStatus === 'defended' ? 'text-emerald-300 font-bold' : 'text-neutral-500'}>00:14 BROKER</span>
                     <span className="text-neutral-600">→</span>
-                    <span className={activePipelineStep >= 5 || pipelineStatus === 'defended' ? 'text-cyan-300 font-bold' : 'text-neutral-500'}>
-                      00:15 LEDGER
-                    </span>
+                    <span className={activePipelineStep >= 5 || pipelineStatus === 'defended' ? 'text-cyan-300 font-bold' : 'text-neutral-500'}>00:15 LEDGER</span>
                   </div>
 
-                  <div className="text-[9.5px] uppercase tracking-wider text-neutral-500">
+                  <div className="text-[9px] uppercase tracking-wider text-neutral-500 hidden sm:block">
                     <span className="text-cyan-400 font-bold">BAYORA_CANARY_*</span>
-                    <span> · </span>
-                    <span className="text-neutral-400">SMALL TOKENS. BIG CONSEQUENCES.</span>
                   </div>
                 </div>
 
