@@ -1,27 +1,33 @@
-# BAYORA Demo Video — Production Notes
+# BAYORA Demo Video — Production Notes (76s festival cut)
 
 ## Files
-- `BAYORA-demo-4K.mp4` (80MB) — 4K master, 3840x2160
-- `BAYORA-demo-1080p.mp4` (18.7MB) — upload this one (Unstop/YouTube/WhatsApp)
-- Runtime: 2m 19s
+- `BAYORA-demo.mp4` (~19MB) — 76s master, 1080p30, film-graded
+- `BAYORA-demo-1080p.mp4` (~16MB) — upload version
+- Runtime: 1:16 (cap: 60–90s)
 
-## The Build
-1. Voice: piper TTS `en_GB-alan` — 92.6Hz fundamental, pitch-shifted -10%,
-   bass-boosted, compressed, dark room reverb. British accent.
-2. Footage: Playwright headless-chromium native video capture of the LIVE app
-   (1920x1080@30fps) — every verdict on screen is a real broker execution.
-3. Film grade: motion-interpolated to 30fps, upscaled to 4K lanczos,
-   contrast curves, film grain, vignette, 2.39:1 letterbox.
-4. Titles: typeset cards over the live product backdrop, Ken Burns zoom.
-5. Score: synthesized sub-drone (D1 + A1 sines, tremolo, dark reverb) under
-   the narration, loudness-normalized to -16 LUFS.
+## Structure
+| Time | Content |
+|------|---------|
+| 0:00 | Title card — A BAYORA PRODUCTION |
+| 0:04 | Hero scroll (light → dark) |
+| 0:13 | Four defense cards |
+| 0:18 | SC-01 Neural Gateway fires → DETECTED (red alarm) |
+| 0:29 | SC-02 Canary Knot fires → REDACTED |
+| 0:39 | SC-03 Egress Boundary → BLOCKED |
+| 0:48 | SC-04 Island → EROFS seal |
+| 0:57 | Iridescent typography beat (2s) |
+| 0:59 | Sandbox console |
+| 1:03 | Tamper test → REJECTED, BAD_HASH at block #3 |
+| 1:13 | Outro — BAYORA |
 
-## Timeline
-- 0:00  A BAYORA PRODUCTION — Don't Trust AI. Prove It.
-- 0:03  Neural Gateway fires — DETECTED (real)
-- 0:19  Chapter One — the receipts
-- 0:34  Canary Knot fires — REDACTED (real)
-- 0:53  Egress Boundary fires — BLOCKED 403 (real)
-- 1:09  Of The Oak fires — EROFS seal (real)
-- 1:31  Chapter Two — the ledger + tamper collapse
-- 2:11  Close — hero + BAYORA
+## Voice
+en-GB-RyanNeural (Edge TTS), rate -4%, pitch -2Hz, light low-end boost,
+loudness -16 LUFS. 6 narration blocks, continuous through the ending.
+
+## Score
+Synthesized sub-drone (D1 + A1 sines, tremolo, dark reverb) fading out.
+
+## Source footage
+User's own screen recordings (lag-free) for hero/cards/console;
+Playwright 25fps native captures for the four fired worlds.
+Every verdict on screen is a real broker execution.
