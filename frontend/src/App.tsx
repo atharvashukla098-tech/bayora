@@ -50,6 +50,8 @@ export default function App() {
 
   const lenisRef = useRef<Lenis | null>(null);
 
+  const flipArmedRef = useRef(false);
+
   const activeViewRef = useRef(activeView);
 
 
@@ -159,7 +161,14 @@ export default function App() {
 
     const onScroll = () => {
 
-      if (activeViewRef.current === 'editorial') return;
+      if (activeViewRef.current === 'editorial') {
+        // Editorial mode: the flip to the cinematic page is decided by the
+        // dedicated wheel listener below (real user scroll intent), not here.
+        // The secops element lives inside the hidden fixed cinematic wrapper,
+        // so its rect is meaningless here — using it caused the view to flip
+        // mid-editorial, making the footer unreachable.
+        return;
+      }
 
 
 
@@ -227,6 +236,31 @@ export default function App() {
 
     window.addEventListener('scroll', onScroll, { passive: true });
 
+    // Wheel-intent bridge: while on the editorial page, flipping to the
+    // cinematic page requires the user to be AT the bottom (footer visible)
+    // and to keep scrolling DOWN with the wheel. This keeps the footer
+    // readable and clickable instead of teleporting past it.
+    const onWheel = (e: WheelEvent) => {
+      if (activeViewRef.current !== 'editorial') return;
+      const docH = document.documentElement.scrollHeight;
+      const atBottom = window.innerHeight + window.scrollY >= docH - 40;
+      if (!atBottom || e.deltaY <= 0) {
+        flipArmedRef.current = false;
+        return;
+      }
+      if (!flipArmedRef.current) {
+        // first wheel at the bottom: arm, but hold the footer in place
+        flipArmedRef.current = true;
+        return;
+      }
+      // second consecutive downward wheel at the bottom: continue to page 2
+      flipArmedRef.current = false;
+      activeViewRef.current = 'cinematic';
+      setActiveView('cinematic');
+      history.replaceState(null, '', '#cinematic');
+    };
+    window.addEventListener('wheel', onWheel, { passive: true });
+
 
 
     let rafId = 0;
@@ -250,6 +284,8 @@ export default function App() {
       lenis.destroy();
 
       window.removeEventListener('scroll', onScroll);
+
+      window.removeEventListener('wheel', onWheel);
 
     };
 

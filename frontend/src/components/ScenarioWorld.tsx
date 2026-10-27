@@ -122,7 +122,7 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
         rawBehavior: '',
         redactionApplied: false,
         events: [],
-        timing: 'POLICY-ONLY ROUTE / NO SOCKET BUILT',
+        timing: 'Checked by policy first / no connection was ever opened',
       });
       setSceneMode(d.allowed ? 'allowed' : 'blocked');
       sound.playVerified();
