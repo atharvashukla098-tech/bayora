@@ -471,17 +471,17 @@ function EditorialLandingInner({
 
           ========================================================================= */}
 
-      <section className="relative z-10 pt-32 md:pt-36 pb-20 px-6 md:px-14 max-w-7xl mx-auto min-h-[92vh] flex flex-col justify-between overflow-x-clip">
+      <section className="relative z-10 pt-20 md:pt-24 pb-6 px-4 md:px-10 max-w-7xl mx-auto min-h-[88vh] flex flex-col justify-between overflow-x-clip">
 
         
 
 
 
 {/* Core Hero Grid: Headline, Thesis, Explanations, Telemetry Node */}
-        <div className="my-auto py-4 sm:py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start w-full">
+        <div className="my-auto py-1 sm:py-2 grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start w-full">
           
           {/* Left Column: Heading, Supporting Narrative, Actions, & Clear Explanations (5 cols) */}
-          <div className="lg:col-span-5 min-w-0 space-y-4 pt-1">
+          <div className="lg:col-span-5 min-w-0 space-y-3 pt-0">
             <div className="space-y-3">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-[-0.035em] leading-[0.98] text-[#0a0a0e] select-none">
                 Don't Trust AI. <br />
@@ -667,7 +667,7 @@ function EditorialLandingInner({
               </div>
 
               {/* 4 Compact Cockpit Modules (Zero Vertical Waste) */}
-              <div className="relative z-10 space-y-2 pt-2.5">
+              <div className="relative z-10 space-y-1.5 pt-1.5">
                 
                 {/* 01: HOSTILE INPUT VECTOR */}
                 <div className="rounded-lg bg-black/60 border border-white/10 p-2.5 space-y-1.5 transition-all hover:border-white/20">
@@ -856,7 +856,7 @@ function EditorialLandingInner({
 
                   {pipelineStatus === 'tampered' && tamperDiff ? (
                     <div
-                      className="p-2.5 rounded-lg bg-rose-950/40 border border-rose-500/60 space-y-1.5 animate-in fade-in duration-200"
+                      className="p-2 rounded-lg bg-rose-950/40 border border-rose-500/60 space-y-1 animate-in fade-in duration-200"
                     >
                       <div className="flex items-center justify-between flex-wrap gap-1 font-mono">
                         <span className="text-rose-400 font-bold text-xs flex items-center gap-1">
