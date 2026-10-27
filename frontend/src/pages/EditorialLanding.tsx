@@ -480,8 +480,8 @@ function EditorialLandingInner({
 {/* Core Hero Grid: Headline, Thesis, Explanations, Telemetry Node */}
         <div className="my-auto py-1 sm:py-2 grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start w-full">
           
-{/* Left Column: Heading, Supporting Narrative, Actions, & Clear Explanations (5 cols) */}
-          <div className="lg:col-span-5 min-w-0 space-y-4 pt-1">
+{/* Left Column: Heading, Supporting Narrative, Actions, & Clear Explanations (6 cols) */}
+          <div className="lg:col-span-6 min-w-0 space-y-5 pt-1">
             <div className="space-y-3">
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-[-0.035em] leading-[0.98] text-[#0a0a0e] select-none">
                 Don't Trust AI. <br />
@@ -489,7 +489,7 @@ function EditorialLandingInner({
                   Prove It.
                 </span>
               </h1>
-              <p className="text-sm sm:text-base text-neutral-800 leading-relaxed font-normal">
+              <p className="text-base sm:text-lg md:text-xl text-neutral-800 leading-relaxed font-normal">
                 Most tools only give AI safety scores on paper. Bayora actually tests real attacks. We stop prompt hacks, prevent secret data leaks, block unsafe web requests, and seal every action in an independently verifiable cryptographic ledger.
               </p>
             </div>
@@ -519,36 +519,36 @@ function EditorialLandingInner({
             </div>
 
             {/* Quick Evidence Metrics Bar */}
-            <div className="pt-3.5 border-t border-black/10 grid grid-cols-3 gap-3 font-mono">
+            <div className="pt-4 border-t border-black/10 grid grid-cols-3 gap-3 font-mono">
               <div>
-                <span className="text-[10px] sm:text-[11px] text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Scenarios</span>
-                <span className="font-bold text-neutral-950 text-xs sm:text-sm">4 Active Layers</span>
+                <span className="text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-1">Scenarios</span>
+                <span className="font-black text-neutral-950 text-sm sm:text-base md:text-lg">4 Active Layers</span>
               </div>
               <div>
-                <span className="text-[10px] sm:text-[11px] text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Tamper Test</span>
-                <span className="font-bold text-emerald-600 text-xs sm:text-sm">1-Byte Alteration</span>
+                <span className="text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-1">Tamper Test</span>
+                <span className="font-black text-emerald-600 text-sm sm:text-base md:text-lg">1-Byte Alteration</span>
               </div>
               <div>
-                <span className="text-[10px] sm:text-[11px] text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Attestation</span>
-                <span className="font-bold text-cyan-700 text-xs sm:text-sm">Ed25519 + SHA-256</span>
+                <span className="text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-1">Attestation</span>
+                <span className="font-black text-cyan-700 text-sm sm:text-base md:text-lg">Ed25519 + SHA-256</span>
               </div>
             </div>
 
             {/* Educational Proof Walkthrough Guide (Large, Legible, Easy to Read) */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-white/95 backdrop-blur-md border border-black/10 space-y-3 font-sans shadow-md">
+            <div className="p-5 sm:p-6 rounded-2xl bg-white/95 backdrop-blur-md border border-black/10 space-y-3.5 font-sans shadow-md">
               <div className="flex items-center justify-between text-xs sm:text-sm font-mono">
-                <span className="text-neutral-900 font-bold uppercase tracking-wider text-xs sm:text-[13px] flex items-center gap-2">
+                <span className="text-neutral-900 font-black uppercase tracking-wider text-xs sm:text-sm flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-cyan-500" />
                   HOW TO READ THE INTERACTIVE PROOF
                 </span>
-                <span className="text-emerald-700 bg-emerald-50 px-3 py-1 rounded-md text-[10px] sm:text-xs font-bold border border-emerald-300">
+                <span className="text-emerald-700 bg-emerald-50 px-3 py-1 rounded-md text-xs font-bold border border-emerald-300">
                   REAL WEBCRYPTO
                 </span>
               </div>
 
-              <div className="space-y-2.5 text-xs sm:text-sm text-neutral-800 leading-normal">
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-cyan-100 text-cyan-800 font-mono text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+              <div className="space-y-3 text-sm sm:text-[15px] md:text-base text-neutral-800 leading-relaxed">
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-cyan-100 text-cyan-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                     1
                   </span>
                   <div>
@@ -556,17 +556,17 @@ function EditorialLandingInner({
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-teal-100 text-teal-800 font-mono text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-teal-100 text-teal-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                     2
                   </span>
                   <div>
-                    <span className="font-bold text-neutral-950">Pre-Egress Wire Scrub:</span> The model leaks the secret in raw output, but Bayora masks it with <code className="bg-neutral-100 text-neutral-900 font-bold px-1.5 py-0.5 rounded font-mono text-xs">[REDACTED]</code> before wire release.
+                    <span className="font-bold text-neutral-950">Pre-Egress Wire Scrub:</span> The model leaks the secret in raw output, but Bayora masks it with <code className="bg-neutral-200 text-neutral-900 font-bold px-1.5 py-0.5 rounded font-mono text-xs sm:text-sm">[REDACTED]</code> before wire release.
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-mono text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                     3
                   </span>
                   <div>
@@ -574,8 +574,8 @@ function EditorialLandingInner({
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-rose-100 text-rose-800 font-mono text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-full bg-rose-100 text-rose-900 font-mono text-xs font-black flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                     4
                   </span>
                   <div>
@@ -587,7 +587,7 @@ function EditorialLandingInner({
           </div>
 
 {/* Right Column: Compact High-Density Zero-Trust Cockpit Console (7 cols) */}
-          <div className="lg:col-span-7 min-w-0 w-full relative">
+          <div className="lg:col-span-6 min-w-0 w-full relative">
             <div className="relative rounded-2xl overflow-hidden bg-[#090d1a] border border-blue-500/30 shadow-2xl p-3 sm:p-3.5 transition-all duration-300 w-full">
               {/* Subtle deep background glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#060b16] via-[#090d1a] to-[#10172c] opacity-98 pointer-events-none" />
