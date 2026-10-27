@@ -855,7 +855,14 @@ function EditorialLandingInner({
                   </div>
 
                   {pipelineStatus === 'tampered' && tamperDiff ? (
-                    <div className="p-2.5 rounded-lg bg-rose-950/40 border border-rose-500/60 space-y-1.5 animate-in fade-in duration-200">
+                    <div
+                      ref={(el) => {
+                        // The proof renders below the fold on short screens —
+                        // bring the tamper result into view when it appears.
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }}
+                      className="p-2.5 rounded-lg bg-rose-950/40 border border-rose-500/60 space-y-1.5 animate-in fade-in duration-200"
+                    >
                       <div className="flex items-center justify-between flex-wrap gap-1 font-mono">
                         <span className="text-rose-400 font-bold text-xs flex items-center gap-1">
                           <span>[✕]</span>
