@@ -933,15 +933,15 @@ function EditorialLandingInner({
         </div>
       </section>
 
-                  {/* =========================================================================
+                        {/* =========================================================================
           SECTION 2: THE BAYORA EXECUTION PIPELINE & ARCHITECTURE FLOWCHART
           ========================================================================= */}
-      <section id="pipeline-flowchart" className="relative z-10 py-10 md:py-14 px-4 md:px-8 max-w-7xl mx-auto">
-        <div className="rounded-2xl border border-cyan-500/20 bg-[#060a14] text-white p-5 md:p-8 shadow-2xl relative overflow-hidden">
-          {/* Background cyber grid & glow */}
+      <section id="pipeline-flowchart" className="relative z-10 py-12 md:py-16 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-24">
+        <div className="rounded-2xl border border-cyan-500/25 bg-[#060a14] text-white p-5 md:p-8 shadow-2xl relative overflow-hidden">
+          {/* Background cyber grid & ambient glows */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#060a14] via-[#091020] to-[#0d162a] opacity-98 pointer-events-none" />
-          <div className="absolute -top-32 -right-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-32 -right-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-rose-500/15 rounded-full blur-3xl pointer-events-none" />
 
           {/* Section Header */}
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-white/10 gap-4">
@@ -955,37 +955,37 @@ function EditorialLandingInner({
               <h3 className="text-xl md:text-2xl font-black tracking-tight text-white mt-1">
                 Interactive Attack Interception & Dynamic Routing Matrix
               </h3>
-              <p className="text-xs sm:text-sm text-neutral-400 font-sans mt-1">
+              <p className="text-xs sm:text-sm text-neutral-300 font-sans mt-1">
                 Visualizing how adversarial payloads are routed, intercepted, or scrubbed with non-straight bypass curves and closed-loop feedback.
               </p>
             </div>
 
             {/* Interactive Scenario Switcher */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 font-mono text-xs">
-              <span className="text-[10px] text-neutral-400 uppercase tracking-wider">ACTIVE PATH:</span>
-              <div className="inline-flex rounded-lg bg-black/60 border border-white/15 p-1">
+              <span className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">ACTIVE PATH:</span>
+              <div className="inline-flex rounded-lg bg-black/80 border border-white/20 p-1 shadow-inner">
                 <button
                   type="button"
                   onClick={() => handleSelectScenario('SC-02')}
-                  className={`px-3 py-1.5 rounded-md font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 rounded-md font-bold uppercase transition-all cursor-pointer flex items-center gap-2 ${
                     pipelineScenario === 'SC-02'
-                      ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 shadow-[0_0_12px_rgba(34,211,238,0.3)]'
+                      ? 'bg-cyan-500/30 text-cyan-200 border border-cyan-400/60 shadow-[0_0_12px_rgba(34,211,238,0.35)]'
                       : 'text-neutral-400 hover:text-white'
                   }`}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
                   <span>SC-02 · CANARY SCRUB</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleSelectScenario('SC-01')}
-                  className={`px-3 py-1.5 rounded-md font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3.5 py-1.5 rounded-md font-bold uppercase transition-all cursor-pointer flex items-center gap-2 ${
                     pipelineScenario === 'SC-01'
-                      ? 'bg-rose-500/25 text-rose-300 border border-rose-500/40 shadow-[0_0_12px_rgba(244,63,94,0.3)]'
+                      ? 'bg-rose-500/30 text-rose-200 border border-rose-400/60 shadow-[0_0_12px_rgba(244,63,94,0.35)]'
                       : 'text-neutral-400 hover:text-white'
                   }`}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                  <span className="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
                   <span>SC-01 · HARD BLOCK BYPASS</span>
                 </button>
               </div>
@@ -993,29 +993,29 @@ function EditorialLandingInner({
           </div>
 
           {/* Flowchart Legend */}
-          <div className="relative z-10 pt-4 flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono text-neutral-400">
+          <div className="relative z-10 pt-4 flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono">
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-0.5 bg-cyan-400 inline-block" />
+              <div className="flex items-center gap-1.5 text-neutral-300">
+                <span className="w-3.5 h-1 bg-cyan-400 rounded-full inline-block shadow-[0_0_6px_rgba(34,211,238,0.6)]" />
                 <span>S-CURVE STANDARD PIPELINE</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-0.5 bg-rose-500 border-b border-rose-500 border-dashed inline-block" />
-                <span className="text-rose-300 font-semibold">CURVED 403 BYPASS (ZERO MODEL COMPUTE)</span>
+              <div className="flex items-center gap-1.5 text-rose-300">
+                <span className="w-3.5 h-1 bg-rose-500 rounded-full inline-block shadow-[0_0_6px_rgba(244,63,94,0.6)]" />
+                <span className="font-semibold">CURVED 403 BYPASS (ZERO MODEL COMPUTE)</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-0.5 bg-purple-400 inline-block" />
-                <span className="text-purple-300 font-semibold">CURVED ATTESTATION FEEDBACK LOOP</span>
+              <div className="flex items-center gap-1.5 text-purple-300">
+                <span className="w-3.5 h-1 bg-purple-400 rounded-full inline-block shadow-[0_0_6px_rgba(192,132,252,0.6)]" />
+                <span className="font-semibold">CURVED ATTESTATION FEEDBACK LOOP</span>
               </div>
             </div>
-            <div className="text-[10px] text-neutral-500 lg:hidden">
-              ⇄ Scroll horizontally to view full diagram
+            <div className="text-[11px] text-cyan-400/80 font-mono hidden sm:block">
+              [⚡ Non-Linear Dynamic Routing]
             </div>
           </div>
 
           {/* Flowchart Canvas Container (Horizontally Scrollable on Mobile/Tablet so curves remain 100% intact) */}
-          <div className="relative z-10 my-6 overflow-x-auto pb-4 pt-2">
-            <div className="relative min-w-[980px] h-[410px] rounded-2xl bg-black/60 border border-white/10 p-4">
+          <div className="relative z-10 my-6 overflow-x-auto pb-4 pt-2 scrollbar-thin scrollbar-thumb-white/10">
+            <div className="relative min-w-[980px] h-[410px] rounded-2xl bg-black/75 border border-white/15 p-4 shadow-inner">
 
               {/* Vector SVG Routing Layer */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 410" fill="none">
@@ -1053,7 +1053,7 @@ function EditorialLandingInner({
 
                   {/* Glow filter */}
                   <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feGaussianBlur stdDeviation="3.5" result="blur" />
                     <feMerge>
                       <feMergeNode in="blur" />
                       <feMergeNode in="SourceGraphic" />
@@ -1067,7 +1067,7 @@ function EditorialLandingInner({
                   d="M 305 130 C 305 32, 895 32, 895 130"
                   fill="none"
                   stroke="url(#bypassLineGrad)"
-                  strokeWidth={pipelineScenario === 'SC-01' ? '3.5' : '1.5'}
+                  strokeWidth={pipelineScenario === 'SC-01' ? '4' : '1.5'}
                   strokeDasharray={pipelineScenario === 'SC-01' ? '6 4' : '4 6'}
                   strokeOpacity={pipelineScenario === 'SC-01' ? '1' : '0.2'}
                   filter={pipelineScenario === 'SC-01' ? 'url(#neonGlow)' : undefined}
@@ -1152,9 +1152,9 @@ function EditorialLandingInner({
                   d="M 895 295 C 895 385, 305 385, 305 295"
                   fill="none"
                   stroke="url(#feedbackLineGrad)"
-                  strokeWidth="2"
+                  strokeWidth="2.5"
                   strokeDasharray="5 5"
-                  strokeOpacity="0.75"
+                  strokeOpacity="0.8"
                   filter="url(#neonGlow)"
                   markerEnd="url(#arrow-purple)"
                 />
@@ -1169,7 +1169,7 @@ function EditorialLandingInner({
                     fill="#090616"
                     stroke="#a855f7"
                     strokeWidth="1.5"
-                    strokeOpacity="0.75"
+                    strokeOpacity="0.8"
                   />
                   <text
                     x="0"
@@ -1194,7 +1194,7 @@ function EditorialLandingInner({
                   className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c]/95 ${
                     activePipelineStep === 0
                       ? 'border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.35)] ring-1 ring-cyan-400'
-                      : 'border-white/10 hover:border-cyan-500/50'
+                      : 'border-white/15 hover:border-cyan-500/50'
                   }`}
                 >
                   <div>
@@ -1204,12 +1204,12 @@ function EditorialLandingInner({
                     </div>
                     <div className="font-black text-white text-xs tracking-wider">RED HARNESS</div>
                     <div className="text-[10px] text-cyan-300 font-bold uppercase mt-0.5">Hostile Attack Injection</div>
-                    <p className="text-[11px] text-neutral-400 mt-2 font-sans leading-relaxed">
+                    <p className="text-[11px] text-neutral-300 mt-2 font-sans leading-relaxed">
                       Injects adversarial payload ({pipelineScenario === 'SC-01' ? 'Raw Prompt Jailbreak' : 'Exfiltration Probe'}).
                     </p>
                   </div>
                   <div className="pt-2 border-t border-white/10 text-[10px]">
-                    <span className="text-cyan-400 font-bold block bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/30 text-center truncate">
+                    <span className="text-cyan-300 font-bold block bg-cyan-500/15 px-1.5 py-0.5 rounded border border-cyan-500/30 text-center truncate">
                       {pipelineScenario === 'SC-01' ? 'JAILBREAK_PROBE' : 'CANARY_LEAK_TEST'}
                     </span>
                   </div>
@@ -1219,7 +1219,7 @@ function EditorialLandingInner({
                 <div
                   className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c]/95 ${
                     pipelineScenario === 'SC-01'
-                      ? 'border-rose-500/90 shadow-[0_0_20px_rgba(244,63,94,0.4)] ring-1 ring-rose-500'
+                      ? 'border-rose-500/90 shadow-[0_0_20px_rgba(244,63,94,0.45)] ring-1 ring-rose-500'
                       : 'border-cyan-500/60 shadow-[0_0_15px_rgba(34,211,238,0.25)]'
                   }`}
                 >
@@ -1232,7 +1232,7 @@ function EditorialLandingInner({
                     </div>
                     <div className="font-black text-white text-xs tracking-wider">POLICY BROKER</div>
                     <div className="text-[10px] text-cyan-300 font-bold uppercase mt-0.5">Zero-Trust Evaluation</div>
-                    <p className="text-[11px] text-neutral-400 mt-2 font-sans leading-relaxed">
+                    <p className="text-[11px] text-neutral-300 mt-2 font-sans leading-relaxed">
                       {pipelineScenario === 'SC-01'
                         ? 'HARD BLOCK TRIGGERED: Diverts along curved overhead bypass to Ledger.'
                         : 'EVAL PASS: Token entropy passed baseline. Dispatched to Model runtime.'}
@@ -1240,11 +1240,11 @@ function EditorialLandingInner({
                   </div>
                   <div className="pt-2 border-t border-white/10 text-[10px]">
                     {pipelineScenario === 'SC-01' ? (
-                      <span className="text-rose-300 font-bold block bg-rose-500/20 px-1.5 py-0.5 rounded border border-rose-500/40 text-center animate-pulse">
+                      <span className="text-rose-300 font-bold block bg-rose-500/25 px-1.5 py-0.5 rounded border border-rose-500/50 text-center animate-pulse">
                         403 HARD BLOCKED
                       </span>
                     ) : (
-                      <span className="text-emerald-400 font-bold block bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/30 text-center">
+                      <span className="text-emerald-400 font-bold block bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/30 text-center">
                         PASSED TO ENGINE
                       </span>
                     )}
@@ -1255,7 +1255,7 @@ function EditorialLandingInner({
                 <div
                   className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c]/95 ${
                     pipelineScenario === 'SC-01'
-                      ? 'border-white/5 opacity-40 border-dashed'
+                      ? 'border-white/10 opacity-40 border-dashed'
                       : 'border-blue-500/60 shadow-[0_0_15px_rgba(59,130,246,0.25)]'
                   }`}
                 >
@@ -1266,7 +1266,7 @@ function EditorialLandingInner({
                     </div>
                     <div className="font-black text-white text-xs tracking-wider">TARGET MODEL</div>
                     <div className="text-[10px] text-neutral-400 font-bold uppercase mt-0.5">Untrusted AI Engine</div>
-                    <p className="text-[11px] text-neutral-400 mt-2 font-sans leading-relaxed">
+                    <p className="text-[11px] text-neutral-300 mt-2 font-sans leading-relaxed">
                       {pipelineScenario === 'SC-01'
                         ? 'ISOLATED & SUPPRESSED: Zero tokens reached model. 0 compute spent.'
                         : 'Model generates unconstrained completion containing confidential canary.'}
@@ -1274,9 +1274,11 @@ function EditorialLandingInner({
                   </div>
                   <div className="pt-2 border-t border-white/10 text-[10px]">
                     {pipelineScenario === 'SC-01' ? (
-                      <span className="text-neutral-500 font-bold block text-center">[COMPUTE SAVED]</span>
+                      <span className="text-neutral-400 font-bold block text-center bg-white/5 py-0.5 rounded">
+                        [COMPUTE SAVED]
+                      </span>
                     ) : (
-                      <span className="text-cyan-400 font-bold block bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/30 text-center">
+                      <span className="text-cyan-300 font-bold block bg-cyan-500/15 px-1.5 py-0.5 rounded border border-cyan-500/30 text-center">
                         RAW LEAK DETECTED
                       </span>
                     )}
@@ -1287,7 +1289,7 @@ function EditorialLandingInner({
                 <div
                   className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c]/95 ${
                     pipelineScenario === 'SC-01'
-                      ? 'border-white/5 opacity-40 border-dashed'
+                      ? 'border-white/10 opacity-40 border-dashed'
                       : 'border-teal-500/60 shadow-[0_0_15px_rgba(20,184,166,0.25)]'
                   }`}
                 >
@@ -1298,7 +1300,7 @@ function EditorialLandingInner({
                     </div>
                     <div className="font-black text-white text-xs tracking-wider">BLUE GUARDRAIL</div>
                     <div className="text-[10px] text-teal-300 font-bold uppercase mt-0.5">Pre-Egress Inspection</div>
-                    <p className="text-[11px] text-neutral-400 mt-2 font-sans leading-relaxed">
+                    <p className="text-[11px] text-neutral-300 mt-2 font-sans leading-relaxed">
                       {pipelineScenario === 'SC-01'
                         ? 'NOT INVOKED: Pre-target block eliminated need for downstream wire scrub.'
                         : 'Catches canary secret before network egress and rewires to [REDACTED].'}
@@ -1306,9 +1308,11 @@ function EditorialLandingInner({
                   </div>
                   <div className="pt-2 border-t border-white/10 text-[10px]">
                     {pipelineScenario === 'SC-01' ? (
-                      <span className="text-neutral-500 font-bold block text-center">[NOT INVOKED]</span>
+                      <span className="text-neutral-400 font-bold block text-center bg-white/5 py-0.5 rounded">
+                        [NOT INVOKED]
+                      </span>
                     ) : (
-                      <span className="text-emerald-400 font-bold block bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/30 text-center">
+                      <span className="text-emerald-300 font-bold block bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/30 text-center">
                         CANARY SCRUBBED
                       </span>
                     )}
@@ -1326,12 +1330,12 @@ function EditorialLandingInner({
                     </div>
                     <div className="font-black text-white text-xs tracking-wider">AUDIT LEDGER</div>
                     <div className="text-[10px] text-emerald-300 font-bold uppercase mt-0.5">Cryptographic Attestation</div>
-                    <p className="text-[11px] text-neutral-400 mt-2 font-sans leading-relaxed">
+                    <p className="text-[11px] text-neutral-300 mt-2 font-sans leading-relaxed">
                       Seals verdict with SHA-256 digest & Ed25519 signature. Feeds back to Stage 02.
                     </p>
                   </div>
                   <div className="pt-2 border-t border-white/10 text-[10px]">
-                    <span className="text-emerald-300 font-bold block bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/30 text-center">
+                    <span className="text-emerald-300 font-bold block bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/40 text-center">
                       SEALED #{pipelineResult.blockSeq} (Ed25519)
                     </span>
                   </div>
@@ -1341,63 +1345,63 @@ function EditorialLandingInner({
             </div>
           </div>
 
-          {/* Test Coverage & Architecture Scope */}
+          {/* Test Coverage & Architecture Scope - High Contrast and Legible */}
           <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
-            <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
+            <div className="p-4 rounded-xl bg-black/60 border border-white/15 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-black text-white">4</span>
-                <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-bold">
+                <span className="text-3xl font-black text-white">4</span>
+                <span className="text-[10px] text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30 font-bold">
                   4 OF 4 ACTIVE
                 </span>
               </div>
-              <div className="font-bold text-white text-xs">CORE DEFENSE LAYERS</div>
-              <p className="text-neutral-400 text-[11px] leading-relaxed">
+              <div className="font-black text-white text-sm tracking-wide">CORE DEFENSE LAYERS</div>
+              <p className="text-neutral-300 text-[12px] font-sans leading-relaxed">
                 Active runtime boundaries: Input Shield (SC-01), Data Privacy (SC-02), Network Guard (SC-03), and System Armor (SC-04r).
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
+            <div className="p-4 rounded-xl bg-black/60 border border-white/15 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-black text-white">14</span>
-                <span className="text-[10px] text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20 font-bold">
+                <span className="text-3xl font-black text-white">14</span>
+                <span className="text-[10px] text-cyan-300 bg-cyan-500/20 px-2 py-0.5 rounded border border-cyan-500/30 font-bold">
                   DEFINED MATRIX
                 </span>
               </div>
-              <div className="font-bold text-white text-xs">SCENARIO CATALOGUE</div>
-              <p className="text-neutral-400 text-[11px] leading-relaxed">
+              <div className="font-black text-white text-sm tracking-wide">SCENARIO CATALOGUE</div>
+              <p className="text-neutral-300 text-[12px] font-sans leading-relaxed">
                 Full adversarial test suite in /scenarios/ covering prompt jailbreaks, canary leaks, SSRF, memory leaks, and EROFS write probes.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
+            <div className="p-4 rounded-xl bg-black/60 border border-white/15 space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-black text-white">6</span>
-                <span className="text-[10px] text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20 font-bold">
+                <span className="text-3xl font-black text-white">6</span>
+                <span className="text-[10px] text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded border border-purple-500/30 font-bold">
                   CHECKPOINTS
                 </span>
               </div>
-              <div className="font-bold text-white text-xs">GUIDED DEMO STAGES</div>
-              <p className="text-neutral-400 text-[11px] leading-relaxed">
+              <div className="font-black text-white text-sm tracking-wide">GUIDED DEMO STAGES</div>
+              <p className="text-neutral-300 text-[12px] font-sans leading-relaxed">
                 Sequential inspection checkpoints in the Evidence Console: Ingress, Pre-target Block, Sandbox, Wire Scrub, Merkle Link, and Attestation.
               </p>
             </div>
           </div>
 
           {/* Session Verification Status Bar */}
-          <div className="mt-4 px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-neutral-400">
+          <div className="mt-4 px-4 py-3 rounded-lg bg-black/60 border border-white/15 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-neutral-300">
             <div className="flex items-center space-x-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-              <span>SESSION VERIFICATION TRACKER:</span>
+              <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+              <span className="text-neutral-400">SESSION VERIFICATION:</span>
               <span className="text-white font-bold">
                 {sessionExecutionCount} Live Execution{sessionExecutionCount !== 1 ? 's' : ''} in Session
               </span>
-              <span>·</span>
+              <span className="text-neutral-500">·</span>
               <span className="text-emerald-400 font-semibold">0 Unsubstantiated Guarantees</span>
             </div>
             <button
               type="button"
               onClick={() => onOpenConsole()}
-              className="text-cyan-400 hover:text-cyan-300 font-bold tracking-wider uppercase flex items-center gap-1 cursor-pointer"
+              className="text-cyan-400 hover:text-cyan-300 font-bold tracking-wider uppercase flex items-center gap-1.5 cursor-pointer bg-cyan-500/10 px-3 py-1 rounded border border-cyan-500/20 hover:border-cyan-400/40 transition-all"
             >
               <span>EXPLORE FULL 14-SCENARIO EVIDENCE CONSOLE</span>
               <span>[↗]</span>
