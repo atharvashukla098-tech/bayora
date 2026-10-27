@@ -122,109 +122,117 @@ export async function evaluatePrompt(
   scenarioId: string = 'SC-01',
   blockMode: boolean = false
 ): Promise<EvaluateResult> {
-  try {
-    const resp = await fetch(`${BACKEND_URL}/v1/evaluate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ prompt, scenario_id: scenarioId, block_mode: blockMode }),
-    });
+  if (BACKEND_URL) {
+    try {
+      const resp = await fetch(`${BACKEND_URL}/v1/evaluate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt, scenario_id: scenarioId, block_mode: blockMode }),
+      });
 
-    const data = await resp.json();
-    return {
-      runId: data.run_id || 'demo-run',
-      scenarioId: data.scenario_id || scenarioId,
-      outcome: data.outcome || (resp.status === 403 ? 'BLOCKED' : 'DETECTED'),
-      httpStatus: resp.status,
-      policyReason: data.policy_decision?.reason_code || (resp.status === 403 ? 'INJECTION_BLOCKED' : 'POLICY_EVALUATED'),
-      matchedPatterns: data.policy_decision?.matched_patterns || [],
-      releasedText: data.released_text || JSON.stringify(data),
-      rawTargetOutput: data.raw_target_output || `Model Raw Output for [${scenarioId}]`,
-      rawBehavior: data.raw_behavior || '',
-      redactionApplied: !!data.redaction_applied,
-      events: data.events || [],
-      timing: 'PRE-EGRESS WIRE INTERCEPTION',
-    };
-  } catch {
-    // Offline deterministic evaluation fallback (LABELED : the UI badges
-    // this as SIM so it can never impersonate a live broker verdict)
-    const res = runDeterministicEvaluation(prompt, scenarioId, blockMode);
-    return { ...res, timing: 'SIMULATION : LIVE BROKER UNREACHABLE' };
+      const data = await resp.json();
+      return {
+        runId: data.run_id || 'demo-run',
+        scenarioId: data.scenario_id || scenarioId,
+        outcome: data.outcome || (resp.status === 403 ? 'BLOCKED' : 'DETECTED'),
+        httpStatus: resp.status,
+        policyReason: data.policy_decision?.reason_code || (resp.status === 403 ? 'INJECTION_BLOCKED' : 'POLICY_EVALUATED'),
+        matchedPatterns: data.policy_decision?.matched_patterns || [],
+        releasedText: data.released_text || JSON.stringify(data),
+        rawTargetOutput: data.raw_target_output || `Model Raw Output for [${scenarioId}]`,
+        rawBehavior: data.raw_behavior || '',
+        redactionApplied: !!data.redaction_applied,
+        events: data.events || [],
+        timing: 'PRE-EGRESS WIRE INTERCEPTION',
+      };
+    } catch {
+      // Offline deterministic evaluation fallback (LABELED : the UI badges
+      // this as SIM so it can never impersonate a live broker verdict)
+    }
   }
+
+  const res = runDeterministicEvaluation(prompt, scenarioId, blockMode);
+  return { ...res, timing: 'SIMULATION : LIVE BROKER UNREACHABLE' };
 }
 
 export async function checkDestination(url: string): Promise<DestinationCheckResult> {
-  try {
-    const resp = await fetch(`${BACKEND_URL}/v1/check-destination`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url }),
-    });
+  if (BACKEND_URL) {
+    try {
+      const resp = await fetch(`${BACKEND_URL}/v1/check-destination`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
 
-    if (resp.ok) {
-      return {
-        allowed: true,
-        httpStatus: 200,
-        url,
-        policyReason: 'DESTINATION_ALLOWED',
-        detail: 'URL matched approved allowlist [http://target:8000]',
-      };
-    } else {
-      const err = await resp.json();
-      return {
-        allowed: false,
-        httpStatus: resp.status,
-        url,
-        policyReason: err.error || 'DESTINATION_REJECTED',
-        detail: err.detail || 'Destination URL not permitted by zero-trust policy allowlist.',
-      };
+      if (resp.ok) {
+        return {
+          allowed: true,
+          httpStatus: 200,
+          url,
+          policyReason: 'DESTINATION_ALLOWED',
+          detail: 'URL matched approved allowlist [http://target:8000]',
+        };
+      } else {
+        const err = await resp.json();
+        return {
+          allowed: false,
+          httpStatus: resp.status,
+          url,
+          policyReason: err.error || 'DESTINATION_REJECTED',
+          detail: err.detail || 'Destination URL not permitted by zero-trust policy allowlist.',
+        };
+      }
+    } catch {
+      // Offline deterministic check
     }
-  } catch {
-    // Offline deterministic check
-    const isAllowed = url.trim().startsWith('http://target:8000');
-    return {
-      allowed: isAllowed,
-      httpStatus: isAllowed ? 200 : 403,
-      url,
-      policyReason: isAllowed ? 'DESTINATION_ALLOWED' : 'DESTINATION_REJECTED',
-      detail: isAllowed
-        ? 'URL matched approved allowlist [http://target:8000]'
-        : 'Destination rejected prior to socket build. Zero network socket penetration.',
-    };
   }
+
+  const isAllowed = url.trim().startsWith('http://target:8000');
+  return {
+    allowed: isAllowed,
+    httpStatus: isAllowed ? 200 : 403,
+    url,
+    policyReason: isAllowed ? 'DESTINATION_ALLOWED' : 'DESTINATION_REJECTED',
+    detail: isAllowed
+      ? 'URL matched approved allowlist [http://target:8000]'
+      : 'Destination rejected prior to socket build. Zero network socket penetration.',
+  };
 }
 
 export async function runTamperSimulation(
   mode: 'byte' | 'delete' | 'reorder' | 'truncate' | 'forge' = 'byte',
   eventIndex: number = 3
 ): Promise<TamperSimResult> {
-  try {
-    const resp = await fetch(`${BACKEND_URL}/v1/tamper`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode, event_index: eventIndex }),
-    });
-    if (resp.ok) {
-      const data = await resp.json();
-      return {
-        success: true,
-        mode: data.mode,
-        targetEventIndex: data.target_event_index,
-        originalValid: data.original_valid,
-        tamperedValid: data.tampered_valid,
-        tamperRejected: data.tamper_rejected,
-        earliestFailureSeq: data.earliest_failure_seq,
-        findings: data.findings || ['BAD_HASH'],
-        expectedHash: data.expected_hash,
-        computedHash: data.computed_hash,
-        originalUnmodified: data.original_unmodified,
-        originalBlocks: data.original_blocks || [],
-        tamperedBlocks: data.tampered_blocks || [],
-      };
+  if (BACKEND_URL) {
+    try {
+      const resp = await fetch(`${BACKEND_URL}/v1/tamper`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode, event_index: eventIndex }),
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        return {
+          success: true,
+          mode: data.mode,
+          targetEventIndex: data.target_event_index,
+          originalValid: data.original_valid,
+          tamperedValid: data.tampered_valid,
+          tamperRejected: data.tamper_rejected,
+          earliestFailureSeq: data.earliest_failure_seq,
+          findings: data.findings || ['BAD_HASH'],
+          expectedHash: data.expected_hash,
+          computedHash: data.computed_hash,
+          originalUnmodified: data.original_unmodified,
+          originalBlocks: data.original_blocks || [],
+          tamperedBlocks: data.tampered_blocks || [],
+        };
+      }
+    } catch {
+      // Offline fallback simulation
     }
-  } catch {
-    // Offline fallback simulation
   }
 
   // Deterministic in-browser fallback
@@ -275,15 +283,17 @@ export interface GateTestResult {
 }
 
 export async function runGateTest(gate: 'rate' | 'size' | 'schema' | 'concurrency' | 'destination'): Promise<GateTestResult> {
-  try {
-    const resp = await fetch(`${BACKEND_URL}/v1/gate-test`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ gate }),
-    });
-    if (resp.ok) return await resp.json();
-  } catch {
-    // fall through to labeled simulation
+  if (BACKEND_URL) {
+    try {
+      const resp = await fetch(`${BACKEND_URL}/v1/gate-test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gate }),
+      });
+      if (resp.ok) return await resp.json();
+    } catch {
+      // fall through to labeled simulation
+    }
   }
   // SIMULATION (labeled): mirrors the real gate codes when the backend is down
   const codes: Record<string, GateTestResult> = {
