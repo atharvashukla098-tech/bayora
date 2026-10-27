@@ -70,13 +70,13 @@ export function Header({
               : 'bg-black/5 text-neutral-600 border border-black/10'
           }`}
         >
-          {isSecOps ? 'SECOPS EVIDENCE SUITE' : 'ZERO-TRUST AI DEFENSE'}
+          {isSecOps ? 'SECURITY EVIDENCE SUITE' : 'AI SECURITY SHIELD'}
         </span>
       </div>
 
       {/* Upper Right Action Controls */}
       <div className="flex items-center space-x-2 md:space-x-3 font-mono">
-        {/* Page Navigation Capsule: "SECURITY SANDBOX •" */}
+        {/* Page Navigation Capsule */}
         <button
           onClick={() => {
             onOpenConsole();
@@ -91,7 +91,7 @@ export function Header({
               : 'bg-[#12131a] text-white hover:bg-black shadow-md'
           }`}
         >
-          <span>QUICK SANDBOX</span>
+          <span>TEST SANDBOX</span>
           <span className="w-1.5 h-1.5 rounded-full bg-[#22d3ee] animate-pulse" />
         </button>
       </div>

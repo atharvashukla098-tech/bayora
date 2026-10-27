@@ -218,7 +218,7 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
             <div className="max-w-md space-y-4"
               style={{ background: 'rgba(4,6,10,0.55)', backdropFilter: 'blur(6px)', padding: '1.25rem', borderRadius: '4px' }}>
               <div className="font-mono text-[10px] tracking-[0.3em] text-neutral-400 uppercase">
-                Adversarial payload
+                Test Prompt (Click to Run)
               </div>
               <textarea
                 rows={3}
@@ -241,12 +241,12 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
                 {evaluating ? (
                   <span className="flex items-center justify-center gap-3">
                     <span className="w-1.5 h-1.5 bg-amber-300 rounded-full animate-pulse" />
-                    firing at the {scenario.tag.toLowerCase()}
+                    testing defense...
                   </span>
-                ) : result ? 'fire again' : 'fire'}
+                ) : result ? 'run test again' : 'run test prompt'}
               </button>
               <div className="font-mono text-[9px] text-neutral-500 tracking-wider">
-                live broker 127.0.0.1:8000 / the scene reacts to the real verdict
+                connected to security engine / the 3D scene reacts to the real result
               </div>
             </div>
           </section>
@@ -255,7 +255,7 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
           <section ref={verdictRef} className="mb-44" style={{ background: 'rgba(4,6,10,0.62)', backdropFilter: 'blur(8px)', padding: '2rem', borderRadius: '6px' }}>
             {evaluating && (
               <div className="border-l-2 border-amber-400/70 pl-5 py-2 font-mono text-xs text-amber-300 tracking-widest">
-                the payload is inside — watch the world respond
+                evaluating prompt — watch the 3D world react
               </div>
             )}
             {result && !evaluating && (
@@ -274,14 +274,14 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
                   )}
                   {result.rawBehavior && (
                     <span className="font-mono text-[11px] text-amber-300/80 tracking-widest">
-                      pre-enforcement behavior: {result.rawBehavior}
+                      behavior: {result.rawBehavior}
                     </span>
                   )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                   <div className="border-l-2 border-red-400/50 pl-5 space-y-2">
                     <div className="font-mono text-[9px] tracking-[0.3em] text-red-300/70 uppercase">
-                      what the model tried to say
+                      what the model tried to output
                     </div>
                     <div className="font-mono text-[12px] text-rose-200/90 leading-relaxed break-words">
                       {result.rawTargetOutput.split(/(BAYORA-CANARY-[a-z0-9-]+)/gi).map((part, i) =>
@@ -293,7 +293,7 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
                   </div>
                   <div className="border-l-2 border-emerald-400/50 pl-5 space-y-2">
                     <div className="font-mono text-[9px] tracking-[0.3em] text-emerald-300/70 uppercase">
-                      what left the wire
+                      what was safely released
                     </div>
                     <div className="font-mono text-[12px] text-emerald-200/90 leading-relaxed break-words">
                       {result.releasedText}
@@ -303,7 +303,7 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
                 {events.length > 0 && (
                   <div className="pt-7 border-t border-white/10 space-y-3 max-w-2xl">
                     <div className="font-mono text-[9px] tracking-[0.3em] text-neutral-500 uppercase">
-                      sealed trail / {scenario.scenarioId} / {events.length} events
+                      audit log / {scenario.scenarioId} / {events.length} events recorded
                     </div>
                     <div className="space-y-1.5">
                       {events.slice(-6).reverse().map((ev) => (
@@ -323,7 +323,7 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
             )}
             {!result && !evaluating && (
               <div className="border-l-2 border-white/20 pl-5 py-2 font-mono text-xs text-neutral-400 tracking-wider">
-                the world is live — fire the payload and watch what the {scenario.tag.toLowerCase()} does with it
+                the simulation is live — run the test prompt to see the defense in action
               </div>
             )}
           </section>
@@ -331,14 +331,14 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
           {/* spec */}
           <section className="pb-24" style={{ background: 'rgba(4,6,10,0.62)', backdropFilter: 'blur(8px)', padding: '2rem', borderRadius: '6px' }}>
             <div className="font-mono text-[10px] tracking-[0.3em] text-neutral-400 uppercase mb-7">
-              Enforcement specification
+              Defense Details
             </div>
             <dl className="divide-y divide-white/10">
               {[
-                ['attack vector', scenario.vector],
-                ['control under test', scenario.control],
-                ['detection mechanism', scenario.detection],
-                ['expected outcome', `${scenario.expectedOutcome} — HTTP ${scenario.httpCode}`],
+                ['attack type', scenario.vector],
+                ['defense applied', scenario.control],
+                ['detection rule', scenario.detection],
+                ['expected result', `${scenario.expectedOutcome} — HTTP ${scenario.httpCode}`],
               ].map(([k, v]) => (
                 <div key={k} className="grid grid-cols-12 gap-4 py-4">
                   <dt className="col-span-4 sm:col-span-3 font-mono text-[10px] tracking-[0.25em] text-neutral-500 uppercase pt-0.5">
@@ -357,7 +357,7 @@ export function ScenarioWorld({ scenario, onClose }: ScenarioWorldProps) {
 
       {/* drag hint */}
       <div className={`pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2 z-20 font-mono text-[9px] tracking-[0.35em] text-white/50 uppercase transition-opacity duration-1000 ${showHint ? 'opacity-100' : 'opacity-0'}`}>
-        drag to orbit the world
+        drag to rotate 3D world
       </div>
     </div>
   );
