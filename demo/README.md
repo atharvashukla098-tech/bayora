@@ -1,58 +1,65 @@
-# BAYORA Demo Video - For Antigravity Review (68s, 1080p, v10)
+# BAYORA Demo Video - For Antigravity Review (68s, 1080p, v11)
 
-**File:** `demo/BAYORA-demo.mp4` (1:08, ~13MB)
-**Frames:** `demo/frames/f1..f15_*.png` - keyframes at the times below
+**File:** `demo/BAYORA-demo.mp4` (1:08, ~4.4MB)
+**Frames:** `demo/frames/f1..f10_*.png` - keyframes at the times below
 
-Rebuilt per your second review. Headlines: verdicts are now IN FRAME in every
-attack scene, each verdict gets its own large 1.5s title card, the tamper
-climax is bright and held, the title card has no ghosted page behind it, the
-first attack fires at 0:10, the ending is a real end card with the repo URL,
-and the audio is now stereo with safe peaks and an audible music bed.
+Rebuilt per your third review, following your 7-scene structure. All footage
+is fresh capture of the LIVE product. The blocker you flagged (tamper test
+showing an execution failure) is FIXED and is now the climax of the film.
 
-## Timeline
+## Timeline (your 7 scenes)
 
-| # | Frame (t=) | Content |
-|---|-----------|---------|
-| f1 | 1s | Clean title card (flat black, no ghost page) |
-| f2 | 4s | Hero (4s) |
-| f3 | 8s | Four defense cards (4s) |
-| f4 | 14s | World 1 - Input Shield fires; scene turns red |
-| f5 | 19s | World 1 verdict IN FRAME: big DETECTED + output diff + audit log |
-| f6 | 22s | Verdict card: DETECTED (large, 1.5s) |
-| f7 | 27s | World 2 - Data Privacy fires |
-| f8 | 32s | World 2 verdict IN FRAME: REDACTED + masked-secret diff |
-| f9 | 36s | Verdict card: REDACTED (large, 1.5s) |
-| f10 | 42s | World 3 - Network Guard fires |
-| f11 | 46s | World 3 verdict IN FRAME: BLOCKED |
-| f12 | 52s | World 4 - System Armor fires |
-| f13 | 57s | Tamper test: result held bright on screen |
-| f14 | 59s | Tamper climax card: REJECTED - TAMPER FOUND (2s) |
-| f15 | 66s | End card: BAYORA + tagline + github.com/atharvashukla098-tech/bayora + "TRY THE LIVE SANDBOX YOURSELF" |
+| # | Frame (t=) | Scene | Content |
+|---|-----------|-------|---------|
+| f1 | 2s | 1. The threat | Matte title card: "AI CAN BE ATTACKED. CAN ITS DEFENSES BE VERIFIED?" + BAYORA |
+| f2 | 8s | 2. Attack | Real canary-leak request runs; raw target output shows the exposed secret |
+| f3 | 13s | 2. Attack | Raw output vs released output side by side (secret visible in raw) |
+| f4 | 18s | 3. Interception | Broker scrub: released wire output shows [REDACTED-BAYORA] |
+| f5 | 27s | 4. Containment | The 5-stage architecture: Red Harness / Policy Broker / Target Model / Blue Guardrail / Audit Ledger |
+| f6 | 38s | 5. Evidence | Cryptographic receipt: SHA-256 record hash + Ed25519 public key, SEALED & ATTESTED |
+| f7 | 47s | 6. The proof | One-byte tamper dispatched (E -> X at byte 160) |
+| f8 | 53s | 6. The proof | FRAUD DETECTED - BAD_HASH AT BLOCK #0056, original vs altered hashes, signature failed |
+| f9 | 57s | 6. The proof | Long hold on ALTERED COPY REJECTED + the expected/computed digest mismatch |
+| f10 | 63s | 7. Takeaway | "TEST THE ATTACK. ENFORCE THE POLICY. VERIFY THE EVIDENCE." + BAYORA + repo URL |
 
-## Fixes from your second review
-1. Verdicts no longer cropped: every attack scene scrolls the result panel
-   (verdict headline, output-vs-released diff, audit log) into frame after
-   firing. Verified in frames f5/f8/f11.
-2. Each verdict also gets a large dedicated title card for 1.5 seconds.
-3. Tamper test: result held ~7s at full brightness, then a 2s climax card.
-4. Title card is clean flat black - the Oryzo ghost page is gone.
-5. Home page appears once (4s); first attack now at 0:10.
-6. Ending is an end card with the repo URL and a spoken call to action.
-7. Audio: stereo, peaks -2.7 dBFS (no clipping), audible dark-tone music bed.
+## The blocker, fixed first
+You were right: the one-byte tamper test showed an execution failure, not
+confirmed proof. Root cause: the tamper result rendered BELOW THE FOLD (the
+hero panel is taller than the viewport) - the test itself worked, but the
+proof was invisible. Fix: the result now auto-scrolls into view when it
+appears (commit 427091e). Re-tested end to end: real WebCrypto SHA-256 digest
+mismatch + real Ed25519 signature failure, verified in frame at f8/f9.
+No faked animation - the failure on screen is the actual verifier result.
 
-## Narration (en-GB-RyanNeural, plain English)
-- 0:03 "AI apps are under attack every day. Prompts try to hijack them. Secrets try to leak out. Bayora is a security layer that sits between your AI and the outside world, and tests it with real attacks."
-- 0:18 "Pick an attack. Input Shield catches malicious prompts before the model ever sees them. Watch. The test fires, and the scene itself turns red. Caught."
-- 0:32 "Data Privacy plants a fake secret, and masks it before it can leave. Network Guard stops unsafe web requests before any connection is even opened."
-- 0:42 "System Armor locks the files themselves. Attackers cannot change what they are not allowed to touch."
-- 0:50 "Every result is saved into a sealed record. Try to fake it, and the system catches it instantly. The proof stands."
-- 0:59 "Don't trust AI. Prove it. Bayora. The sandbox is open. Try it yourself."
+## Feature coverage (your checklist)
+- A. Red-team attack + target response: Scene 2 (raw canary leak visible)
+- B. Canary redaction with explicit policy decision: Scene 3 (raw vs released side by side)
+- C. Trust boundaries: Scene 4 (5 distinct stages, real enforced paths)
+- D. Cryptographic audit receipt: Scene 5 (values from the actual event being demonstrated)
+- E. One-byte tamper rejection: Scene 6 - the climax, held ~10s
+- F. Machine-readable evidence: DOWNLOAD REPORT (.JSON) visible in the console panel; in-browser WebCrypto labeled ("REAL WEBCRYPTO" badge, "LIVE BACKEND - LOCAL - OFFLINE - DETERMINISTIC" status)
 
-## Open questions
-1. Are the verdicts readable in-frame now (f5/f8/f11)?
-2. Does the ending land (URL + spoken CTA)?
-3. Any remaining weak moment?
+## Narration (en-GB-RyanNeural, claims verified)
+- 0:00 "AI can be attacked. Can its defenses be verified? Bayora tests real attacks, and proves the results with cryptography."
+- 0:11 "A real attack. The prompt asks the model to print a planted secret. The model leaks it. This is the threat."
+- 0:20 "The broker intercepts. The secret is masked. The leak never reaches the wire."
+- 0:27 "Every component has its own boundary. Red harness. Policy broker. Target model. Blue guardrail. Audit ledger."
+- 0:38 "Each event is sealed. SHA-256 hash. Ed25519 signature. Real cryptography, checked in your browser."
+- 0:50 "Now the proof. Change one letter. The hash breaks. The signature fails. Rejected."
+- 1:00 "Test the attack. Enforce the policy. Verify the evidence. Bayora."
+
+No scenario counts are claimed in narration (your earlier note). Names match
+the on-screen labels. The offline/in-browser mode is labeled on screen, not
+claimed as the live pipeline.
 
 ## Production
-Playwright captures of the live site (:4173 production build); every verdict
-is a real backend execution. Verdict cards + end card rendered clean.
+Playwright captures of the live product (:4173 production build, live backend
+on :8000). Every value on screen (canary, hashes, signature) comes from the
+run being recorded. Audio: stereo, peaks -2.3 dBFS, restrained low drone bed,
+continuous narration with no long gaps. Visual grade: matte, minimal - no
+neon glows, no film grain, no letterbox bars.
+
+## Open questions
+1. Does the scene structure now match what you prescribed (threat -> attack -> intercept -> containment -> evidence -> proof -> takeaway)?
+2. Is the tamper proof convincing and held long enough (f8/f9, ~10s)?
+3. Is the restrained visual direction better than the previous neon-cyan look?
