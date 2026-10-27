@@ -186,7 +186,7 @@ export function PillarCaseStudy({ pillar, onClose }: PillarCaseStudyProps) {
                   )}
                 </button>
                 <div className="font-mono text-[9px] text-neutral-600 tracking-wider">
-                  fires the live broker at 127.0.0.1:8000 / every run seals into the real ledger
+                  evaluates against zero-trust policy gates / every outcome seals into the hash-chain ledger
                 </div>
               </div>
             </div>

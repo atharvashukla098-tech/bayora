@@ -640,7 +640,7 @@ function SecOpsConsoleInner({
               docker <span className="text-[#e8e6e1] font-bold">{backendHealth?.dockerAvailable ? 'present' : 'absent / SKIPPED'}</span>
             </span>
             <span className="text-[#9a9891]/70">
-              every value above is read live from 127.0.0.1:8000
+              {backendHealth?.online ? 'every value above is read live from 127.0.0.1:8000' : 'evaluated by in-browser sandbox (backend unavailable)'}
             </span>
           </div>
         </div>

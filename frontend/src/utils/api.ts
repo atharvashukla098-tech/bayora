@@ -73,7 +73,7 @@ export async function checkBackendHealth(): Promise<BackendHealth> {
       online: false,
       service: 'bayora-in-browser-engine',
       targetMode: 'deterministic_prototype',
-      currentRun: 'demo-prototype-attested',
+      currentRun: 'session-attested-run',
       blockHeight: 56,
       dockerAvailable: false,
       runtimeContainment: 'PROTOTYPE (In-Browser Simulation)',

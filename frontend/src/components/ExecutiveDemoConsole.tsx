@@ -329,9 +329,9 @@ export function ExecutiveDemoConsole({ onDownloadReport }: ExecutiveDemoConsoleP
             <span className="font-mono text-[10px] text-[#9a9891] font-bold">[DB]</span>
           </div>
           <div>
-            <span className="text-[10px] text-[#9a9891]/70 uppercase block tracking-wider">Backend Mode</span>
-            <span className={`text-sm font-bold flex items-center gap-1.5 ${backendOnline ? 'text-[#34d399]' : 'text-[#fbbf24]'}`}>
-              <span>{backendOnline ? 'LIVE / FastAPI' : 'SIM / offline fallback'}</span>
+            <span className="text-[10px] text-[#9a9891]/70 uppercase block tracking-wider">Execution Mode</span>
+            <span className={`text-xs font-bold flex items-center gap-1.5 ${backendOnline ? 'text-[#34d399]' : 'text-cyan-400'}`}>
+              <span>{backendOnline ? 'LIVE BACKEND (FastAPI)' : 'IN-BROWSER DEMO (WebCrypto)'}</span>
             </span>
           </div>
         </div>
@@ -345,7 +345,7 @@ export function ExecutiveDemoConsole({ onDownloadReport }: ExecutiveDemoConsoleP
           <div>
             <span className="text-[10px] text-[#9a9891]/70 uppercase block tracking-wider">Evidence</span>
             <span className={`text-sm font-bold ${realLedger.length > 0 && !ledgerSimulated ? 'text-[#34d399]' : 'text-[#e8e6e1]'}`}>
-              {ledgerSimulated ? 'SIM : backend offline' : realLedger.length > 0 ? `${realLedger.length} live events` : 'awaiting first run'}
+              {ledgerSimulated ? 'IN-BROWSER DEMO' : realLedger.length > 0 ? `${realLedger.length} live events` : 'awaiting first run'}
             </span>
           </div>
         </div>
@@ -620,7 +620,7 @@ export function ExecutiveDemoConsole({ onDownloadReport }: ExecutiveDemoConsoleP
                   <span className="text-[10px] text-[#9a9891]/60 uppercase tracking-wider block">Backend</span>
                   <div className="text-xs font-bold text-[#e8e6e1] flex items-center gap-1.5">
                     <span className="font-mono text-[9px] text-[#3a3f4a] font-bold shrink-0">[DB]</span>
-                    <span>{backendOnline ? 'FastAPI (live)' : 'offline fallback'}</span>
+                    <span>{backendOnline ? 'FastAPI (live)' : 'in-browser demo'}</span>
                   </div>
                 </div>
 

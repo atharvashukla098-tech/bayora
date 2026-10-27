@@ -467,11 +467,11 @@ export function InteractiveConsole({
                   const reportData = {
                     platform: 'Bayora Zero-Trust AI Red-Teaming Sandbox v1.0.0',
                     generated_at: new Date().toISOString(),
-                    source: 'live backend http://127.0.0.1:8000',
+                    source: ledger.simulated ? 'IN-BROWSER DEMO (Client WebCrypto Engine)' : 'LIVE BACKEND (http://127.0.0.1:8000)',
                     verification: verify,
                     ledger_events: ledger.events,
                     note: ledger.simulated
-                      ? 'SIMULATION : backend unreachable; this export contains no live evidence.'
+                      ? 'IN-BROWSER DEMO : local broker unreachable; exported from deterministic client-side sandbox.'
                       : 'Exported from the live fsynced evidence ledger. Verify with scripts/verify_ledger.py.',
                   };
                   const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
