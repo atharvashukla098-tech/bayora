@@ -933,194 +933,409 @@ function EditorialLandingInner({
         </div>
       </section>
 
-      {/* =========================================================================
-          SECTION 2: THE BAYORA EXECUTION PIPELINE & TEST COVERAGE
+            {/* =========================================================================
+          SECTION 2: THE BAYORA EXECUTION PIPELINE & ARCHITECTURE FLOWCHART
           ========================================================================= */}
-      <section className="relative z-10 py-10 md:py-12 px-6 md:px-14 max-w-7xl mx-auto">
-        <div className="rounded-2xl border border-black/10 bg-[#070b16] text-white p-6 md:p-8 shadow-2xl relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#070b16] via-[#0c1322] to-[#121c32] opacity-95 pointer-events-none" />
+      <section id="pipeline-flowchart" className="relative z-10 py-10 md:py-14 px-4 md:px-10 max-w-7xl mx-auto">
+        <div className="rounded-2xl border border-blue-500/20 bg-[#070b16] text-white p-5 md:p-8 shadow-2xl relative overflow-hidden">
+          {/* Background cyber grid & glow */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#070b16] via-[#0a1122] to-[#0e172e] opacity-98 pointer-events-none" />
+          <div className="absolute -top-32 -right-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* Section Header */}
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-white/10 gap-4">
             <div>
               <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-[#00e5ff]">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                 <span>[SYSTEM ARCHITECTURE]</span>
                 <span>·</span>
-                <span>THE BAYORA EXECUTION PIPELINE</span>
+                <span>EXECUTION FLOWCHART & DEFENSE ROUTING</span>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold tracking-tight text-white mt-1">
+              <h3 className="text-xl md:text-2xl font-black tracking-tight text-white mt-1">
                 How Attacks Are Intercepted, Contained, & Cryptographically Attested
               </h3>
+              <p className="text-xs sm:text-sm text-neutral-400 font-sans mt-1">
+                Non-linear execution pipeline with dynamic routing curves: hard-blocking hostile ingress at Broker level or scrubbing egress canary leaks.
+              </p>
             </div>
-            <div className="flex items-center space-x-2 font-mono text-xs text-neutral-400">
-              <span className="text-[10px] uppercase tracking-wider">ACTIVE ARCHITECTURAL PATH:</span>
-              <span className="px-2.5 py-1 rounded bg-white/10 text-cyan-300 font-bold border border-white/15">
-                {pipelineScenario === 'SC-01' ? 'SC-01 · PRE-TARGET HARD BLOCK' : 'SC-02 · PRE-EGRESS CANARY SCRUB'}
-              </span>
+
+            {/* Interactive Path Selector */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 font-mono text-xs">
+              <span className="text-[10px] text-neutral-400 uppercase tracking-wider">ACTIVE ROUTE:</span>
+              <div className="inline-flex rounded-lg bg-black/60 border border-white/15 p-1">
+                <button
+                  type="button"
+                  onClick={() => handleSelectScenario('SC-02')}
+                  className={`px-3 py-1.5 rounded-md font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
+                    pipelineScenario === 'SC-02'
+                      ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 shadow-[0_0_10px_rgba(34,211,238,0.25)]'
+                      : 'text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  <span>SC-02 · CANARY SCRUB</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSelectScenario('SC-01')}
+                  className={`px-3 py-1.5 rounded-md font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
+                    pipelineScenario === 'SC-01'
+                      ? 'bg-rose-500/25 text-rose-300 border border-rose-500/40 shadow-[0_0_10px_rgba(244,63,94,0.25)]'
+                      : 'text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                  <span>SC-01 · HARD BLOCK BYPASS</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* 5-Stage Interconnected Execution Diagram */}
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-5 gap-3 pt-6 font-mono text-xs">
-            {/* Stage 01: RED HARNESS */}
-            <div
-              className={`p-4 rounded-xl border transition-all duration-300 space-y-2 flex flex-col justify-between ${
-                activePipelineStep >= 1
-                  ? 'bg-rose-950/30 border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.15)]'
-                  : 'bg-black/40 border-white/10'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
-                  <span>STAGE 01</span>
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
-                </div>
-                <div className="font-bold text-white text-xs tracking-wider">01 // RED HARNESS</div>
-                <div className="text-[10px] text-rose-300 font-semibold uppercase mt-0.5">Adversarial Ingress</div>
-                <p className="text-[11px] text-neutral-400 mt-2 leading-relaxed">
-                  Dispatches hostile prompt injection or secret exfiltration payload into the sandbox boundary.
-                </p>
-              </div>
-              <div className="pt-2 border-t border-white/5 text-[10px] text-neutral-500">
-                Payload: {pipelineScenario === 'SC-01' ? 'Jailbreak heuristics inj-2' : 'Canary extraction query'}
-              </div>
+          {/* Flowchart Legend */}
+          <div className="relative z-10 pt-4 flex flex-wrap items-center gap-4 text-[11px] font-mono text-neutral-400">
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-0.5 bg-cyan-400 inline-block" />
+              <span>PERMITTED S-CURVE PIPELINE</span>
             </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-0.5 bg-rose-500 border-b border-rose-500 border-dashed inline-block" />
+              <span className="text-rose-300 font-semibold">CURVED 403 BYPASS (ZERO COMPUTE)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-0.5 bg-purple-400 inline-block" />
+              <span className="text-purple-300 font-semibold">CURVED ATTESTATION FEEDBACK LOOP</span>
+            </div>
+          </div>
 
-            {/* Stage 02: POLICY BROKER */}
-            <div
-              className={`p-4 rounded-xl border transition-all duration-300 space-y-2 flex flex-col justify-between ${
-                activePipelineStep >= 2
-                  ? pipelineScenario === 'SC-01'
-                    ? 'bg-rose-950/40 border-rose-500/60 shadow-[0_0_15px_rgba(244,63,94,0.2)]'
-                    : 'bg-cyan-950/30 border-cyan-500/50'
-                  : 'bg-black/40 border-white/10'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
-                  <span>STAGE 02</span>
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      pipelineScenario === 'SC-01' ? 'bg-rose-400' : 'bg-cyan-400'
-                    }`}
+          {/* The Visual Architecture Flowchart Canvas */}
+          <div className="relative z-10 my-6 rounded-2xl bg-black/70 border border-white/10 p-4 md:p-6 overflow-hidden">
+            
+            {/* SVG Connecting Flowchart Lines (Desktop & Tablet) */}
+            <div className="hidden lg:block absolute inset-0 pointer-events-none">
+              <svg className="w-full h-full" viewBox="0 0 1000 380" fill="none" preserveAspectRatio="none">
+                <defs>
+                  {/* Gradients */}
+                  <linearGradient id="cyanFlowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#00e5ff" stopOpacity="0.9" />
+                    <stop offset="50%" stopColor="#38bdf8" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.9" />
+                  </linearGradient>
+                  <linearGradient id="bypassLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.9" />
+                    <stop offset="50%" stopColor="#fb7185" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.9" />
+                  </linearGradient>
+                  <linearGradient id="feedbackLineGrad" x1="100%" y1="0%" x2="0%" y2="0%">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
+                    <stop offset="50%" stopColor="#a855f7" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.8" />
+                  </linearGradient>
+
+                  {/* Arrowhead Markers */}
+                  <marker id="arrow-cyan" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                    <path d="M0,0 L6,3 L0,6 Z" fill="#22d3ee" />
+                  </marker>
+                  <marker id="arrow-rose" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                    <path d="M0,0 L6,3 L0,6 Z" fill="#f43f5e" />
+                  </marker>
+                  <marker id="arrow-emerald" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                    <path d="M0,0 L6,3 L0,6 Z" fill="#10b981" />
+                  </marker>
+                  <marker id="arrow-purple" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                    <path d="M0,0 L6,3 L0,6 Z" fill="#c084fc" />
+                  </marker>
+
+                  {/* Glow filter */}
+                  <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                {/* --- NON-STRAIGHT CURVED LINE 1: Overhead 403 Hard Block Bypass Arch --- */}
+                {/* Loops dramatically from Stage 02 overhead around Stages 03 & 04 straight into Stage 05 */}
+                <path
+                  d="M 292 115 C 292 15, 875 15, 875 115"
+                  fill="none"
+                  stroke="url(#bypassLineGrad)"
+                  strokeWidth={pipelineScenario === 'SC-01' ? '3.5' : '1.5'}
+                  strokeDasharray={pipelineScenario === 'SC-01' ? '6 4' : '4 6'}
+                  strokeOpacity={pipelineScenario === 'SC-01' ? '1' : '0.2'}
+                  filter={pipelineScenario === 'SC-01' ? 'url(#neonGlow)' : undefined}
+                  markerEnd="url(#arrow-rose)"
+                  className={pipelineScenario === 'SC-01' ? 'animate-pulse' : ''}
+                />
+                {/* Floating badge on the overhead bypass arc */}
+                <g transform="translate(585, 26)">
+                  <rect
+                    x="-135"
+                    y="-12"
+                    width="270"
+                    height="24"
+                    rx="12"
+                    fill="#18070d"
+                    stroke={pipelineScenario === 'SC-01' ? '#f43f5e' : '#471420'}
+                    strokeWidth="1.5"
+                    strokeOpacity={pipelineScenario === 'SC-01' ? '0.9' : '0.4'}
                   />
-                </div>
-                <div className="font-bold text-white text-xs tracking-wider">02 // POLICY BROKER</div>
-                <div className="text-[10px] text-cyan-300 font-semibold uppercase mt-0.5">Pre-Target Policy Gate</div>
-                <p className="text-[11px] text-neutral-400 mt-2 leading-relaxed">
-                  {pipelineScenario === 'SC-01'
-                    ? 'Hard-blocks prompt injection before any socket is built to the model runtime.'
-                    : 'Permits request under surveillance and sets active canary token listeners.'}
-                </p>
-              </div>
-              <div className="pt-2 border-t border-white/5 text-[10px]">
-                {pipelineScenario === 'SC-01' ? (
-                  <span className="text-rose-400 font-bold">VERDICT: HARD BLOCK 403</span>
-                ) : (
-                  <span className="text-emerald-400 font-bold">VERDICT: PASS 200</span>
-                )}
-              </div>
-            </div>
+                  <text
+                    x="0"
+                    y="4"
+                    textAnchor="middle"
+                    fill={pipelineScenario === 'SC-01' ? '#fda4af' : '#9f1239'}
+                    fontSize="10"
+                    fontWeight="bold"
+                    fontFamily="monospace"
+                  >
+                    CURVED 403 BYPASS (MODEL COMPLETELY ISOLATED)
+                  </text>
+                </g>
 
-            {/* Stage 03: TARGET MODEL (Accurately showing bypassed/suppressed on SC-01!) */}
-            <div
-              className={`p-4 rounded-xl border transition-all duration-300 space-y-2 flex flex-col justify-between ${
-                pipelineScenario === 'SC-01'
-                  ? 'bg-black/20 border-white/5 border-dashed opacity-60'
-                  : activePipelineStep >= 3
-                  ? 'bg-blue-950/30 border-blue-500/50'
-                  : 'bg-black/40 border-white/10'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
-                  <span>STAGE 03</span>
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      pipelineScenario === 'SC-01' ? 'bg-neutral-600' : 'bg-blue-400'
-                    }`}
+                {/* --- NON-STRAIGHT S-CURVE CONDUITS BETWEEN STAGES --- */}
+                {/* 01 -> 02: Ingress S-Curve Conduit */}
+                <path
+                  d="M 180 190 C 205 172, 215 208, 240 190"
+                  fill="none"
+                  stroke="#22d3ee"
+                  strokeWidth="2.5"
+                  strokeOpacity="0.8"
+                  markerEnd="url(#arrow-cyan)"
+                />
+                <circle cx="210" cy="190" r="3" fill="#22d3ee" className="animate-ping" />
+
+                {/* 02 -> 03: Pre-Target Policy Gate to Target Model (S-curve) */}
+                <path
+                  d="M 380 190 C 405 172, 415 208, 440 190"
+                  fill="none"
+                  stroke={pipelineScenario === 'SC-01' ? '#374151' : '#22d3ee'}
+                  strokeWidth="2.5"
+                  strokeDasharray={pipelineScenario === 'SC-01' ? '4 4' : 'none'}
+                  strokeOpacity={pipelineScenario === 'SC-01' ? '0.2' : '0.8'}
+                  markerEnd={pipelineScenario === 'SC-01' ? undefined : 'url(#arrow-cyan)'}
+                />
+
+                {/* 03 -> 04: Target Model to Blue Guardrail (S-curve) */}
+                <path
+                  d="M 580 190 C 605 172, 615 208, 640 190"
+                  fill="none"
+                  stroke={pipelineScenario === 'SC-01' ? '#374151' : '#10b981'}
+                  strokeWidth="2.5"
+                  strokeDasharray={pipelineScenario === 'SC-01' ? '4 4' : 'none'}
+                  strokeOpacity={pipelineScenario === 'SC-01' ? '0.2' : '0.8'}
+                  markerEnd={pipelineScenario === 'SC-01' ? undefined : 'url(#arrow-emerald)'}
+                />
+
+                {/* 04 -> 05: Blue Guardrail to Audit Ledger (S-curve) */}
+                <path
+                  d="M 780 190 C 805 172, 815 208, 840 190"
+                  fill="none"
+                  stroke={pipelineScenario === 'SC-01' ? '#374151' : '#10b981'}
+                  strokeWidth="2.5"
+                  strokeDasharray={pipelineScenario === 'SC-01' ? '4 4' : 'none'}
+                  strokeOpacity={pipelineScenario === 'SC-01' ? '0.2' : '0.8'}
+                  markerEnd={pipelineScenario === 'SC-01' ? undefined : 'url(#arrow-emerald)'}
+                />
+
+                {/* --- NON-STRAIGHT CURVED LINE 2: Bottom Closed-Loop Attestation & Telemetry Loop --- */}
+                {/* Loops backward from Stage 05 underneath back to Stage 02 (Policy Broker) */}
+                <path
+                  d="M 875 270 C 875 365, 292 365, 292 270"
+                  fill="none"
+                  stroke="url(#feedbackLineGrad)"
+                  strokeWidth="2"
+                  strokeDasharray="5 5"
+                  strokeOpacity="0.7"
+                  filter="url(#neonGlow)"
+                  markerEnd="url(#arrow-purple)"
+                />
+                {/* Floating badge on bottom curved feedback */}
+                <g transform="translate(585, 348)">
+                  <rect
+                    x="-145"
+                    y="-12"
+                    width="290"
+                    height="24"
+                    rx="12"
+                    fill="#0a0a1a"
+                    stroke="#a855f7"
+                    strokeWidth="1.5"
+                    strokeOpacity="0.7"
                   />
-                </div>
-                <div className="font-bold text-white text-xs tracking-wider">03 // TARGET MODEL</div>
-                <div className="text-[10px] text-neutral-400 font-semibold uppercase mt-0.5">Untrusted AI Runtime</div>
-                <p className="text-[11px] text-neutral-400 mt-2 leading-relaxed">
-                  {pipelineScenario === 'SC-01'
-                    ? 'CALL SUPPRESSED: Prompt was halted at broker boundary. Zero model compute or exfiltration risk.'
-                    : 'Model runs in isolated sandbox and generates raw completion containing canary value.'}
-                </p>
-              </div>
-              <div className="pt-2 border-t border-white/5 text-[10px]">
-                {pipelineScenario === 'SC-01' ? (
-                  <span className="text-neutral-500 font-bold">[BYPASSED & SUPPRESSED]</span>
-                ) : (
-                  <span className="text-cyan-400 font-bold">RAW LEAK DETECTED</span>
-                )}
-              </div>
+                  <text
+                    x="0"
+                    y="4"
+                    textAnchor="middle"
+                    fill="#d8b4fe"
+                    fontSize="10"
+                    fontWeight="bold"
+                    fontFamily="monospace"
+                  >
+                    CURVED TELEMETRY FEEDBACK & TOKEN ROTATION
+                  </text>
+                </g>
+              </svg>
             </div>
 
-            {/* Stage 04: BLUE GUARDRAIL (Accurately showing not invoked on SC-01!) */}
-            <div
-              className={`p-4 rounded-xl border transition-all duration-300 space-y-2 flex flex-col justify-between ${
-                pipelineScenario === 'SC-01'
-                  ? 'bg-black/20 border-white/5 border-dashed opacity-60'
-                  : activePipelineStep >= 4
-                  ? 'bg-emerald-950/30 border-emerald-500/50'
-                  : 'bg-black/40 border-white/10'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
-                  <span>STAGE 04</span>
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      pipelineScenario === 'SC-01' ? 'bg-neutral-600' : 'bg-emerald-400'
-                    }`}
-                  />
-                </div>
-                <div className="font-bold text-white text-xs tracking-wider">04 // BLUE GUARDRAIL</div>
-                <div className="text-[10px] text-emerald-300 font-semibold uppercase mt-0.5">Pre-Egress Inspection</div>
-                <p className="text-[11px] text-neutral-400 mt-2 leading-relaxed">
-                  {pipelineScenario === 'SC-01'
-                    ? 'NOT INVOKED: Pre-target hard block eliminated need for downstream output scrubbing.'
-                    : 'Scans wire before release: catches secret canary token and scrubs it with [REDACTED-BAYORA].'}
-                </p>
-              </div>
-              <div className="pt-2 border-t border-white/5 text-[10px]">
-                {pipelineScenario === 'SC-01' ? (
-                  <span className="text-neutral-500 font-bold">[NOT INVOKED]</span>
-                ) : (
-                  <span className="text-emerald-400 font-bold">CANARY SCRUBBED</span>
-                )}
-              </div>
-            </div>
+            {/* 5 Interconnected Node Pods */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4 relative z-10 pt-10 pb-12">
 
-            {/* Stage 05: AUDIT LEDGER */}
-            <div
-              className={`p-4 rounded-xl border transition-all duration-300 space-y-2 flex flex-col justify-between ${
-                activePipelineStep >= 5
-                  ? 'bg-emerald-950/40 border-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.2)]'
-                  : 'bg-black/40 border-white/10'
-              }`}
-            >
-              <div>
-                <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
-                  <span>STAGE 05</span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              {/* NODE 01: RED HARNESS */}
+              <div
+                className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c] ${
+                  activePipelineStep === 0
+                    ? 'border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.3)] ring-1 ring-cyan-400'
+                    : 'border-white/10 hover:border-cyan-500/50'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
+                    <span className="font-bold text-cyan-400">SOURCE</span>
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                  </div>
+                  <div className="font-black text-white text-xs sm:text-sm tracking-wider">01 // RED HARNESS</div>
+                  <div className="text-[10px] text-cyan-300 font-bold uppercase mt-0.5">Hostile Ingress</div>
+                  <p className="text-[11px] text-neutral-400 mt-2 font-sans leading-relaxed">
+                    Injects adversarial payload ({pipelineScenario === 'SC-01' ? 'Raw Prompt Jailbreak' : 'Exfiltration Probe'}).
+                  </p>
                 </div>
-                <div className="font-bold text-white text-xs tracking-wider">05 // AUDIT LEDGER</div>
-                <div className="text-[10px] text-emerald-300 font-semibold uppercase mt-0.5">Cryptographic Seal</div>
-                <p className="text-[11px] text-neutral-400 mt-2 leading-relaxed">
-                  Seals sequential block with SHA-256 hash link and Ed25519 digital signature. One-byte changes break verification.
-                </p>
+                <div className="pt-2 border-t border-white/10 text-[10px]">
+                  <span className="text-cyan-400 font-bold block bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/30 text-center truncate">
+                    {pipelineScenario === 'SC-01' ? 'JAILBREAK_PROBE' : 'CANARY_LEAK_TEST'}
+                  </span>
+                </div>
               </div>
-              <div className="pt-2 border-t border-white/5 text-[10px] text-emerald-300 font-bold">
-                SEALED: BLOCK #{pipelineResult.blockSeq}
+
+              {/* NODE 02: POLICY BROKER */}
+              <div
+                className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c] ${
+                  pipelineScenario === 'SC-01'
+                    ? 'border-rose-500/80 shadow-[0_0_20px_rgba(244,63,94,0.35)] ring-1 ring-rose-500'
+                    : 'border-cyan-500/60 shadow-[0_0_15px_rgba(34,211,238,0.2)]'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
+                    <span className={`font-bold ${pipelineScenario === 'SC-01' ? 'text-rose-400' : 'text-cyan-400'}`}>
+                      {pipelineScenario === 'SC-01' ? 'INTERCEPTOR' : 'ROUTER'}
+                    </span>
+                    <span className={`w-2 h-2 rounded-full ${pipelineScenario === 'SC-01' ? 'bg-rose-500 animate-ping' : 'bg-cyan-400'}`} />
+                  </div>
+                  <div className="font-black text-white text-xs sm:text-sm tracking-wider">02 // POLICY BROKER</div>
+                  <div className="text-[10px] text-cyan-300 font-bold uppercase mt-0.5">Zero-Trust Evaluation</div>
+                  <p className="text-[11px] text-neutral-400 mt-2 font-sans leading-relaxed">
+                    {pipelineScenario === 'SC-01'
+                      ? 'HARD BLOCK TRIGGERED: Diverts execution along curved overhead bypass to Ledger.'
+                      : 'EVAL PASS: Token entropy and intent passed baseline. Dispatched to Model runtime.'}
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-white/10 text-[10px]">
+                  {pipelineScenario === 'SC-01' ? (
+                    <span className="text-rose-300 font-bold block bg-rose-500/20 px-1.5 py-0.5 rounded border border-rose-500/40 text-center animate-pulse">
+                      403 HARD BLOCKED
+                    </span>
+                  ) : (
+                    <span className="text-emerald-400 font-bold block bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/30 text-center">
+                      PASSED TO ENGINE
+                    </span>
+                  )}
+                </div>
               </div>
+
+              {/* NODE 03: TARGET MODEL */}
+              <div
+                className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c] ${
+                  pipelineScenario === 'SC-01'
+                    ? 'border-white/5 opacity-40 border-dashed'
+                    : 'border-blue-500/60 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
+                    <span className="font-bold text-blue-400">RUNTIME</span>
+                    <span className={`w-2 h-2 rounded-full ${pipelineScenario === 'SC-01' ? 'bg-neutral-600' : 'bg-blue-400'}`} />
+                  </div>
+                  <div className="font-black text-white text-xs sm:text-sm tracking-wider">03 // TARGET MODEL</div>
+                  <div className="text-[10px] text-neutral-400 font-bold uppercase mt-0.5">Untrusted AI Engine</div>
+                  <p className="text-[11px] text-neutral-400 mt-2 font-sans leading-relaxed">
+                    {pipelineScenario === 'SC-01'
+                      ? 'ISOLATED & SUPPRESSED: Zero tokens reached model. 0 compute spent.'
+                      : 'Model generates unconstrained completion containing confidential canary.'}
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-white/10 text-[10px]">
+                  {pipelineScenario === 'SC-01' ? (
+                    <span className="text-neutral-500 font-bold block text-center">[COMPUTE SAVED]</span>
+                  ) : (
+                    <span className="text-cyan-400 font-bold block bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/30 text-center">
+                      RAW LEAK DETECTED
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* NODE 04: BLUE GUARDRAIL */}
+              <div
+                className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c] ${
+                  pipelineScenario === 'SC-01'
+                    ? 'border-white/5 opacity-40 border-dashed'
+                    : 'border-teal-500/60 shadow-[0_0_15px_rgba(20,184,166,0.2)]'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
+                    <span className="font-bold text-teal-400">SCRUBBER</span>
+                    <span className={`w-2 h-2 rounded-full ${pipelineScenario === 'SC-01' ? 'bg-neutral-600' : 'bg-teal-400'}`} />
+                  </div>
+                  <div className="font-black text-white text-xs sm:text-sm tracking-wider">04 // BLUE GUARDRAIL</div>
+                  <div className="text-[10px] text-teal-300 font-bold uppercase mt-0.5">Pre-Egress Inspection</div>
+                  <p className="text-[11px] text-neutral-400 mt-2 font-sans leading-relaxed">
+                    {pipelineScenario === 'SC-01'
+                      ? 'NOT INVOKED: Pre-target block eliminated need for downstream wire scrub.'
+                      : 'Catches canary secret before network egress and rewires to [REDACTED].'}
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-white/10 text-[10px]">
+                  {pipelineScenario === 'SC-01' ? (
+                    <span className="text-neutral-500 font-bold block text-center">[NOT INVOKED]</span>
+                  ) : (
+                    <span className="text-emerald-400 font-bold block bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/30 text-center">
+                      CANARY SCRUBBED
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* NODE 05: AUDIT LEDGER */}
+              <div
+                className="p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c] border-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+              >
+                <div>
+                  <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
+                    <span className="font-bold text-emerald-400">IMMUTABLE LOG</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  </div>
+                  <div className="font-black text-white text-xs sm:text-sm tracking-wider">05 // AUDIT LEDGER</div>
+                  <div className="text-[10px] text-emerald-300 font-bold uppercase mt-0.5">Cryptographic Attestation</div>
+                  <p className="text-[11px] text-neutral-400 mt-2 font-sans leading-relaxed">
+                    Seals verdict with SHA-256 digest & Ed25519 signature. Feeds back to Stage 02.
+                  </p>
+                </div>
+                <div className="pt-2 border-t border-white/10 text-[10px]">
+                  <span className="text-emerald-300 font-bold block bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/30 text-center">
+                    SEALED #{pipelineResult.blockSeq} (Ed25519)
+                  </span>
+                </div>
+              </div>
+
             </div>
           </div>
 
           {/* Test Coverage & Architecture Scope (Clarifying 4, 14, and 6) */}
-          <div className="mt-8 pt-6 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+          <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
             <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-2xl font-black text-white">4</span>
@@ -1181,6 +1396,7 @@ function EditorialLandingInner({
               <span>[↗]</span>
             </button>
           </div>
+
         </div>
       </section>
 
