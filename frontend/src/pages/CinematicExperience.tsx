@@ -547,7 +547,7 @@ function CinematicExperienceInner({
 
             <p className="text-xs sm:text-[13px] md:text-sm font-mono tracking-widest text-neutral-400 leading-relaxed uppercase">
 
-              A CONTROLLED PIPELINE FOR ADVERSARIAL TESTING, POLICY ENFORCEMENT, CONTAINMENT, AND TAMPER-EVIDENT AUDIT.
+              A SAFE PLACE TO RUN REAL ATTACKS, CATCH THEM, AND KEEP PROOF THAT CANNOT BE FAKED.
 
             </p>
 
@@ -842,7 +842,7 @@ function CinematicExperienceInner({
               </span>
               <div className="text-white font-semibold text-xs tracking-wider">ED25519 ASYMMETRIC SEAL</div>
               <p className="text-neutral-400 text-[11px] leading-relaxed">
-                Mathematical attestation verifiable offline by independent third-party auditors.
+                Every result is mathematically sealed. Anyone can check it offline.
               </p>
             </div>
           </div>
@@ -895,7 +895,7 @@ function CinematicExperienceInner({
 
             <p className="text-xs sm:text-sm md:text-base text-neutral-300 font-mono max-w-2xl mx-auto leading-relaxed">
 
-              Dispatch live adversarial inputs, trigger synthetic canary disclosure traps, and test 1-byte ledger tampering directly.
+              Send real attacks, watch them get stopped, and try to fake the results yourself.
 
             </p>
 

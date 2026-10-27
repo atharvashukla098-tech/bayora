@@ -58,11 +58,11 @@ export const JUDGE_SCENES: JudgeSceneData[] = [
     code: 'SCN-002',
     index: 2,
     title: 'Attack & Redaction',
-    desc: 'Hostile injection & canary extraction scrubbed pre-egress',
-    evaluates: 'Evaluates adversarial prompt injection and secondary canary exfiltration. Proves canary tokens are scrubbed BEFORE socket egress.',
+    desc: 'Attacks caught and secrets removed before leaving the system',
+    evaluates: 'Tests whether prompt attacks are caught and secret values are removed before any data leaves the system.',
     verification: {
       title: 'No Canary Tokens Detected in Wire Output',
-      detail: 'Adversarial prompt injection contained. Canary extracted by target model successfully scrubbed pre-socket egress.',
+      detail: 'Prompt attack contained. The secret value the model tried to reveal was removed before it could leave.',
     },
   },
   {
@@ -83,10 +83,10 @@ export const JUDGE_SCENES: JudgeSceneData[] = [
     index: 4,
     title: 'EROFS Docker Probe',
     desc: 'Read-only assertion (kernel errno 30 verification)',
-    evaluates: 'Validates container root filesystem immutability. Probes kernel syscall open(/etc/probe, O_WRONLY) and verifies Linux errno 30 [EROFS].',
+    evaluates: 'Checks that the container system files cannot be changed. The test tries to write a file and expects the kernel to refuse (error 30).',
     verification: {
       title: 'EROFS Read-Only Container Rootfs Verified (Errno 30)',
-      detail: 'Container filesystem write syscall rejected with kernel error code 30. No adversarial persistence vectors exist.',
+      detail: 'The system rejected the file write at the kernel level (error 30). Attackers cannot save files to disk.',
     },
   },
   {
@@ -107,7 +107,7 @@ export const JUDGE_SCENES: JudgeSceneData[] = [
     index: 6,
     title: 'Ed25519 Sign Report',
     desc: 'Compile evaluation matrix and sign audit_report.json',
-    evaluates: 'Aggregates all 16 security assertions into audit_report.json and seals the cryptographic certificate with an asymmetric Ed25519 signature.',
+    evaluates: 'Collects all 16 test results into one report and seals it with a tamper-proof Ed25519 signature.',
   },
 ];
 
@@ -669,7 +669,7 @@ export function ExecutiveDemoConsole({ onDownloadReport }: ExecutiveDemoConsoleP
                             <div className="h-3 bg-[#e8e6e1]/8 rounded w-2/3" />
                           </div>
                           <div className="text-[10px] text-[#9a9891]/50">
-                            Interrogating sandbox runtime & streaming cryptographic attestation...
+                            Checking the sandbox and streaming signed results...
                           </div>
                         </div>
                       );

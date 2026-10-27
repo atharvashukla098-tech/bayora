@@ -1197,31 +1197,31 @@ function EditorialLandingInner({
             {legalModal === 'tos' && (
               <div className="space-y-3.5 text-neutral-300 leading-relaxed text-[11px]">
                 <p className="font-semibold text-white">1. Scope of Evaluation</p>
-                <p>Bayora Protocol is an automated security attestation harness designed strictly for adversarial red-teaming, prompt injection defense, and sandbox boundary verification under controlled conditions.</p>
-                <p className="font-semibold text-white">2. Non-Custodial Local Execution</p>
-                <p>All red-team scenarios and mutation tests execute locally within offline Docker sandboxes (EROFS filesystem mount, read-only permissions). No third-party API credentials or proprietary model weights are transmitted to external endpoints.</p>
-                <p className="font-semibold text-white">3. Cryptographic Verification & Liability</p>
-                <p>Audit ledgers are sealed using asymmetric Ed25519 signatures and SHA-256 block hashes chained to the previous sealed block. Verification claims represent mathematically deterministic outputs at block height execution time. Bayora Protocol provides these auditing tools under open-source security licenses without warranty.</p>
+                <p>Bayora is a security testing tool. It runs real attack tests against AI models in a controlled environment, checks that prompt attacks are stopped, and keeps a record of every result.</p>
+                <p className="font-semibold text-white">2. Everything Runs on Your Machine</p>
+                <p>All tests run locally inside offline Docker containers with read-only system files. Your API keys and model files are never sent to any external server.</p>
+                <p className="font-semibold text-white">3. Verification & Liability</p>
+                <p>Every test result is sealed with an Ed25519 digital signature and linked SHA-256 hashes. Anyone can verify the results offline. Bayora is open source and provided without warranty.</p>
               </div>
             )}
 
             {legalModal === 'privacy' && (
               <div className="space-y-3.5 text-neutral-300 leading-relaxed text-[11px]">
-                <p className="font-semibold text-white">1. Zero Prompt & Telemetry Retention</p>
-                <p>Bayora operates on a strict zero-retention posture. Evaluated prompt inputs, jailbreak payloads, and canary tokens reside exclusively in volatile container memory during execution and are purged immediately upon container exit.</p>
-                <p className="font-semibold text-white">2. Local Cryptographic Hashing</p>
-                <p>Ledger entries contain cryptographic hashes (SHA-256) of evaluated payloads rather than plaintext sensitive data. In adversarial tests involving canary tokens, exfiltration guardrails redact sensitive strings prior to signing.</p>
-                <p className="font-semibold text-white">3. Network Isolation</p>
-                <p>Container execution occurs in network-isolated bridge environments with explicit destination allowlisting (SSRF denial). No external tracking cookies, telemetry beacons, or third-party analytics are embedded.</p>
+                <p className="font-semibold text-white">1. We Keep Nothing</p>
+                <p>Test prompts and attack payloads exist only in temporary memory while a test runs. When the test container shuts down, everything is wiped. Nothing is stored.</p>
+                <p className="font-semibold text-white">2. Secrets Are Never Saved as Plain Text</p>
+                <p>The log stores only a SHA-256 fingerprint of each test, never the raw text. In tests that use secret canary values, the secrets are removed from the text before anything is saved.</p>
+                <p className="font-semibold text-white">3. No Tracking</p>
+                <p>Tests run in network-isolated containers, and only whitelisted addresses are allowed. The site uses no tracking cookies, no telemetry, and no third-party analytics.</p>
               </div>
             )}
 
             {legalModal === 'compliance' && (
               <div className="space-y-3.5 text-neutral-300 leading-relaxed text-[11px]">
                 <p className="font-semibold text-white">1. Verification Standard</p>
-                <p>Protocol version: Bayora SecOps v1.4. Root algorithm: Ed25519 asymmetric signing over SHA-256 ledger blocks. Mutation tolerance boundary: strictly 0 bytes.</p>
-                <p className="font-semibold text-white">2. Two-Party Verification Model</p>
-                <p>Ledgers can be audited offline by independent third parties using standard libsodium / cryptography libraries without requiring access to the original evaluation environment.</p>
+                <p>Bayora SecOps v1.4. Every result is signed with Ed25519 and chained with SHA-256 hashes. Even a single changed character breaks the chain, so fakes are always caught.</p>
+                <p className="font-semibold text-white">2. Anyone Can Check the Results</p>
+                <p>The full results log can be checked offline by anyone using standard open-source tools. No access to the original test machine is needed.</p>
               </div>
             )}
 

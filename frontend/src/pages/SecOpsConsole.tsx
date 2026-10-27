@@ -1072,7 +1072,7 @@ function SecOpsConsoleInner({
                   rows={3}
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
-                  placeholder="Type any adversarial or benign prompt to test policy enforcement..."
+                  placeholder="Type any prompt here - safe or malicious - and see what the broker does..."
                   className="w-full p-3.5 rounded-xl bg-[#101216] border border-[#2a2e37]/50 text-xs text-[#e8e6e1] font-mono focus:outline-none focus:border-[#d97706] transition-all resize-y"
                 />
               </div>
@@ -1131,7 +1131,7 @@ function SecOpsConsoleInner({
                     Side-by-Side Wire Payload &amp; Redaction Inspector
                   </h3>
                   <p className="text-xs text-[#9a9891] leading-relaxed">
-                    Cryptographic evidence of enforcement <strong>BEFORE</strong> release : fired LIVE against the broker on this machine. Raw target outputs are scrubbed before egress; the digests are the broker's real sha256:16 prompt/response digests from the sealed ledger events.
+                    Proof of enforcement <strong>BEFORE</strong> release: fired LIVE against the broker on this machine. Raw outputs are cleaned before leaving; the digests are the broker's real sha256:16 fingerprints from the sealed ledger.
                   </p>
                 </div>
                 <button
