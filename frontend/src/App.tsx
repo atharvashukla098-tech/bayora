@@ -97,6 +97,12 @@ export default function App() {
 
     }
 
+    if (!window.location.hash || window.location.hash === '#editorial') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+
     const onHashChange = () => {
 
       const hash = window.location.hash;
@@ -156,6 +162,7 @@ export default function App() {
     });
 
     lenisRef.current = lenis;
+    (window as any).__lenis = lenis;
 
 
 
@@ -280,6 +287,8 @@ export default function App() {
     return () => {
 
       cancelAnimationFrame(rafId);
+
+      delete (window as any).__lenis;
 
       lenis.destroy();
 

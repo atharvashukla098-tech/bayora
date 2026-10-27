@@ -452,6 +452,192 @@ function EditorialLandingInner({
   }, [isActive, onTransitionTo3D]);
 
 
+  // =========================================================================
+  // USER NAVIGATION: PAGE 1 (START/END) <-> PAGE 2 (START) BIDIRECTIONAL REDIRECT
+  // =========================================================================
+  useEffect(() => {
+    // 1. Initial link entry: strictly redirect to the very top (starting of first page)
+    if (typeof window !== 'undefined') {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+      }
+      if (!window.location.hash || window.location.hash === '#editorial') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        const lenis = (window as any).__lenis;
+        if (lenis && typeof lenis.scrollTo === 'function') {
+          lenis.scrollTo(0, { immediate: true });
+        }
+      }
+    }
+
+    let isRedirecting = false;
+    let redirectTimer: any = null;
+
+    const setLock = (duration = 900) => {
+      isRedirecting = true;
+      if (redirectTimer) clearTimeout(redirectTimer);
+      redirectTimer = setTimeout(() => {
+        isRedirecting = false;
+      }, duration);
+    };
+
+    const scrollToPage2Start = () => {
+      const s2 = document.getElementById('pipeline-flowchart');
+      if (!s2 || isRedirecting) return;
+      setLock(950);
+      const lenis = (window as any).__lenis;
+      if (lenis && typeof lenis.scrollTo === 'function') {
+        lenis.scrollTo(s2, { offset: -80, duration: 0.85 });
+      } else {
+        s2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
+    const scrollToPage1End = () => {
+      const s1 = document.getElementById('hero-section');
+      const heroEnd = document.getElementById('hero-end');
+      if (!s1 || isRedirecting) return;
+      setLock(950);
+
+      const targetY = Math.max(0, s1.offsetTop + s1.offsetHeight - window.innerHeight);
+      const lenis = (window as any).__lenis;
+      if (lenis && typeof lenis.scrollTo === 'function') {
+        lenis.scrollTo(targetY, { duration: 0.85 });
+      } else if (heroEnd) {
+        heroEnd.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      } else {
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+      }
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      if (isRedirecting) return;
+
+      const s1 = document.getElementById('hero-section');
+      const s2 = document.getElementById('pipeline-flowchart');
+      if (!s1 || !s2) return;
+
+      const scrollY = window.scrollY;
+      const page1End = Math.max(0, s1.offsetTop + s1.offsetHeight - window.innerHeight);
+      const s2Top = s2.getBoundingClientRect().top + window.pageYOffset;
+      const page2Start = s2Top - 85;
+
+      // SCROLL DOWN: from first page towards second page
+      if (e.deltaY > 15) {
+        if (scrollY <= page1End + 35) {
+          if (scrollY >= page1End - 20 || page1End === 0) {
+            e.preventDefault();
+            scrollToPage2Start();
+          }
+        }
+      }
+
+      // SCROLL UP: from second page towards first page
+      if (e.deltaY < -15) {
+        if (scrollY >= page2Start - 60 && scrollY <= page2Start + 320) {
+          e.preventDefault();
+          scrollToPage1End();
+        }
+      }
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isRedirecting) return;
+      const currentY = e.touches[0].clientY;
+      const deltaY = touchStartY - currentY; // positive = scroll down
+
+      const s1 = document.getElementById('hero-section');
+      const s2 = document.getElementById('pipeline-flowchart');
+      if (!s1 || !s2) return;
+
+      const scrollY = window.scrollY;
+      const page1End = Math.max(0, s1.offsetTop + s1.offsetHeight - window.innerHeight);
+      const s2Top = s2.getBoundingClientRect().top + window.pageYOffset;
+      const page2Start = s2Top - 85;
+
+      if (deltaY > 35) { // swipe up -> scroll down
+        if (scrollY <= page1End + 35) {
+          if (scrollY >= page1End - 20 || page1End === 0) {
+            scrollToPage2Start();
+          }
+        }
+      } else if (deltaY < -35) { // swipe down -> scroll up
+        if (scrollY >= page2Start - 60 && scrollY <= page2Start + 320) {
+          scrollToPage1End();
+        }
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isRedirecting) return;
+      const s1 = document.getElementById('hero-section');
+      const s2 = document.getElementById('pipeline-flowchart');
+      if (!s1 || !s2) return;
+
+      const scrollY = window.scrollY;
+      const page1End = Math.max(0, s1.offsetTop + s1.offsetHeight - window.innerHeight);
+      const s2Top = s2.getBoundingClientRect().top + window.pageYOffset;
+      const page2Start = s2Top - 85;
+
+      if (['ArrowDown', 'PageDown', ' '].includes(e.key)) {
+        if (scrollY <= page1End + 35 && (scrollY >= page1End - 20 || page1End === 0)) {
+          e.preventDefault();
+          scrollToPage2Start();
+        }
+      } else if (['ArrowUp', 'PageUp'].includes(e.key)) {
+        if (scrollY >= page2Start - 60 && scrollY <= page2Start + 320) {
+          e.preventDefault();
+          scrollToPage1End();
+        }
+      }
+    };
+
+    let lastScrollY = window.scrollY;
+    const handleScrollSnap = () => {
+      if (isRedirecting) return;
+      const s1 = document.getElementById('hero-section');
+      const s2 = document.getElementById('pipeline-flowchart');
+      if (!s1 || !s2) return;
+
+      const currentY = window.scrollY;
+      const page1End = Math.max(0, s1.offsetTop + s1.offsetHeight - window.innerHeight);
+      const s2Top = s2.getBoundingClientRect().top + window.pageYOffset;
+      const page2Start = s2Top - 85;
+
+      // In the threshold gap between end of Section 1 and start of Section 2:
+      if (currentY > page1End + 40 && currentY < page2Start - 40) {
+        if (currentY > lastScrollY) {
+          scrollToPage2Start();
+        } else if (currentY < lastScrollY) {
+          scrollToPage1End();
+        }
+      }
+      lastScrollY = currentY;
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('scroll', handleScrollSnap, { passive: true });
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('scroll', handleScrollSnap);
+      if (redirectTimer) clearTimeout(redirectTimer);
+    };
+  }, []);
+
+
+
 
 
 
@@ -471,7 +657,7 @@ function EditorialLandingInner({
 
           ========================================================================= */}
 
-      <section className="relative z-10 pt-16 md:pt-20 pb-4 px-4 md:px-10 max-w-7xl mx-auto min-h-[85vh] flex flex-col justify-between overflow-x-clip">
+      <section id="hero-section" className="relative z-10 pt-16 md:pt-20 pb-4 px-4 md:px-10 max-w-7xl mx-auto min-h-[85vh] flex flex-col justify-between overflow-x-clip">
 
         
 
@@ -931,6 +1117,8 @@ function EditorialLandingInner({
             </div>
           </div>
         </div>
+        {/* Sentinel for end of the first page */}
+        <div id="hero-end" className="w-full h-px pointer-events-none" />
       </section>
 
                         {/* =========================================================================
