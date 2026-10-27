@@ -521,7 +521,7 @@ export async function fetchSignedReport(): Promise<SignedReportData> {
     signature: {
       algorithm: 'Ed25519',
       key_id: 'bayora-ed25519-demo-key',
-      signature: '9zs1VSQ3ep6j/9HjAANFfB4/gOJCZKhEQP7sr6zvxP4iCntvwTtoNyaA4mNfEcmGMbupIgpOBCXVXnorA8geCw==',
+      signature: 'DEMO-NOT-A-REAL-SIGNATURE-9zs1VSQ3ep6j/9HjAANFfB4/gOJCZKhEQP7sr6zvxP4iCntvwTtoNyaA4mNfEcmGMbupIgpOBCXVXnorA8geCw==',
     },
     assertions: { total: 14, passed: 14, failed: 0, errors: 0, skipped: 0, not_evaluated: 0 },
     simulated: true,
