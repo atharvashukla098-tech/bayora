@@ -65,79 +65,43 @@ function CinematicExperienceInner({
 
 
     const onWheel = (e: WheelEvent) => {
-
       if (isTriggering) return;
+      const currentY = window.scrollY || (window as any).__lenis?.scroll || document.documentElement.scrollTop || 0;
 
-      const currentY = window.scrollY;
-
-
-
-      if (currentY <= 5 && e.deltaY < 0) {
-
+      if (currentY <= 25 && e.deltaY < 0) {
         upScrollAccumulator += Math.abs(e.deltaY);
 
-
-
         if (resetTimer) clearTimeout(resetTimer);
-
         resetTimer = window.setTimeout(() => {
-
           upScrollAccumulator = 0;
-
         }, 300);
 
-
-
-        if (upScrollAccumulator >= 140) {
-
+        if (upScrollAccumulator >= 30) {
           isTriggering = true;
-
           onSwitchToEditorial();
-
         }
-
       } else {
-
         upScrollAccumulator = 0;
-
       }
-
     };
-
-
 
     let touchStartY = 0;
 
     const onTouchStart = (e: TouchEvent) => {
-
       if (e.touches.length > 0) {
-
         touchStartY = e.touches[0].clientY;
-
       }
-
     };
 
-
-
     const onTouchMove = (e: TouchEvent) => {
-
       if (isTriggering || e.touches.length === 0) return;
+      const currentY = window.scrollY || (window as any).__lenis?.scroll || document.documentElement.scrollTop || 0;
+      const deltaTouchY = e.touches[0].clientY - touchStartY; // positive = swipe down = scroll up
 
-      const currentY = window.scrollY;
-
-      const deltaTouchY = e.touches[0].clientY - touchStartY;
-
-
-
-      if (currentY <= 2 && deltaTouchY > 50) {
-
+      if (currentY <= 25 && deltaTouchY > 35) {
         isTriggering = true;
-
         onSwitchToEditorial();
-
       }
-
     };
 
 

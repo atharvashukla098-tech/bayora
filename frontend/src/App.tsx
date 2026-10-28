@@ -35,8 +35,6 @@ export default function App() {
 
   const lenisRef = useRef<Lenis | null>(null);
 
-  const flipArmedRef = useRef(false);
-
   const activeViewRef = useRef(activeView);
   const transitionTo3DRef = useRef<() => void>(() => {});
 
@@ -234,57 +232,71 @@ export default function App() {
 
     window.addEventListener('scroll', onScroll, { passive: true });
 
-    // Wheel-intent bridge: while on the editorial page, flipping to the
-    // cinematic page requires the user to be AT the bottom (footer visible)
-    // and to keep scrolling DOWN with the wheel. This keeps the footer
-    // readable and clickable instead of teleporting past it.
+    // Bidirectional scroll bridge: when user reaches the end of the first page (editorial)
+    // and scrolls down, redirect to the starting of the second page (cinematic).
+    let downScrollAccumulator = 0;
+    let downResetTimer: number | null = null;
+
     const onWheel = (e: WheelEvent) => {
       if (activeViewRef.current !== 'editorial') return;
+      const scrollY = window.scrollY || (window as any).__lenis?.scroll || document.documentElement.scrollTop || 0;
       const docH = document.documentElement.scrollHeight;
-      const atBottom = window.innerHeight + window.scrollY >= docH - 40;
+      const atBottom = window.innerHeight + scrollY >= docH - 75;
       if (!atBottom || e.deltaY <= 0) {
-        flipArmedRef.current = false;
+        downScrollAccumulator = 0;
         return;
       }
-      if (!flipArmedRef.current) {
-        // first wheel at the bottom: arm, but hold the footer in place
-        flipArmedRef.current = true;
-        return;
+
+      downScrollAccumulator += Math.abs(e.deltaY);
+      if (downResetTimer) clearTimeout(downResetTimer);
+      downResetTimer = window.setTimeout(() => {
+        downScrollAccumulator = 0;
+      }, 300);
+
+      if (downScrollAccumulator >= 30) {
+        downScrollAccumulator = 0;
+        transitionTo3DRef.current();
       }
-      // second consecutive downward wheel at the bottom: continue to page 2 via transition
-      flipArmedRef.current = false;
-      transitionTo3DRef.current();
     };
     window.addEventListener('wheel', onWheel, { passive: true });
 
-
+    let touchStartY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        touchStartY = e.touches[0].clientY;
+      }
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (activeViewRef.current !== 'editorial' || e.touches.length === 0) return;
+      const scrollY = window.scrollY || (window as any).__lenis?.scroll || document.documentElement.scrollTop || 0;
+      const docH = document.documentElement.scrollHeight;
+      const atBottom = window.innerHeight + scrollY >= docH - 75;
+      const deltaTouchY = touchStartY - e.touches[0].clientY;
+      if (atBottom && deltaTouchY > 35) {
+        transitionTo3DRef.current();
+      }
+    };
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
 
     let rafId = 0;
 
     function raf(time: number) {
-
       lenis.raf(time);
-
       rafId = requestAnimationFrame(raf);
-
     }
 
     rafId = requestAnimationFrame(raf);
 
-
-
     return () => {
-
       cancelAnimationFrame(rafId);
-
       delete (window as any).__lenis;
-
       lenis.destroy();
-
       window.removeEventListener('scroll', onScroll);
-
       window.removeEventListener('wheel', onWheel);
-
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      if (downResetTimer) clearTimeout(downResetTimer);
     };
 
   }, []);
@@ -420,6 +432,8 @@ export default function App() {
     }, 250);
 
   };
+
+  transitionTo3DRef.current = handleTransitionTo3D;
 
 
 
