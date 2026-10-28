@@ -38,6 +38,7 @@ export default function App() {
   const flipArmedRef = useRef(false);
 
   const activeViewRef = useRef(activeView);
+  const transitionTo3DRef = useRef<() => void>(() => {});
 
 
 
@@ -69,21 +70,18 @@ export default function App() {
     }
 
     const resetToFirstPageStart = () => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      if (lenisRef.current) {
-        lenisRef.current.scrollTo(0, { immediate: true });
+      if (!window.location.hash || window.location.hash === '#editorial') {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        if (lenisRef.current) {
+          lenisRef.current.scrollTo(0, { immediate: true });
+        }
       }
     };
-
     resetToFirstPageStart();
     window.addEventListener('load', resetToFirstPageStart);
     window.addEventListener('pageshow', resetToFirstPageStart);
-
-    const t1 = setTimeout(resetToFirstPageStart, 50);
-    const t2 = setTimeout(resetToFirstPageStart, 150);
-    const t3 = setTimeout(resetToFirstPageStart, 300);
 
     const onHashChange = () => {
 
@@ -127,9 +125,7 @@ export default function App() {
       window.removeEventListener('load', resetToFirstPageStart);
       window.removeEventListener('pageshow', resetToFirstPageStart);
       window.removeEventListener('hashchange', onHashChange);
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
+
     };
 
   }, []);
@@ -255,11 +251,9 @@ export default function App() {
         flipArmedRef.current = true;
         return;
       }
-      // second consecutive downward wheel at the bottom: continue to page 2
+      // second consecutive downward wheel at the bottom: continue to page 2 via transition
       flipArmedRef.current = false;
-      activeViewRef.current = 'cinematic';
-      setActiveView('cinematic');
-      history.replaceState(null, '', '#cinematic');
+      transitionTo3DRef.current();
     };
     window.addEventListener('wheel', onWheel, { passive: true });
 
@@ -372,6 +366,8 @@ export default function App() {
   // Transition from Page 1 -> Page 2
 
   const handleTransitionTo3D = () => {
+    // Ensure transition callback is wired
+
 
     if (isTransitioning) return;
 

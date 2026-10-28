@@ -23,7 +23,7 @@
     box-sizing: border-box;
   }
 
-  html, body {
+  html {
     background-color: var(--bg-light);
     color: #12131a;
     font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -31,6 +31,11 @@
     scroll-behavior: auto;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    overflow-x: clip;
+    min-height: 100vh;
   }
 
   /* Lenis Butter-Smooth Optimization */

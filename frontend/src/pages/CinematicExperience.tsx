@@ -88,7 +88,7 @@ function CinematicExperienceInner({
 
 
 
-        if (upScrollAccumulator >= 40) {
+        if (upScrollAccumulator >= 140) {
 
           isTriggering = true;
 
