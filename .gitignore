@@ -15,3 +15,5 @@ dist/
 .vercel/
 .playwright-mcp/
 demo/BAYORA-demo.mp4
+
+.vercel

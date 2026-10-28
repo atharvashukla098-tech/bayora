@@ -166,7 +166,7 @@ const SCENARIOS: ScenarioItem[] = [
     policyReason: 'BAD_HASH',
     pillar: 'Cryptographic Ledger Sentry',
     rawOutput: 'Mutated Block #3: 1 byte altered in canonical JSON payload.',
-    releasedText: 'REJECTED: Stored hash does not match computed SHA-256. Cryptographic fraud detected.',
+    releasedText: 'REJECTED: Stored hash does not match computed SHA-256. Cryptographic tamper detected.',
   },
   {
     id: 'SC-05b',

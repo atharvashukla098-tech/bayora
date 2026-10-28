@@ -153,7 +153,7 @@ export function InteractiveConsole({
       `  Findings: ${res.findings.join(', ')}\n` +
       `  Pre-Corruption Hash: ${res.expectedHash.slice(0, 32)}...\n` +
       `  Mutated Computed Hash: ${res.computedHash.slice(0, 32)}...\n` +
-      `CONCLUSION: Cryptographic fraud detected. Tampered chain rejected. Original production ledger unmodified.`
+      `CONCLUSION: Cryptographic tamper detected. Altered copy rejected — hash mismatch. Original production ledger unmodified.`
     );
   };
 

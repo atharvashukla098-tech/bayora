@@ -701,7 +701,7 @@ function EditorialLandingInner({
                 </span>
               </h1>
               <p className="text-sm sm:text-base md:text-lg text-neutral-800 leading-relaxed font-normal">
-                Most tools only give AI safety scores on paper. Bayora actually tests real attacks. We stop prompt hacks, prevent secret data leaks, block unsafe web requests, and seal every action in an independently verifiable cryptographic ledger.
+                Most tools only give AI safety scores on paper. Bayora actually tests real attacks. We stop prompt hacks, prevent secret data leaks, block unsafe web requests, and seal every action in an independently verifiable cryptographic ledger — proven live via native WebCrypto in your browser or through our hardened backend daemon.
               </p>
             </div>
 
@@ -730,18 +730,22 @@ function EditorialLandingInner({
             </div>
 
             {/* Quick Evidence Metrics Bar */}
-            <div className="pt-2.5 border-t border-black/10 grid grid-cols-3 gap-2 font-mono">
+            <div className="pt-2.5 border-t border-black/10 grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono">
               <div>
-                <span className="text-[10px] sm:text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Scenarios</span>
-                <span className="font-black text-neutral-950 text-xs sm:text-sm md:text-base">4 Active Layers</span>
+                <span className="text-[10px] sm:text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Architecture</span>
+                <span className="font-black text-neutral-950 text-xs sm:text-sm">4 DEFENSE LAYERS</span>
               </div>
               <div>
-                <span className="text-[10px] sm:text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Tamper Test</span>
-                <span className="font-black text-emerald-600 text-xs sm:text-sm md:text-base">1-Byte Alteration</span>
+                <span className="text-[10px] sm:text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Catalogue</span>
+                <span className="font-black text-neutral-950 text-xs sm:text-sm">14 SCENARIOS IN CATALOGUE</span>
+              </div>
+              <div>
+                <span className="text-[10px] sm:text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Interactive Demo</span>
+                <span className="font-black text-neutral-950 text-xs sm:text-sm">6 GUIDED DEMO STAGES</span>
               </div>
               <div>
                 <span className="text-[10px] sm:text-xs text-neutral-500 uppercase tracking-widest block font-bold mb-0.5">Attestation</span>
-                <span className="font-black text-cyan-700 text-xs sm:text-sm md:text-base">Ed25519 + SHA-256</span>
+                <span className="font-black text-cyan-700 text-xs sm:text-sm">Ed25519 + SHA-256</span>
               </div>
             </div>
 
@@ -851,7 +855,29 @@ function EditorialLandingInner({
                 </div>
 
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="text-emerald-400 font-bold hidden sm:inline text-[11px]">● DEMO</span>
+                  <span
+                    className={`font-mono text-[10px] sm:text-[10.5px] px-2 py-0.5 rounded border font-semibold flex items-center gap-1.5 ${
+                      executionMode === 'LIVE_BACKEND'
+                        ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/40'
+                        : 'bg-cyan-950/60 text-cyan-300 border-cyan-500/40'
+                    }`}
+                    title={
+                      executionMode === 'LIVE_BACKEND'
+                        ? 'Connected to local FastAPI + Docker enclave daemon'
+                        : 'In-browser demo using synthetic canary & client WebCrypto API'
+                    }
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        executionMode === 'LIVE_BACKEND' ? 'bg-emerald-400 animate-pulse' : 'bg-cyan-400'
+                      }`}
+                    />
+                    <span>
+                      {executionMode === 'LIVE_BACKEND'
+                        ? 'LIVE BACKEND (127.0.0.1:8000)'
+                        : 'BROWSER DEMO (SYNTHETIC · WEBCRYPTO)'}
+                    </span>
+                  </span>
                   <button
                     type="button"
                     onClick={handleExportReport}
@@ -931,7 +957,16 @@ function EditorialLandingInner({
                       </span>
                     </div>
                     <div className="flex items-center space-x-2 font-mono text-xs">
-                      <span className="text-neutral-300">{pipelineResult.ms}ms</span>
+                      <span
+                        className="text-neutral-400 text-[10px] sm:text-[11px]"
+                        title={
+                          executionMode === 'LIVE_BACKEND'
+                            ? 'Backend broker interception latency'
+                            : 'Client-side WebCrypto policy evaluation timing (excludes remote LLM inference)'
+                        }
+                      >
+                        {pipelineResult.ms}ms {executionMode === 'LIVE_BACKEND' ? '(daemon)' : '(client policy)'}
+                      </span>
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold uppercase tracking-wider border ${
                           pipelineResult.outcome === 'REDACTED'
@@ -1059,21 +1094,31 @@ function EditorialLandingInner({
                       <div className="flex items-center justify-between flex-wrap gap-1 font-mono text-xs">
                         <span className="text-rose-400 font-extrabold flex items-center gap-1 sm:text-[13px]">
                           <span>[✕]</span>
-                          <span>FRAUD DETECTED · BAD_HASH #0056</span>
+                          <span>TAMPER DETECTED · BAD_HASH AT BLOCK #0056</span>
                         </span>
                         <span className="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border border-rose-500/40">
-                          ALTERED COPY REJECTED
+                          ALTERED COPY: REJECTED — HASH MISMATCH
                         </span>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 text-[10px] sm:text-xs font-mono">
-                        <div className="p-1.5 rounded bg-black/70 border border-white/10">
-                          <span className="text-neutral-400 block uppercase text-[9px] font-bold">ORIGINAL:</span>
+                        <div className="p-2 rounded bg-black/70 border border-emerald-500/30 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-neutral-400 block uppercase text-[9px] font-bold">ORIGINAL RECORD:</span>
+                            <span className="text-emerald-400 text-[9px] font-extrabold px-1.5 py-0.2 bg-emerald-500/10 rounded border border-emerald-500/30">VALID ✓</span>
+                          </div>
                           <span className="text-emerald-400 block font-bold truncate">SHA-256: {tamperDiff.originalHash.slice(0, 18)}...</span>
+                          <span className="text-neutral-400 block text-[9px]">Ed25519 Signature: VALID</span>
                         </div>
-                        <div className="p-1.5 rounded bg-rose-950/60 border border-rose-500/40">
-                          <span className="text-rose-300 block uppercase text-[9px] font-bold">ALTERED ('E'→'X'):</span>
+                        <div className="p-2 rounded bg-rose-950/60 border border-rose-500/40 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-rose-300 block uppercase text-[9px] font-bold">ALTERED COPY ('E'→'X'):</span>
+                            <span className="text-rose-400 text-[9px] font-extrabold px-1.5 py-0.2 bg-rose-500/10 rounded border border-rose-500/30">REJECTED ✕</span>
+                          </div>
                           <span className="text-rose-300 block font-bold truncate">SHA-256: {tamperDiff.mutatedHash.slice(0, 18)}...</span>
+                          <span className="text-rose-300 block text-[9px]">
+                            {tamperDiff.mutatedSigValid ? 'Hash Mismatch (Tampered Content)' : 'Hash Mismatch · Signature Invalid'}
+                          </span>
                         </div>
                       </div>
 
@@ -2051,9 +2096,40 @@ function EditorialLandingInner({
             </p>
 
             <div className="text-[11px] font-mono text-neutral-500">
-
               HACK IN HILLS '26 PROTOTYPE · PRODUCTION ARCHITECTURE
+            </div>
 
+            {/* Primary Live Demo Call To Action */}
+            <div className="p-3.5 rounded-xl bg-gradient-to-r from-cyan-950/40 via-blue-950/30 to-black/80 border border-cyan-500/40 space-y-2 max-w-md shadow-lg shadow-cyan-950/20">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-cyan-400 uppercase tracking-widest font-mono font-bold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  TRY THE LIVE PRODUCT
+                </span>
+                <span className="text-[9px] font-mono text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/30 font-bold">
+                  VERIFIED ONLINE
+                </span>
+              </div>
+              <a
+                href="https://bayora-defense.vercel.app"
+                target="_blank"
+                rel="noreferrer"
+                className="text-base sm:text-lg font-mono font-black text-white hover:text-cyan-300 transition-colors flex items-center gap-2 group"
+              >
+                <span className="underline decoration-cyan-400/50 decoration-2 underline-offset-4">bayora-defense.vercel.app</span>
+                <span className="text-cyan-400 group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform">↗</span>
+              </a>
+              <div className="text-[10.5px] font-mono text-neutral-400 pt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span>Repository:</span>
+                <a
+                  href="https://github.com/atharvashukla098-tech/bayora"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-neutral-300 hover:text-white underline decoration-white/30"
+                >
+                  github.com/atharvashukla098-tech/bayora
+                </a>
+              </div>
             </div>
 
           </div>
@@ -2190,6 +2266,15 @@ function EditorialLandingInner({
             <button onClick={() => setLegalModal('compliance')} className="hover:text-neutral-400 transition-colors cursor-pointer">
               COMPLIANCE SPEC
             </button>
+            <a
+              href="https://bayora-defense.vercel.app"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[#00e5ff] font-bold hover:text-white transition-colors flex items-center gap-1"
+            >
+              <span>LIVE DEMO</span>
+              <span className="text-[10px]">↗</span>
+            </a>
             <a
               href="https://github.com/atharvashukla098-tech/bayora"
               target="_blank"

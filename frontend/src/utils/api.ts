@@ -441,7 +441,7 @@ export async function verifyLedger(): Promise<VerifyResult> {
       findings: ['BAD_HASH at block #54: content mismatch'],
       earliest_failure_seq: 54,
       simulated: true,
-      detail: 'Cryptographic fraud detected: block content does not match recorded SHA-256 hash.',
+      detail: 'Cryptographic tamper detected: block content does not match recorded SHA-256 hash.',
     };
   }
 

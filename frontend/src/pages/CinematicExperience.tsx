@@ -436,41 +436,26 @@ function CinematicExperienceInner({
 
 
           {/* Right Minimalist Floating Telemetry Strip */}
-
-          <div className="grid grid-cols-2 gap-4 p-6 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl font-mono text-xs max-w-md shadow-2xl">
-
-            <div className="space-y-1 p-3 rounded-xl bg-white/[0.02] border border-white/5">
-
-              <span className="text-[10px] text-neutral-500 uppercase tracking-widest block">ATTACK SPACE</span>
-
-              <span className="text-white font-bold text-lg">14 SCENARIOS</span>
-
+          <div className="grid grid-cols-2 gap-4 p-6 rounded-2xl border border-white/20 bg-black/80 backdrop-blur-2xl font-mono text-xs max-w-md shadow-2xl">
+            <div className="space-y-1 p-3 rounded-xl bg-white/[0.05] border border-white/15">
+              <span className="text-[10px] text-neutral-300 font-bold uppercase tracking-widest block">ATTACK SPACE</span>
+              <span className="text-white font-black text-lg">14 SCENARIOS IN CATALOGUE</span>
             </div>
 
-            <div className="space-y-1 p-3 rounded-xl bg-white/[0.02] border border-white/5">
-
-              <span className="text-[10px] text-neutral-500 uppercase tracking-widest block">HASH CHAIN</span>
-
-              <span className="text-[#00e5ff] font-bold text-lg">SHA-256</span>
-
+            <div className="space-y-1 p-3 rounded-xl bg-white/[0.05] border border-white/15">
+              <span className="text-[10px] text-neutral-300 font-bold uppercase tracking-widest block">HASH CHAIN</span>
+              <span className="text-[#00e5ff] font-black text-lg">SHA-256</span>
             </div>
 
-            <div className="space-y-1 p-3 rounded-xl bg-white/[0.02] border border-white/5">
-
-              <span className="text-[10px] text-neutral-500 uppercase tracking-widest block">CONTAINMENT</span>
-
-              <span className="text-emerald-400 font-bold text-lg">EROFS DOCKER</span>
-
+            <div className="space-y-1 p-3 rounded-xl bg-white/[0.05] border border-white/15">
+              <span className="text-[10px] text-neutral-300 font-bold uppercase tracking-widest block">CONTAINMENT</span>
+              <span className="text-emerald-400 font-black text-lg">EROFS DOCKER</span>
             </div>
 
-            <div className="space-y-1 p-3 rounded-xl bg-white/[0.02] border border-white/5">
-
-              <span className="text-[10px] text-neutral-500 uppercase tracking-widest block">ATTESTATION</span>
-
-              <span className="text-cyan-300 font-bold text-lg">Ed25519</span>
-
+            <div className="space-y-1 p-3 rounded-xl bg-white/[0.05] border border-white/15">
+              <span className="text-[10px] text-neutral-300 font-bold uppercase tracking-widest block">ATTESTATION</span>
+              <span className="text-cyan-300 font-black text-lg">Ed25519</span>
             </div>
-
           </div>
 
         </div>
@@ -858,79 +843,63 @@ function CinematicExperienceInner({
           ========================================================================= */}
 
       <section
-
         id="sandbox"
-
-        className="relative min-h-screen flex flex-col items-center justify-center p-6 md:p-14 z-10 pointer-events-auto"
-
+        className="relative min-h-[90vh] py-24 md:py-36 flex flex-col items-center justify-center p-6 md:p-14 z-20 pointer-events-auto scroll-mt-28"
       >
-
         <div className="w-full max-w-4xl space-y-8 text-center">
-
-          <div className="p-8 md:p-14 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl space-y-6 shadow-2xl">
-
-            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-950/30 text-[#00e5ff] font-mono text-xs">
-
+          <div className="p-8 md:p-14 rounded-3xl border border-white/15 bg-black/60 backdrop-blur-2xl space-y-6 shadow-2xl">
+            <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-950/40 text-[#00e5ff] font-mono text-xs">
               <span className="font-mono text-[10px] text-[#00e5ff]">[SPEC]</span>
-
               <span>SIMULATION BENCHMARK COMPLETE</span>
-
             </div>
 
-
-
-            <h3 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white uppercase leading-tight">
-
+            <h3 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white uppercase leading-tight py-2 my-2">
               PROVE ZERO TRUST <br />
-
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-[#00e5ff]">
-
                 IN THE TERMINAL.
-
               </span>
-
             </h3>
 
-
-
             <p className="text-xs sm:text-sm md:text-base text-neutral-300 font-mono max-w-2xl mx-auto leading-relaxed">
-
               Send real attacks, watch them get stopped, and try to fake the results yourself.
-
             </p>
 
-
-
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-3">
               <button
-
                 onClick={() => {
-
                   sound.playClick();
-
                   onOpenConsole('SC-02');
-
                 }}
-
                 onMouseEnter={() => sound.playHover()}
-
-                className="px-7 py-3.5 rounded-full bg-white text-black font-mono font-bold text-xs tracking-wider hover:bg-neutral-200 transition-all flex items-center space-x-2.5 cursor-pointer"
-
+                className="px-7 py-3.5 rounded-full bg-white text-black font-mono font-bold text-xs tracking-wider hover:bg-neutral-200 transition-all flex items-center space-x-2.5 cursor-pointer shadow-lg shadow-white/10"
               >
-
                 <span className="font-mono font-bold text-xs">[TERM]</span>
-
                 <span>OPEN PROOF TERMINAL</span>
-
               </button>
 
-
-
-              
-
+              <a
+                href="https://bayora-defense.vercel.app"
+                target="_blank"
+                rel="noreferrer"
+                className="px-6 py-3.5 rounded-full border border-cyan-400/50 bg-cyan-950/40 text-cyan-200 font-mono font-bold text-xs tracking-wider hover:bg-cyan-900/50 hover:text-white transition-all flex items-center space-x-2 cursor-pointer shadow-lg shadow-cyan-950/40"
+              >
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                <span>bayora-defense.vercel.app</span>
+                <span className="text-[10px]">↗</span>
+              </a>
             </div>
 
+            <div className="pt-2 text-[11px] font-mono text-neutral-400 flex items-center justify-center gap-2">
+              <span>Audit Source:</span>
+              <a
+                href="https://github.com/atharvashukla098-tech/bayora"
+                target="_blank"
+                rel="noreferrer"
+                className="text-neutral-300 hover:text-white underline decoration-white/20"
+              >
+                github.com/atharvashukla098-tech/bayora
+              </a>
+            </div>
           </div>
 
 
