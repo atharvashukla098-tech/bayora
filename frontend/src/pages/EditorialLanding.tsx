@@ -179,7 +179,6 @@ function EditorialLandingInner({
   const [activePipelineStep, setActivePipelineStep] = useState<number>(0);
   const [showRawJson, setShowRawJson] = useState<boolean>(false);
   const [copiedCommand, setCopiedCommand] = useState<boolean>(false);
-  const [sessionExecutionCount, setSessionExecutionCount] = useState<number>(1);
   const [executionMode, setExecutionMode] = useState<'LIVE_BACKEND' | 'IN_BROWSER_DEMO' | 'BACKEND_UNAVAILABLE'>('IN_BROWSER_DEMO');
   const [receipt, setReceipt] = useState<CryptographicReceipt | null>(null);
   const [tamperDiff, setTamperDiff] = useState<TamperDiff | null>(null);
@@ -337,8 +336,6 @@ function EditorialLandingInner({
       ms: elapsed || (pipelineScenario === 'SC-02' ? 69 : 76),
       isSimulated: executionMode !== 'LIVE_BACKEND',
     });
-
-    setSessionExecutionCount((prev) => prev + 1);
     setPipelineStatus('defended');
   };
 
@@ -452,214 +449,6 @@ function EditorialLandingInner({
   }, [isActive, onTransitionTo3D]);
 
 
-  // =========================================================================
-  // USER NAVIGATION: PAGE 1 (START/END) <-> PAGE 2 (START) BIDIRECTIONAL REDIRECT
-  // =========================================================================
-  useEffect(() => {
-    let t0: any = null;
-    let t1: any = null;
-    const resetToTop = () => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-      const lenis = (window as any).__lenis;
-      if (lenis && typeof lenis.scrollTo === 'function') {
-        lenis.scrollTo(0, { immediate: true });
-      }
-    };
-
-    // 1. Initial link entry: strictly redirect to the very top (starting of first page)
-    if (typeof window !== 'undefined') {
-      if ('scrollRestoration' in window.history) {
-        window.history.scrollRestoration = 'manual';
-      }
-      resetToTop();
-      t0 = setTimeout(resetToTop, 50);
-      t1 = setTimeout(resetToTop, 150);
-      window.addEventListener('load', resetToTop);
-      window.addEventListener('pageshow', resetToTop);
-    }
-
-    let isRedirecting = false;
-    let redirectTimer: any = null;
-
-    const setLock = (duration = 900) => {
-      isRedirecting = true;
-      if (redirectTimer) clearTimeout(redirectTimer);
-      redirectTimer = setTimeout(() => {
-        isRedirecting = false;
-      }, duration);
-    };
-
-    const scrollToPage2Start = () => {
-      const s2 = document.getElementById('pipeline-flowchart');
-      if (!s2 || isRedirecting) return;
-      setLock(950);
-      const targetY = s2.offsetTop - 75;
-      const lenis = (window as any).__lenis;
-      if (lenis && typeof lenis.scrollTo === 'function') {
-        lenis.scrollTo(targetY, { duration: 0.85, lock: true });
-      } else {
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
-      }
-    };
-
-    const scrollToPage1End = () => {
-      const s1 = document.getElementById('hero-section');
-      if (!s1 || isRedirecting) return;
-      setLock(950);
-
-      const s1Bottom = s1.offsetTop + s1.offsetHeight;
-      const targetY = Math.max(0, s1Bottom - window.innerHeight);
-      const lenis = (window as any).__lenis;
-      if (lenis && typeof lenis.scrollTo === 'function') {
-        lenis.scrollTo(targetY, { duration: 0.85, lock: true });
-      } else {
-        window.scrollTo({ top: targetY, behavior: 'smooth' });
-      }
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      if (isRedirecting) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-
-      const s1 = document.getElementById('hero-section');
-      const s2 = document.getElementById('pipeline-flowchart');
-      if (!s1 || !s2) return;
-
-      const scrollY = window.scrollY;
-      const s1Bottom = s1.offsetTop + s1.offsetHeight;
-      const page1End = Math.max(0, s1Bottom - window.innerHeight);
-      const page2Start = s2.offsetTop - 75;
-
-      // 1. SCROLL DOWN: from first page towards second page
-      if (e.deltaY > 10) {
-        if (scrollY < page2Start - 80) {
-          if (scrollY >= page1End - 35) {
-            e.preventDefault();
-            e.stopPropagation();
-            scrollToPage2Start();
-          }
-        }
-      }
-
-      // 2. SCROLL UP: from second page towards first page
-      if (e.deltaY < -10) {
-        if (scrollY >= page2Start - 80 && scrollY <= page2Start + 400) {
-          e.preventDefault();
-          e.stopPropagation();
-          scrollToPage1End();
-        }
-      }
-    };
-
-    let touchStartY = 0;
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY = e.touches[0].clientY;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (isRedirecting) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-      const currentY = e.touches[0].clientY;
-      const deltaY = touchStartY - currentY; // positive = scroll down
-
-      const s1 = document.getElementById('hero-section');
-      const s2 = document.getElementById('pipeline-flowchart');
-      if (!s1 || !s2) return;
-
-      const scrollY = window.scrollY;
-      const s1Bottom = s1.offsetTop + s1.offsetHeight;
-      const page1End = Math.max(0, s1Bottom - window.innerHeight);
-      const page2Start = s2.offsetTop - 75;
-
-      if (deltaY > 30) { // swipe up -> scroll down
-        if (scrollY >= page1End - 35 && scrollY < page2Start - 80) {
-          e.preventDefault();
-          e.stopPropagation();
-          scrollToPage2Start();
-        }
-      } else if (deltaY < -30) { // swipe down -> scroll up
-        if (scrollY >= page2Start - 80 && scrollY <= page2Start + 400) {
-          e.preventDefault();
-          e.stopPropagation();
-          scrollToPage1End();
-        }
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isRedirecting) return;
-      const s1 = document.getElementById('hero-section');
-      const s2 = document.getElementById('pipeline-flowchart');
-      if (!s1 || !s2) return;
-
-      const scrollY = window.scrollY;
-      const s1Bottom = s1.offsetTop + s1.offsetHeight;
-      const page1End = Math.max(0, s1Bottom - window.innerHeight);
-      const page2Start = s2.offsetTop - 75;
-
-      if (['ArrowDown', 'PageDown', ' '].includes(e.key)) {
-        if (scrollY >= page1End - 35 && scrollY < page2Start - 80) {
-          e.preventDefault();
-          scrollToPage2Start();
-        }
-      } else if (['ArrowUp', 'PageUp'].includes(e.key)) {
-        if (scrollY >= page2Start - 80 && scrollY <= page2Start + 400) {
-          e.preventDefault();
-          scrollToPage1End();
-        }
-      }
-    };
-
-    let lastScrollY = window.scrollY;
-    const handleScrollSnap = () => {
-      if (isRedirecting) return;
-      const s1 = document.getElementById('hero-section');
-      const s2 = document.getElementById('pipeline-flowchart');
-      if (!s1 || !s2) return;
-
-      const currentY = window.scrollY;
-      const s1Bottom = s1.offsetTop + s1.offsetHeight;
-      const page1End = Math.max(0, s1Bottom - window.innerHeight);
-      const page2Start = s2.offsetTop - 75;
-
-      // In the threshold gap between end of Section 1 and start of Section 2:
-      if (currentY > page1End + 35 && currentY < page2Start - 40) {
-        if (currentY > lastScrollY) {
-          scrollToPage2Start();
-        } else if (currentY < lastScrollY) {
-          scrollToPage1End();
-        }
-      }
-      lastScrollY = currentY;
-    };
-
-    window.addEventListener('wheel', handleWheel, { capture: true, passive: false });
-    window.addEventListener('touchstart', handleTouchStart, { capture: true, passive: true });
-    window.addEventListener('touchmove', handleTouchMove, { capture: true, passive: false });
-    window.addEventListener('keydown', handleKeyDown, { capture: true });
-    window.addEventListener('scroll', handleScrollSnap, { passive: true });
-
-    return () => {
-      window.removeEventListener('load', resetToTop);
-      window.removeEventListener('pageshow', resetToTop);
-      window.removeEventListener('wheel', handleWheel, { capture: true });
-      window.removeEventListener('touchstart', handleTouchStart, { capture: true });
-      window.removeEventListener('touchmove', handleTouchMove, { capture: true });
-      window.removeEventListener('keydown', handleKeyDown, { capture: true });
-      window.removeEventListener('scroll', handleScrollSnap);
-      if (redirectTimer) clearTimeout(redirectTimer);
-      if (t0) clearTimeout(t0);
-      if (t1) clearTimeout(t1);
-    };
-  }, []);
 
 
 
@@ -807,9 +596,9 @@ function EditorialLandingInner({
 
 {/* Right Column: Equal-Height 50/50 Zero-Trust Cockpit Console (6 cols) */}
           <div className="lg:col-span-6 min-w-0 w-full relative flex flex-col">
-            <div className="relative rounded-2xl overflow-hidden bg-white border border-neutral-200/90 shadow-2xl p-4 sm:p-5 transition-all duration-300 w-full flex-1 flex flex-col justify-between">
+            <div className="relative rounded-3xl overflow-hidden bg-[#fbf7eb] border border-[#dfd2bc] shadow-xl p-4 sm:p-5.5 transition-all duration-300 w-full flex-1 flex flex-col justify-between">
               {/* Single-Row Header: Title, Scenario Tabs, Mode, and Export Actions */}
-              <div className="relative z-10 pb-3 border-b border-neutral-200/80 font-mono flex flex-wrap items-center justify-between gap-2">
+              <div className="relative z-10 pb-3 border-b border-[#e2d5be] font-mono flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center space-x-2">
                   <span
                     className={`w-2.5 h-2.5 rounded-full ${
@@ -820,19 +609,19 @@ function EditorialLandingInner({
                         : 'bg-[#00b4d8] shadow-[0_0_8px_rgba(0,180,216,0.6)]'
                     }`}
                   />
-                  <span className="font-extrabold tracking-wider text-xs sm:text-sm text-neutral-900 uppercase">
+                  <span className="font-black tracking-wider text-xs sm:text-sm text-[#1a1714] uppercase">
                     {pipelineScenario === 'SC-02' ? 'CANARY LEAK ENGINE' : 'PROMPT FIREWALL'}
                   </span>
 
                   {/* Compact Scenario Tabs */}
-                  <div className="inline-flex rounded-lg bg-neutral-100 border border-neutral-200 p-0.5 text-[10px]">
+                  <div className="inline-flex rounded-lg bg-[#ede4d3] border border-[#ded0b9] p-0.5 text-[10px]">
                     <button
                       type="button"
                       onClick={() => handleSelectScenario('SC-02')}
-                      className={`px-2.5 py-0.5 rounded font-bold uppercase transition-all cursor-pointer ${
+                      className={`px-2.5 py-0.5 rounded-md font-bold uppercase transition-all cursor-pointer ${
                         pipelineScenario === 'SC-02'
-                          ? 'bg-[#e0f2fe] text-[#0369a1] border border-[#7dd3fc] shadow-xs'
-                          : 'text-neutral-500 hover:text-neutral-900'
+                          ? 'bg-[#d8f0f6] text-[#036e88] border border-[#9fd3e3] shadow-xs'
+                          : 'text-[#736855] hover:text-[#1a1714]'
                       }`}
                     >
                       SC-02
@@ -840,10 +629,10 @@ function EditorialLandingInner({
                     <button
                       type="button"
                       onClick={() => handleSelectScenario('SC-01')}
-                      className={`px-2.5 py-0.5 rounded font-bold uppercase transition-all cursor-pointer ${
+                      className={`px-2.5 py-0.5 rounded-md font-bold uppercase transition-all cursor-pointer ${
                         pipelineScenario === 'SC-01'
-                          ? 'bg-[#ffe4e6] text-[#be123c] border border-[#fda4af] shadow-xs'
-                          : 'text-neutral-500 hover:text-neutral-900'
+                          ? 'bg-[#fae2e5] text-[#9b1c2e] border border-[#f3bac1] shadow-xs'
+                          : 'text-[#736855] hover:text-[#1a1714]'
                       }`}
                     >
                       SC-01
@@ -853,7 +642,7 @@ function EditorialLandingInner({
 
                 <div className="flex items-center gap-2 text-xs">
                   <span
-                    className="font-mono text-xs font-semibold flex items-center gap-1.5 text-emerald-600"
+                    className="font-mono text-xs font-semibold flex items-center gap-1.5 text-[#186a3e]"
                     title={
                       executionMode === 'LIVE_BACKEND'
                         ? 'Connected to local FastAPI + Docker enclave daemon'
@@ -872,7 +661,7 @@ function EditorialLandingInner({
                   <button
                     type="button"
                     onClick={handleExportReport}
-                    className="text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200 px-2.5 py-1 rounded border border-neutral-300 font-bold cursor-pointer transition-colors text-xs flex items-center gap-1"
+                    className="text-[#186a3e] hover:text-[#0f4d2c] bg-[#e6f3ec] hover:bg-[#d8ece0] px-2.5 py-1 rounded-md border border-[#c4e3d0] font-bold cursor-pointer transition-colors text-xs flex items-center gap-1"
                     title="Download verifiable JSON attestation report"
                   >
                     <span>↓</span>
@@ -881,7 +670,7 @@ function EditorialLandingInner({
                   <button
                     type="button"
                     onClick={() => onOpenConsole(pipelineScenario)}
-                    className="text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200 px-2.5 py-1 rounded border border-neutral-300 cursor-pointer transition-colors text-xs font-semibold"
+                    className="text-[#3d372e] hover:text-[#1a1714] bg-[#f3ece0] hover:bg-[#e9dfce] px-2.5 py-1 rounded-md border border-[#ded2bf] cursor-pointer transition-colors text-xs font-semibold"
                   >
                     CONSOLE ↗
                   </button>
@@ -889,29 +678,29 @@ function EditorialLandingInner({
               </div>
 
               {/* 4 Cockpit Modules - Vertically Balanced */}
-              <div className="relative z-10 space-y-2 py-2 flex-1 flex flex-col justify-between">
+              <div className="relative z-10 space-y-2.5 py-2.5 flex-1 flex flex-col justify-between">
                 
                 {/* 01: HOSTILE INPUT VECTOR */}
-                <div className="rounded-xl bg-white border border-neutral-200/90 p-3 space-y-2 transition-all hover:border-neutral-300 shadow-xs">
+                <div className="rounded-2xl bg-[#fffdf9] border border-[#e8dfd0] p-3 space-y-2 transition-all hover:border-[#dbcbb4] shadow-xs">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center space-x-2">
-                      <span className="font-mono text-xs font-extrabold text-[#22d3ee] bg-[#0e2738] px-2 py-0.5 rounded">01</span>
-                      <span className="font-extrabold text-neutral-900 uppercase tracking-wider text-xs sm:text-[13px]">
+                      <span className="font-mono text-xs font-bold text-[#332e26] bg-[#f0ebe0] border border-[#ded3c1] px-2 py-0.5 rounded-md">01</span>
+                      <span className="font-black text-[#1a1714] uppercase tracking-wider text-xs sm:text-[13px]">
                         HOSTILE INPUT VECTOR
                       </span>
                     </div>
-                    <span className="text-[11px] font-mono text-neutral-500 font-medium">
+                    <span className="text-[11px] font-mono text-[#736c60] font-medium">
                       {pipelineScenario === 'SC-02' ? 'SECRET CANARY QUERY' : 'JAILBREAK HEURISTICS'}
                     </span>
                   </div>
 
                   <div className="flex gap-2 items-center">
-                    <div className="flex-1 min-w-0 relative flex items-center bg-white border border-neutral-300 rounded-lg px-3 py-2 text-xs sm:text-[13px] font-mono text-neutral-900 shadow-xs">
+                    <div className="flex-1 min-w-0 relative flex items-center bg-[#fffdfa] border border-[#ded5c5] rounded-xl px-3.5 py-2 text-xs sm:text-[13px] font-mono text-[#1a1714] shadow-inner">
                       <span className="truncate pr-7 select-all">{pipelinePrompt}</span>
                       <button
                         type="button"
                         onClick={handleCopyPrompt}
-                        className="absolute right-2.5 text-neutral-400 hover:text-neutral-700 cursor-pointer transition-colors text-xs"
+                        className="absolute right-2.5 text-[#8a8070] hover:text-[#1a1714] cursor-pointer transition-colors text-xs"
                         title="Copy prompt"
                       >
                         {copiedPrompt ? <span className="text-[10px] text-emerald-600 font-bold">✓</span> : '📋'}
@@ -922,7 +711,7 @@ function EditorialLandingInner({
                       type="button"
                       onClick={handleRunAttack}
                       disabled={pipelineStatus === 'running'}
-                      className="shrink-0 px-4 py-2 rounded-lg bg-[#0070f3] hover:bg-[#005bb5] text-white font-mono text-xs font-extrabold tracking-wider uppercase transition-all shadow-md shadow-blue-500/20 cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
+                      className="shrink-0 px-4 py-2 rounded-xl bg-[#0070f3] hover:bg-[#005bb5] text-white font-mono text-xs font-extrabold tracking-wider uppercase transition-all shadow-md shadow-blue-500/25 cursor-pointer disabled:opacity-50 flex items-center space-x-1.5"
                     >
                       {pipelineStatus === 'running' ? (
                         <>
@@ -940,17 +729,17 @@ function EditorialLandingInner({
                 </div>
 
                 {/* 02: DEFENSE INTERCEPTION & WIRE SCRUB */}
-                <div className="rounded-xl bg-white border border-neutral-200/90 p-3 space-y-2 transition-all hover:border-neutral-300 shadow-xs">
+                <div className="rounded-2xl bg-[#fffdf9] border border-[#e8dfd0] p-3 space-y-2 transition-all hover:border-[#dbcbb4] shadow-xs">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center space-x-2">
-                      <span className="font-mono text-xs font-extrabold text-[#2dd4bf] bg-[#0c2e28] px-2 py-0.5 rounded">02</span>
-                      <span className="font-extrabold text-neutral-900 uppercase tracking-wider text-xs sm:text-[13px]">
+                      <span className="font-mono text-xs font-bold text-[#332e26] bg-[#f0ebe0] border border-[#ded3c1] px-2 py-0.5 rounded-md">02</span>
+                      <span className="font-black text-[#1a1714] uppercase tracking-wider text-xs sm:text-[13px]">
                         DEFENSE INTERCEPTION & WIRE SCRUB
                       </span>
                     </div>
                     <div className="flex items-center space-x-2 font-mono text-xs">
                       <span
-                        className="text-neutral-500 text-[11px]"
+                        className="text-[#736c60] text-[11px]"
                         title={
                           executionMode === 'LIVE_BACKEND'
                             ? 'Backend broker interception latency'
@@ -960,12 +749,12 @@ function EditorialLandingInner({
                         {pipelineResult.ms}ms
                       </span>
                       <span
-                        className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider border ${
+                        className={`px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider border ${
                           pipelineResult.outcome === 'REDACTED'
-                            ? 'bg-[#e0f2fe] text-[#0284c7] border-[#bae6fd]'
+                            ? 'bg-[#fae2e5] text-[#9b1c2e] border-[#f3bac1]'
                             : pipelineResult.outcome === 'BLOCKED'
-                            ? 'bg-rose-50 text-rose-800 border-rose-300'
-                            : 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                            ? 'bg-[#fae2e5] text-[#9b1c2e] border-[#f3bac1]'
+                            : 'bg-[#e0f3e6] text-[#166534] border-[#bbf7d0]'
                         }`}
                       >
                         ● {pipelineResult.outcome}
@@ -974,22 +763,22 @@ function EditorialLandingInner({
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs font-mono items-stretch">
-                    <div className="p-2.5 rounded-lg bg-[#fdf2f4] border border-[#fecdd3] space-y-1">
-                      <div className="text-[10px] text-[#e11d48] font-extrabold uppercase tracking-wider flex items-center justify-between">
+                    <div className="p-2.5 rounded-xl bg-[#fff5f5] border border-[#fcd5d9] space-y-1">
+                      <div className="text-[10.5px] text-[#b91c1c] font-black uppercase tracking-wider flex items-center justify-between">
                         <span>⊙ RAW MODEL OUTPUT</span>
-                        <span className="text-[#f43f5e] font-mono">[PRE-FILTER]</span>
+                        <span className="text-[#b91c1c] font-mono font-bold">[PRE-FILTER]</span>
                       </div>
-                      <p className="text-[#881337] text-xs font-mono break-words leading-relaxed">
+                      <p className="text-[#2d2524] text-xs font-mono break-words leading-relaxed">
                         {pipelineResult.rawTargetOutput}
                       </p>
                     </div>
 
-                    <div className="p-2.5 rounded-lg bg-[#f0fdf4] border border-[#bbf7d0] space-y-1">
-                      <div className="text-[10px] text-[#16a34a] font-extrabold uppercase tracking-wider flex items-center justify-between">
-                        <span>🛡 SCRUBBED WIRE EGRESS</span>
-                        <span className="text-[#22c55e] font-mono">[ENFORCED]</span>
+                    <div className="p-2.5 rounded-xl bg-[#f4fbf6] border border-[#cbeed7] space-y-1">
+                      <div className="text-[10.5px] text-[#15803d] font-black uppercase tracking-wider flex items-center justify-between">
+                        <span>○ SCRUBBED WIRE EGRESS</span>
+                        <span className="text-[#15803d] font-mono font-bold">[ENFORCED]</span>
                       </div>
-                      <p className="text-[#14532d] text-xs font-bold font-mono break-words leading-relaxed">
+                      <p className="text-[#19241b] text-xs font-bold font-mono break-words leading-relaxed">
                         {pipelineResult.releasedText}
                       </p>
                     </div>
@@ -997,23 +786,23 @@ function EditorialLandingInner({
                 </div>
 
                 {/* 03: AUDIT EVENT #0056 (CRYPTOGRAPHIC RECEIPT) */}
-                <div className="rounded-xl bg-white border border-neutral-200/90 p-3 space-y-2 transition-all hover:border-neutral-300 shadow-xs">
+                <div className="rounded-2xl bg-[#fffdf9] border border-[#e8dfd0] p-3 space-y-2 transition-all hover:border-[#dbcbb4] shadow-xs">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center space-x-2">
-                      <span className="font-mono text-xs font-extrabold text-[#34d399] bg-[#0e2a1b] px-2 py-0.5 rounded">03</span>
-                      <span className="font-extrabold text-neutral-900 uppercase tracking-wider text-xs sm:text-[13px]">
+                      <span className="font-mono text-xs font-bold text-[#1c4722] bg-[#e6efe4] border border-[#cbdec7] px-2 py-0.5 rounded-md">03</span>
+                      <span className="font-black text-[#1a1714] uppercase tracking-wider text-xs sm:text-[13px]">
                         AUDIT EVENT #0056 (CRYPTOGRAPHIC RECEIPT)
                       </span>
                     </div>
                     <div className="flex items-center space-x-2 font-mono text-xs">
-                      <span className="text-[#15803d] font-bold bg-[#dcfce7] px-2.5 py-0.5 rounded border border-[#86efac] flex items-center gap-1">
+                      <span className="text-[#196b3a] font-bold bg-[#e2f3e8] px-2.5 py-0.5 rounded-md border border-[#bce3ca] flex items-center gap-1">
                         <span>✓</span>
                         <span>SEALED</span>
                       </span>
                       <button
                         type="button"
                         onClick={() => setShowRawJson(!showRawJson)}
-                        className="text-neutral-500 hover:text-neutral-900 cursor-pointer font-bold"
+                        className="text-[#6e685c] hover:text-[#1a1714] cursor-pointer font-bold"
                         title="Toggle canonical raw JSON record"
                       >
                         {showRawJson ? '[-] HIDE' : '[+] RAW'}
@@ -1022,34 +811,34 @@ function EditorialLandingInner({
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-mono text-xs">
-                    <div className="p-2 rounded-lg bg-[#f8fafc] border border-neutral-200/80 flex items-center justify-between gap-1.5">
+                    <div className="p-2.5 rounded-xl bg-[#f9f6ef] border border-[#e8dfd0] flex items-center justify-between gap-1.5">
                       <div className="min-w-0 flex-1">
-                        <span className="text-[9.5px] text-neutral-500 font-bold block uppercase">RECORD HASH (SHA-256)</span>
-                        <div className="text-neutral-900 font-extrabold truncate text-xs select-all">
+                        <span className="text-[9.5px] text-[#736c60] font-bold block uppercase">RECORD HASH (SHA-256)</span>
+                        <div className="text-[#1a1714] font-black truncate text-xs select-all">
                           {receipt ? receipt.recordHash : pipelineResult.hash}
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={handleCopyHash}
-                        className="text-neutral-400 hover:text-neutral-700 p-1 cursor-pointer transition-colors shrink-0"
+                        className="text-[#8a8070] hover:text-[#1a1714] p-1 cursor-pointer transition-colors shrink-0"
                         title="Copy SHA-256 hash"
                       >
                         {copiedHash ? <span className="text-emerald-600 text-[9px] font-bold">✓</span> : '📋'}
                       </button>
                     </div>
 
-                    <div className="p-2 rounded-lg bg-[#f8fafc] border border-neutral-200/80 flex items-center justify-between gap-1.5">
+                    <div className="p-2.5 rounded-xl bg-[#f9f6ef] border border-[#e8dfd0] flex items-center justify-between gap-1.5">
                       <div className="min-w-0 flex-1">
-                        <span className="text-[9.5px] text-neutral-500 font-bold block uppercase">VERIFICATION PUBLIC KEY</span>
-                        <div className="text-neutral-900 font-extrabold truncate text-xs select-all">
+                        <span className="text-[9.5px] text-[#736c60] font-bold block uppercase">VERIFICATION PUBLIC KEY</span>
+                        <div className="text-[#1a1714] font-black truncate text-xs select-all">
                           {receipt ? `${receipt.publicKeyHex.slice(0, 26)}...` : 'c9d9c2bdba295cf629b98583ed...'}
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={handleCopyPubKey}
-                        className="text-neutral-400 hover:text-neutral-700 p-1 cursor-pointer transition-colors shrink-0"
+                        className="text-[#8a8070] hover:text-[#1a1714] p-1 cursor-pointer transition-colors shrink-0"
                         title="Copy public key"
                       >
                         {copiedPubKey ? <span className="text-emerald-600 text-[9px] font-bold">✓</span> : '📋'}
@@ -1070,45 +859,45 @@ function EditorialLandingInner({
                 </div>
 
                 {/* 04: ONE-BYTE ALTERATION TEST */}
-                <div className="rounded-xl bg-white border border-neutral-200/90 p-3 space-y-2 transition-all hover:border-neutral-300 shadow-xs">
+                <div className="rounded-2xl bg-[#fffdf9] border border-[#e8dfd0] p-3 space-y-2 transition-all hover:border-[#dbcbb4] shadow-xs">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center space-x-2">
-                      <span className="font-mono text-xs font-extrabold text-[#fb7185] bg-[#2d1219] px-2 py-0.5 rounded">04</span>
-                      <span className="font-extrabold text-neutral-900 uppercase tracking-wider text-xs sm:text-[13px]">
+                      <span className="font-mono text-xs font-bold text-[#5c2d22] bg-[#f5eae5] border border-[#e7d2c9] px-2 py-0.5 rounded-md">04</span>
+                      <span className="font-black text-[#1a1714] uppercase tracking-wider text-xs sm:text-[13px]">
                         ONE-BYTE ALTERATION TEST
                       </span>
                     </div>
-                    <span className="text-[11px] font-mono text-neutral-500">DISPOSABLE RECORD MUTATION</span>
+                    <span className="text-[11px] font-mono text-[#736c60]">DISPOSABLE RECORD MUTATION</span>
                   </div>
 
                   {pipelineStatus === 'tampered' && tamperDiff ? (
-                    <div className="p-2.5 rounded-lg bg-rose-50/90 border border-rose-300 space-y-1.5 animate-in fade-in duration-150">
+                    <div className="p-2.5 rounded-xl bg-[#fae8ea] border border-[#f3bac1] space-y-1.5 animate-in fade-in duration-150">
                       <div className="flex items-center justify-between flex-wrap gap-1 font-mono text-xs">
-                        <span className="text-rose-900 font-extrabold flex items-center gap-1 sm:text-[13px]">
+                        <span className="text-[#7a0f1d] font-black flex items-center gap-1 sm:text-[13px]">
                           <span>[✕]</span>
                           <span>TAMPER DETECTED · BAD_HASH AT BLOCK #0056</span>
                         </span>
-                        <span className="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold border border-rose-300">
+                        <span className="bg-[#fcd5d9] text-[#7a0f1d] px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold border border-[#f3bac1]">
                           ALTERED COPY: REJECTED — HASH MISMATCH
                         </span>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 text-[10px] sm:text-xs font-mono">
-                        <div className="p-2 rounded bg-white border border-emerald-300 space-y-1 shadow-xs">
+                        <div className="p-2 rounded-lg bg-[#fffdf9] border border-[#cbeed7] space-y-1 shadow-xs">
                           <div className="flex items-center justify-between">
-                            <span className="text-neutral-600 block uppercase text-[9px] font-bold">ORIGINAL RECORD:</span>
-                            <span className="text-emerald-800 text-[9px] font-extrabold px-1.5 py-0.2 bg-emerald-100 rounded border border-emerald-300">VALID ✓</span>
+                            <span className="text-[#736c60] block uppercase text-[9px] font-bold">ORIGINAL RECORD:</span>
+                            <span className="text-[#15803d] text-[9px] font-extrabold px-1.5 py-0.2 bg-[#e2f3e8] rounded border border-[#bce3ca]">VALID ✓</span>
                           </div>
-                          <span className="text-emerald-800 block font-bold truncate">SHA-256: {tamperDiff.originalHash.slice(0, 18)}...</span>
-                          <span className="text-neutral-600 block text-[9px]">Ed25519 Signature: VALID</span>
+                          <span className="text-[#15803d] block font-bold truncate">SHA-256: {tamperDiff.originalHash.slice(0, 18)}...</span>
+                          <span className="text-[#736c60] block text-[9px]">Ed25519 Signature: VALID</span>
                         </div>
-                        <div className="p-2 rounded bg-rose-100/70 border border-rose-300 space-y-1 shadow-xs">
+                        <div className="p-2 rounded-lg bg-[#fff5f5] border border-[#fcd5d9] space-y-1 shadow-xs">
                           <div className="flex items-center justify-between">
-                            <span className="text-rose-900 block uppercase text-[9px] font-bold">ALTERED COPY ('E'→'X'):</span>
-                            <span className="text-rose-800 text-[9px] font-extrabold px-1.5 py-0.2 bg-rose-200 rounded border border-rose-300">REJECTED ✕</span>
+                            <span className="text-[#9b1c2e] block uppercase text-[9px] font-bold">ALTERED COPY ('E'→'X'):</span>
+                            <span className="text-[#9b1c2e] text-[9px] font-extrabold px-1.5 py-0.2 bg-[#fcd5d9] rounded border border-[#f3bac1]">REJECTED ✕</span>
                           </div>
-                          <span className="text-rose-900 block font-bold truncate">SHA-256: {tamperDiff.mutatedHash.slice(0, 18)}...</span>
-                          <span className="text-rose-800 block text-[9px]">
+                          <span className="text-[#9b1c2e] block font-bold truncate">SHA-256: {tamperDiff.mutatedHash.slice(0, 18)}...</span>
+                          <span className="text-[#9b1c2e] block text-[9px]">
                             {tamperDiff.mutatedSigValid ? 'Hash Mismatch (Tampered Content)' : 'Hash Mismatch · Signature Invalid'}
                           </span>
                         </div>
@@ -1118,21 +907,21 @@ function EditorialLandingInner({
                         <button
                           type="button"
                           onClick={handleRestoreRecord}
-                          className="py-1 px-3 rounded-md bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5"
+                          className="py-1 px-3 rounded-md bg-[#e6f3ec] hover:bg-[#d8ece0] text-[#186a3e] border border-[#c4e3d0] font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5"
                         >
                           <span>[↺] RESTORE</span>
                         </button>
                         <button
                           type="button"
                           onClick={handleCopyCommand}
-                          className="py-1 px-3 rounded-md bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-300 font-semibold uppercase transition-all cursor-pointer flex items-center gap-1.5"
+                          className="py-1 px-3 rounded-md bg-[#f3ece0] hover:bg-[#e9dfce] text-[#3d372e] border border-[#ded2bf] font-semibold uppercase transition-all cursor-pointer flex items-center gap-1.5"
                         >
                           <span>📋 {copiedCommand ? 'COPIED!' : 'CLI VERIFY'}</span>
                         </button>
                         <button
                           type="button"
                           onClick={handleExportReport}
-                          className="py-1 px-3 rounded-md bg-cyan-100 hover:bg-cyan-200 text-cyan-900 border border-cyan-300 font-semibold uppercase transition-all cursor-pointer flex items-center gap-1.5"
+                          className="py-1 px-3 rounded-md bg-[#d8f0f6] hover:bg-[#c2e8f1] text-[#036e88] border border-[#9fd3e3] font-semibold uppercase transition-all cursor-pointer flex items-center gap-1.5"
                         >
                           <span>⇩ REPORT</span>
                         </button>
@@ -1140,13 +929,13 @@ function EditorialLandingInner({
                     </div>
                   ) : (
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-1">
-                      <p className="text-xs sm:text-[13px] text-neutral-700 font-sans leading-relaxed flex-1 min-w-0">
+                      <p className="text-xs sm:text-[13px] text-[#4a443a] font-sans leading-relaxed flex-1 min-w-0">
                         Mutates 1 byte in memory ('E' → 'X'). The verifier checks the SHA-256 & Ed25519 signature → fails instantly.
                       </p>
                       <button
                         type="button"
                         onClick={handleTamperRecord}
-                        className="shrink-0 py-2.5 px-4 rounded-xl bg-[#881337] hover:bg-[#70102d] text-white font-mono text-xs font-extrabold tracking-wider uppercase transition-all shadow-md shadow-rose-900/20 cursor-pointer flex items-center justify-center space-x-1.5"
+                        className="shrink-0 py-2.5 px-4 rounded-xl bg-[#4a0d17] hover:bg-[#380a11] text-white font-mono text-xs font-extrabold tracking-wider uppercase transition-all shadow-md shadow-rose-950/25 cursor-pointer flex items-center justify-center space-x-1.5"
                       >
                         <span className="w-4 h-4 rounded-full border border-white/60 flex items-center justify-center text-xs">✕</span>
                         <span>TEST 1-BYTE TAMPER</span>
@@ -1158,21 +947,21 @@ function EditorialLandingInner({
               </div>
 
               {/* Integrated Telemetry Strip at Bottom */}
-              <div className="pt-3 border-t border-neutral-200/80 flex items-center justify-between text-xs font-mono text-neutral-500 relative z-10">
+              <div className="pt-3 border-t border-[#e2d5be] flex items-center justify-between text-xs font-mono text-[#5c5446] relative z-10">
                 <div className="flex items-center space-x-2">
                   <span className="w-2 h-2 rounded-full bg-[#10b981]" />
-                  <span className="text-neutral-900 font-extrabold uppercase mr-1">FEED:</span>
-                  <span className={activePipelineStep >= 1 ? 'text-cyan-700 font-bold' : 'text-neutral-400'}>00:12 INGRESS</span>
-                  <span className="text-neutral-300">→</span>
-                  <span className={activePipelineStep >= 3 ? 'text-amber-700 font-bold' : 'text-neutral-400'}>00:13 TARGET</span>
-                  <span className="text-neutral-300">→</span>
-                  <span className={activePipelineStep >= 4 || pipelineStatus === 'defended' ? 'text-emerald-700 font-bold' : 'text-neutral-400'}>00:14 BROKER</span>
-                  <span className="text-neutral-300">→</span>
-                  <span className={activePipelineStep >= 5 || pipelineStatus === 'defended' ? 'text-cyan-700 font-bold' : 'text-neutral-400'}>00:15 LEDGER</span>
+                  <span className="text-[#1a1714] font-black uppercase mr-1">FEED:</span>
+                  <span className={activePipelineStep >= 1 ? 'text-cyan-800 font-bold' : 'text-[#8c8270]'}>00:12 INGRESS</span>
+                  <span className="text-[#b5a995]">→</span>
+                  <span className={activePipelineStep >= 3 ? 'text-amber-800 font-bold' : 'text-[#8c8270]'}>00:13 TARGET</span>
+                  <span className="text-[#b5a995]">→</span>
+                  <span className={activePipelineStep >= 4 || pipelineStatus === 'defended' ? 'text-emerald-800 font-bold' : 'text-[#8c8270]'}>00:14 BROKER</span>
+                  <span className="text-[#b5a995]">→</span>
+                  <span className={activePipelineStep >= 5 || pipelineStatus === 'defended' ? 'text-cyan-800 font-bold' : 'text-[#8c8270]'}>00:15 LEDGER</span>
                 </div>
 
-                <div className="text-xs uppercase tracking-wider text-neutral-500 hidden sm:block">
-                  <span className="text-[#0070f3] font-bold font-mono">BAYORA_CANARY_★</span>
+                <div className="text-xs uppercase tracking-wider text-[#1a1714] font-black font-mono hidden sm:block">
+                  BAYORA_CANARY_★
                 </div>
               </div>
 
@@ -1186,56 +975,56 @@ function EditorialLandingInner({
                         {/* =========================================================================
           SECTION 2: THE BAYORA EXECUTION PIPELINE & ARCHITECTURE FLOWCHART
           ========================================================================= */}
-      <section id="pipeline-flowchart" className="relative z-10 py-12 md:py-16 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-24">
-        <div className="rounded-2xl border border-cyan-500/25 bg-[#060a14] text-white p-5 md:p-8 shadow-2xl relative overflow-hidden">
-          {/* Background cyber grid & ambient glows */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#060a14] via-[#091020] to-[#0d162a] opacity-98 pointer-events-none" />
-          <div className="absolute -top-32 -right-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-rose-500/15 rounded-full blur-3xl pointer-events-none" />
+            <section id="pipeline-flowchart" className="relative z-10 py-12 md:py-16 px-4 md:px-8 max-w-7xl mx-auto scroll-mt-24">
+        <div className="rounded-3xl border border-[#dfd2bc] bg-[#fbf7eb] text-[#1a1714] p-5 md:p-8 shadow-xl relative overflow-hidden">
+          {/* Subtle warm paper texture & faint ambient glows */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#fbf7eb] via-[#faf5e6] to-[#f5efdc] opacity-98 pointer-events-none" />
+          <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#00b4d8]/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#f43f5e]/5 rounded-full blur-3xl pointer-events-none" />
 
           {/* Section Header */}
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-white/10 gap-4">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-[#e2d5be] gap-4">
             <div>
-              <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-[#00e5ff]">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-widest text-[#036e88] font-bold">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#00b4d8] shadow-[0_0_8px_rgba(0,180,216,0.6)]" />
                 <span>[SYSTEM ARCHITECTURE]</span>
-                <span>·</span>
-                <span>NON-LINEAR DEFENSE FLOWCHART</span>
+                <span className="text-[#a39682]">·</span>
+                <span className="text-[#1a1714] font-black">NON-LINEAR DEFENSE FLOWCHART</span>
               </div>
-              <h3 className="text-xl md:text-2xl font-black tracking-tight text-white mt-1">
+              <h3 className="text-xl md:text-2xl font-black tracking-tight text-[#1a1714] mt-1.5">
                 Interactive Attack Interception & Dynamic Routing Matrix
               </h3>
-              <p className="text-xs sm:text-sm text-neutral-300 font-sans mt-1">
+              <p className="text-xs sm:text-sm text-[#736c60] font-sans mt-1">
                 Visualizing how adversarial payloads are routed, intercepted, or scrubbed with non-straight bypass curves and closed-loop feedback.
               </p>
             </div>
 
             {/* Interactive Scenario Switcher */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 font-mono text-xs">
-              <span className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">ACTIVE PATH:</span>
-              <div className="inline-flex rounded-lg bg-black/80 border border-white/20 p-1 shadow-inner">
+              <span className="text-[10px] text-[#736855] uppercase tracking-wider font-semibold">ACTIVE PATH:</span>
+              <div className="inline-flex rounded-xl bg-[#ede4d3] border border-[#ded0b9] p-1 shadow-inner">
                 <button
                   type="button"
                   onClick={() => handleSelectScenario('SC-02')}
-                  className={`px-3.5 py-1.5 rounded-md font-bold uppercase transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`px-3.5 py-1.5 rounded-lg font-bold uppercase transition-all cursor-pointer flex items-center gap-2 ${
                     pipelineScenario === 'SC-02'
-                      ? 'bg-cyan-500/30 text-cyan-200 border border-cyan-400/60 shadow-[0_0_12px_rgba(34,211,238,0.35)]'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-[#d8f0f6] text-[#036e88] border border-[#9fd3e3] shadow-xs'
+                      : 'text-[#736855] hover:text-[#1a1714]'
                   }`}
                 >
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
+                  <span className="w-2 h-2 rounded-full bg-[#00b4d8] shadow-[0_0_6px_rgba(0,180,216,0.6)]" />
                   <span>SC-02 · CANARY SCRUB</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleSelectScenario('SC-01')}
-                  className={`px-3.5 py-1.5 rounded-md font-bold uppercase transition-all cursor-pointer flex items-center gap-2 ${
+                  className={`px-3.5 py-1.5 rounded-lg font-bold uppercase transition-all cursor-pointer flex items-center gap-2 ${
                     pipelineScenario === 'SC-01'
-                      ? 'bg-rose-500/30 text-rose-200 border border-rose-400/60 shadow-[0_0_12px_rgba(244,63,94,0.35)]'
-                      : 'text-neutral-400 hover:text-white'
+                      ? 'bg-[#fae2e5] text-[#9b1c2e] border border-[#f3bac1] shadow-xs'
+                      : 'text-[#736855] hover:text-[#1a1714]'
                   }`}
                 >
-                  <span className="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_6px_rgba(244,63,94,0.8)]" />
+                  <span className="w-2 h-2 rounded-full bg-[#f43f5e] shadow-[0_0_6px_rgba(244,63,94,0.6)]" />
                   <span>SC-01 · HARD BLOCK BYPASS</span>
                 </button>
               </div>
@@ -1245,82 +1034,71 @@ function EditorialLandingInner({
           {/* Flowchart Legend */}
           <div className="relative z-10 pt-4 flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono">
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-1.5 text-neutral-300">
-                <span className="w-3.5 h-1 bg-cyan-400 rounded-full inline-block shadow-[0_0_6px_rgba(34,211,238,0.6)]" />
+              <div className="flex items-center gap-1.5 text-[#036e88] font-bold">
+                <span className="w-3.5 h-1 bg-[#00b4d8] rounded-full inline-block shadow-xs" />
                 <span>S-CURVE STANDARD PIPELINE</span>
               </div>
-              <div className="flex items-center gap-1.5 text-rose-300">
-                <span className="w-3.5 h-1 bg-rose-500 rounded-full inline-block shadow-[0_0_6px_rgba(244,63,94,0.6)]" />
-                <span className="font-semibold">CURVED 403 BYPASS (ZERO MODEL COMPUTE)</span>
+              <div className="flex items-center gap-1.5 text-[#9b1c2e] font-bold">
+                <span className="w-3.5 h-1 bg-[#dc2626] rounded-full inline-block shadow-xs" />
+                <span>CURVED 403 BYPASS (ZERO MODEL COMPUTE)</span>
               </div>
-              <div className="flex items-center gap-1.5 text-purple-300">
-                <span className="w-3.5 h-1 bg-purple-400 rounded-full inline-block shadow-[0_0_6px_rgba(192,132,252,0.6)]" />
-                <span className="font-semibold">CURVED ATTESTATION FEEDBACK LOOP</span>
+              <div className="flex items-center gap-1.5 text-[#6b21a8] font-bold">
+                <span className="w-3.5 h-1 bg-[#7c3aed] rounded-full inline-block shadow-xs" />
+                <span>CURVED ATTESTATION FEEDBACK LOOP</span>
               </div>
             </div>
-            <div className="text-[11px] text-cyan-400/80 font-mono hidden sm:block">
+            <div className="text-[11px] text-[#036e88] font-mono font-bold hidden sm:block">
               [⚡ Non-Linear Dynamic Routing]
             </div>
           </div>
 
           {/* Flowchart Canvas Container (Horizontally Scrollable on Mobile/Tablet so curves remain 100% intact) */}
-          <div className="relative z-10 my-6 overflow-x-auto pb-4 pt-2 scrollbar-thin scrollbar-thumb-white/10">
-            <div className="relative min-w-[980px] h-[410px] rounded-2xl bg-black/75 border border-white/15 p-4 shadow-inner">
+          <div className="relative z-10 my-6 overflow-x-auto pb-4 pt-2 scrollbar-thin scrollbar-thumb-[#dfd2bc]">
+            <div className="relative min-w-[980px] h-[410px] rounded-2xl bg-[#f4ede0] border border-[#d9ccb4] p-4 shadow-inner">
 
               {/* Vector SVG Routing Layer */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 410" fill="none">
                 <defs>
-                  {/* Glowing linear gradients */}
+                  {/* Linear gradients adapted for cream/parchment background */}
                   <linearGradient id="cyanFlowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#00e5ff" stopOpacity="0.9" />
-                    <stop offset="50%" stopColor="#38bdf8" stopOpacity="0.9" />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.9" />
+                    <stop offset="0%" stopColor="#0284c7" stopOpacity="0.95" />
+                    <stop offset="50%" stopColor="#0891b2" stopOpacity="0.95" />
+                    <stop offset="100%" stopColor="#16a34a" stopOpacity="0.95" />
                   </linearGradient>
                   <linearGradient id="bypassLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.9" />
-                    <stop offset="50%" stopColor="#fb7185" stopOpacity="1" />
-                    <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.9" />
+                    <stop offset="0%" stopColor="#dc2626" stopOpacity="0.95" />
+                    <stop offset="50%" stopColor="#e11d48" stopOpacity="1" />
+                    <stop offset="100%" stopColor="#dc2626" stopOpacity="0.95" />
                   </linearGradient>
                   <linearGradient id="feedbackLineGrad" x1="100%" y1="0%" x2="0%" y2="0%">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
-                    <stop offset="50%" stopColor="#a855f7" stopOpacity="0.9" />
-                    <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.8" />
+                    <stop offset="0%" stopColor="#16a34a" stopOpacity="0.9" />
+                    <stop offset="50%" stopColor="#7c3aed" stopOpacity="0.95" />
+                    <stop offset="100%" stopColor="#0284c7" stopOpacity="0.9" />
                   </linearGradient>
 
                   {/* Sleek Arrowhead Markers */}
                   <marker id="arrow-cyan" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 7 3.5, 0 7" fill="#22d3ee" />
+                    <polygon points="0 0, 7 3.5, 0 7" fill="#0284c7" />
                   </marker>
                   <marker id="arrow-rose" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 7 3.5, 0 7" fill="#f43f5e" />
+                    <polygon points="0 0, 7 3.5, 0 7" fill="#dc2626" />
                   </marker>
                   <marker id="arrow-emerald" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 7 3.5, 0 7" fill="#10b981" />
+                    <polygon points="0 0, 7 3.5, 0 7" fill="#16a34a" />
                   </marker>
                   <marker id="arrow-purple" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 7 3.5, 0 7" fill="#c084fc" />
+                    <polygon points="0 0, 7 3.5, 0 7" fill="#7c3aed" />
                   </marker>
-
-                  {/* Glow filter */}
-                  <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3.5" result="blur" />
-                    <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
                 </defs>
 
                 {/* --- NON-STRAIGHT CURVED LINE 1: Overhead 403 Hard Block Bypass Arch --- */}
-                {/* Arcs gracefully over Stage 03 and Stage 04 directly into Stage 05 */}
                 <path
                   d="M 305 130 C 305 32, 895 32, 895 130"
                   fill="none"
                   stroke="url(#bypassLineGrad)"
                   strokeWidth={pipelineScenario === 'SC-01' ? '4' : '1.5'}
                   strokeDasharray={pipelineScenario === 'SC-01' ? '6 4' : '4 6'}
-                  strokeOpacity={pipelineScenario === 'SC-01' ? '1' : '0.2'}
-                  filter={pipelineScenario === 'SC-01' ? 'url(#neonGlow)' : undefined}
+                  strokeOpacity={pipelineScenario === 'SC-01' ? '1' : '0.25'}
                   markerEnd="url(#arrow-rose)"
                   className={pipelineScenario === 'SC-01' ? 'animate-pulse' : ''}
                 />
@@ -1332,16 +1110,16 @@ function EditorialLandingInner({
                     width="280"
                     height="26"
                     rx="13"
-                    fill="#15060b"
-                    stroke={pipelineScenario === 'SC-01' ? '#f43f5e' : '#471420'}
+                    fill={pipelineScenario === 'SC-01' ? '#fae2e5' : '#ede4d3'}
+                    stroke={pipelineScenario === 'SC-01' ? '#f3bac1' : '#dfd2bc'}
                     strokeWidth="1.5"
-                    strokeOpacity={pipelineScenario === 'SC-01' ? '0.95' : '0.35'}
+                    strokeOpacity="0.95"
                   />
                   <text
                     x="0"
                     y="4"
                     textAnchor="middle"
-                    fill={pipelineScenario === 'SC-01' ? '#fda4af' : '#881337'}
+                    fill={pipelineScenario === 'SC-01' ? '#9b1c2e' : '#a39682'}
                     fontSize="10"
                     fontWeight="bold"
                     fontFamily="monospace"
@@ -1356,21 +1134,21 @@ function EditorialLandingInner({
                 <path
                   d="M 188 215 C 204 195, 216 235, 232 215"
                   fill="none"
-                  stroke="#22d3ee"
+                  stroke="#0284c7"
                   strokeWidth="2.5"
-                  strokeOpacity="0.85"
+                  strokeOpacity="0.9"
                   markerEnd="url(#arrow-cyan)"
                 />
-                <circle cx="210" cy="215" r="2.5" fill="#22d3ee" className="animate-ping" />
+                <circle cx="210" cy="215" r="2.5" fill="#0284c7" className="animate-ping" />
 
                 {/* 02 -> 03 S-Curve */}
                 <path
                   d="M 388 215 C 404 195, 416 235, 432 215"
                   fill="none"
-                  stroke={pipelineScenario === 'SC-01' ? '#374151' : '#22d3ee'}
+                  stroke={pipelineScenario === 'SC-01' ? '#c8baa0' : '#0284c7'}
                   strokeWidth="2.5"
                   strokeDasharray={pipelineScenario === 'SC-01' ? '4 4' : 'none'}
-                  strokeOpacity={pipelineScenario === 'SC-01' ? '0.2' : '0.85'}
+                  strokeOpacity={pipelineScenario === 'SC-01' ? '0.35' : '0.9'}
                   markerEnd={pipelineScenario === 'SC-01' ? undefined : 'url(#arrow-cyan)'}
                 />
 
@@ -1378,10 +1156,10 @@ function EditorialLandingInner({
                 <path
                   d="M 588 215 C 604 195, 616 235, 632 215"
                   fill="none"
-                  stroke={pipelineScenario === 'SC-01' ? '#374151' : '#10b981'}
+                  stroke={pipelineScenario === 'SC-01' ? '#c8baa0' : '#16a34a'}
                   strokeWidth="2.5"
                   strokeDasharray={pipelineScenario === 'SC-01' ? '4 4' : 'none'}
-                  strokeOpacity={pipelineScenario === 'SC-01' ? '0.2' : '0.85'}
+                  strokeOpacity={pipelineScenario === 'SC-01' ? '0.35' : '0.9'}
                   markerEnd={pipelineScenario === 'SC-01' ? undefined : 'url(#arrow-emerald)'}
                 />
 
@@ -1389,23 +1167,21 @@ function EditorialLandingInner({
                 <path
                   d="M 788 215 C 804 195, 816 235, 832 215"
                   fill="none"
-                  stroke={pipelineScenario === 'SC-01' ? '#374151' : '#10b981'}
+                  stroke={pipelineScenario === 'SC-01' ? '#c8baa0' : '#16a34a'}
                   strokeWidth="2.5"
                   strokeDasharray={pipelineScenario === 'SC-01' ? '4 4' : 'none'}
-                  strokeOpacity={pipelineScenario === 'SC-01' ? '0.2' : '0.85'}
+                  strokeOpacity={pipelineScenario === 'SC-01' ? '0.35' : '0.9'}
                   markerEnd={pipelineScenario === 'SC-01' ? undefined : 'url(#arrow-emerald)'}
                 />
 
                 {/* --- NON-STRAIGHT CURVED LINE 2: Bottom Closed-Loop Attestation & Telemetry Loop --- */}
-                {/* Arcs backward underneath from Stage 05 back to Stage 02 */}
                 <path
                   d="M 895 295 C 895 385, 305 385, 305 295"
                   fill="none"
                   stroke="url(#feedbackLineGrad)"
                   strokeWidth="2.5"
                   strokeDasharray="5 5"
-                  strokeOpacity="0.8"
-                  filter="url(#neonGlow)"
+                  strokeOpacity="0.9"
                   markerEnd="url(#arrow-purple)"
                 />
                 {/* Floating badge on bottom curved telemetry loop */}
@@ -1416,16 +1192,16 @@ function EditorialLandingInner({
                     width="300"
                     height="26"
                     rx="13"
-                    fill="#090616"
-                    stroke="#a855f7"
+                    fill="#f3e8ff"
+                    stroke="#d8b4fe"
                     strokeWidth="1.5"
-                    strokeOpacity="0.8"
+                    strokeOpacity="0.95"
                   />
                   <text
                     x="0"
                     y="4"
                     textAnchor="middle"
-                    fill="#d8b4fe"
+                    fill="#6b21a8"
                     fontSize="10"
                     fontWeight="bold"
                     fontFamily="monospace"
@@ -1441,25 +1217,25 @@ function EditorialLandingInner({
 
                 {/* NODE 01: RED HARNESS */}
                 <div
-                  className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c]/95 ${
+                  className={`p-3.5 rounded-2xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-white shadow-sm ${
                     activePipelineStep === 0
-                      ? 'border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.35)] ring-1 ring-cyan-400'
-                      : 'border-white/15 hover:border-cyan-500/50'
+                      ? 'border-[#00b4d8] ring-2 ring-[#00b4d8]/20 shadow-md'
+                      : 'border-[#dfd2bc] hover:border-[#b8a990]'
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
-                      <span className="font-bold text-cyan-400">01 // INGRESS</span>
-                      <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                    <div className="flex items-center justify-between text-[10px] text-[#736c60] mb-1 font-mono">
+                      <span className="font-extrabold text-[#036e88] bg-[#ede4d3] px-2 py-0.5 rounded">01 // INGRESS</span>
+                      <span className="w-2 h-2 rounded-full bg-[#00b4d8] animate-pulse" />
                     </div>
-                    <div className="font-black text-white text-xs tracking-wider">RED HARNESS</div>
-                    <div className="text-[10px] text-cyan-300 font-bold uppercase mt-0.5">Hostile Attack Injection</div>
-                    <p className="text-[11px] text-neutral-300 mt-2 font-sans leading-relaxed">
+                    <div className="font-black text-[#1a1714] text-xs tracking-wider mt-1.5">RED HARNESS</div>
+                    <div className="text-[10px] text-[#036e88] font-bold uppercase mt-0.5 font-mono">Hostile Attack Injection</div>
+                    <p className="text-[11px] text-[#574e3d] mt-2 font-sans leading-relaxed">
                       Injects adversarial payload ({pipelineScenario === 'SC-01' ? 'Raw Prompt Jailbreak' : 'Exfiltration Probe'}).
                     </p>
                   </div>
-                  <div className="pt-2 border-t border-white/10 text-[10px]">
-                    <span className="text-cyan-300 font-bold block bg-cyan-500/15 px-1.5 py-0.5 rounded border border-cyan-500/30 text-center truncate">
+                  <div className="pt-2 border-t border-[#ede4d3] text-[10px] font-mono">
+                    <span className="text-[#036e88] font-bold block bg-[#d8f0f6] px-1.5 py-1 rounded-lg border border-[#9fd3e3] text-center truncate">
                       {pipelineScenario === 'SC-01' ? 'JAILBREAK_PROBE' : 'CANARY_LEAK_TEST'}
                     </span>
                   </div>
@@ -1467,34 +1243,34 @@ function EditorialLandingInner({
 
                 {/* NODE 02: POLICY BROKER */}
                 <div
-                  className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c]/95 ${
+                  className={`p-3.5 rounded-2xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-white shadow-sm ${
                     pipelineScenario === 'SC-01'
-                      ? 'border-rose-500/90 shadow-[0_0_20px_rgba(244,63,94,0.45)] ring-1 ring-rose-500'
-                      : 'border-cyan-500/60 shadow-[0_0_15px_rgba(34,211,238,0.25)]'
+                      ? 'border-[#f43f5e] ring-2 ring-[#f43f5e]/20 shadow-md'
+                      : 'border-[#00b4d8] ring-2 ring-[#00b4d8]/20 shadow-md'
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
-                      <span className={`font-bold ${pipelineScenario === 'SC-01' ? 'text-rose-400' : 'text-cyan-400'}`}>
+                    <div className="flex items-center justify-between text-[10px] text-[#736c60] mb-1 font-mono">
+                      <span className={`font-extrabold px-2 py-0.5 rounded ${pipelineScenario === 'SC-01' ? 'text-[#9b1c2e] bg-[#fae2e5]' : 'text-[#036e88] bg-[#ede4d3]'}`}>
                         02 // POLICY GATE
                       </span>
-                      <span className={`w-2 h-2 rounded-full ${pipelineScenario === 'SC-01' ? 'bg-rose-500 animate-ping' : 'bg-cyan-400'}`} />
+                      <span className={`w-2 h-2 rounded-full ${pipelineScenario === 'SC-01' ? 'bg-[#f43f5e] animate-ping' : 'bg-[#00b4d8]'}`} />
                     </div>
-                    <div className="font-black text-white text-xs tracking-wider">POLICY BROKER</div>
-                    <div className="text-[10px] text-cyan-300 font-bold uppercase mt-0.5">Zero-Trust Evaluation</div>
-                    <p className="text-[11px] text-neutral-300 mt-2 font-sans leading-relaxed">
+                    <div className="font-black text-[#1a1714] text-xs tracking-wider mt-1.5">POLICY BROKER</div>
+                    <div className="text-[10px] text-[#036e88] font-bold uppercase mt-0.5 font-mono">Zero-Trust Evaluation</div>
+                    <p className="text-[11px] text-[#574e3d] mt-2 font-sans leading-relaxed">
                       {pipelineScenario === 'SC-01'
                         ? 'HARD BLOCK TRIGGERED: Diverts along curved overhead bypass to Ledger.'
                         : 'EVAL PASS: Token entropy passed baseline. Dispatched to Model runtime.'}
                     </p>
                   </div>
-                  <div className="pt-2 border-t border-white/10 text-[10px]">
+                  <div className="pt-2 border-t border-[#ede4d3] text-[10px] font-mono">
                     {pipelineScenario === 'SC-01' ? (
-                      <span className="text-rose-300 font-bold block bg-rose-500/25 px-1.5 py-0.5 rounded border border-rose-500/50 text-center animate-pulse">
+                      <span className="text-[#9b1c2e] font-bold block bg-[#fae2e5] px-1.5 py-1 rounded-lg border border-[#f3bac1] text-center animate-pulse">
                         403 HARD BLOCKED
                       </span>
                     ) : (
-                      <span className="text-emerald-400 font-bold block bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/30 text-center">
+                      <span className="text-[#15803d] font-bold block bg-[#e8f7ee] px-1.5 py-1 rounded-lg border border-[#a3e6ba] text-center">
                         PASSED TO ENGINE
                       </span>
                     )}
@@ -1503,32 +1279,32 @@ function EditorialLandingInner({
 
                 {/* NODE 03: TARGET MODEL */}
                 <div
-                  className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c]/95 ${
+                  className={`p-3.5 rounded-2xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-white shadow-sm ${
                     pipelineScenario === 'SC-01'
-                      ? 'border-white/10 opacity-40 border-dashed'
-                      : 'border-blue-500/60 shadow-[0_0_15px_rgba(59,130,246,0.25)]'
+                      ? 'border-[#dfd2bc] opacity-50 border-dashed bg-[#faf5ea]'
+                      : 'border-[#dfd2bc] hover:border-[#b8a990]'
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
-                      <span className="font-bold text-blue-400">03 // ENGINE</span>
-                      <span className={`w-2 h-2 rounded-full ${pipelineScenario === 'SC-01' ? 'bg-neutral-600' : 'bg-blue-400'}`} />
+                    <div className="flex items-center justify-between text-[10px] text-[#736c60] mb-1 font-mono">
+                      <span className="font-extrabold text-[#736855] bg-[#ede4d3] px-2 py-0.5 rounded">03 // ENGINE</span>
+                      <span className={`w-2 h-2 rounded-full ${pipelineScenario === 'SC-01' ? 'bg-[#a39682]' : 'bg-[#0284c7]'}`} />
                     </div>
-                    <div className="font-black text-white text-xs tracking-wider">TARGET MODEL</div>
-                    <div className="text-[10px] text-neutral-400 font-bold uppercase mt-0.5">Untrusted AI Engine</div>
-                    <p className="text-[11px] text-neutral-300 mt-2 font-sans leading-relaxed">
+                    <div className="font-black text-[#1a1714] text-xs tracking-wider mt-1.5">TARGET MODEL</div>
+                    <div className="text-[10px] text-[#736855] font-bold uppercase mt-0.5 font-mono">Untrusted AI Engine</div>
+                    <p className="text-[11px] text-[#574e3d] mt-2 font-sans leading-relaxed">
                       {pipelineScenario === 'SC-01'
                         ? 'ISOLATED & SUPPRESSED: Zero tokens reached model. 0 compute spent.'
                         : 'Model generates unconstrained completion containing confidential canary.'}
                     </p>
                   </div>
-                  <div className="pt-2 border-t border-white/10 text-[10px]">
+                  <div className="pt-2 border-t border-[#ede4d3] text-[10px] font-mono">
                     {pipelineScenario === 'SC-01' ? (
-                      <span className="text-neutral-400 font-bold block text-center bg-white/5 py-0.5 rounded">
+                      <span className="text-[#736855] font-bold block text-center bg-[#ede4d3] py-1 rounded-lg border border-[#ded0b9]">
                         [COMPUTE SAVED]
                       </span>
                     ) : (
-                      <span className="text-cyan-300 font-bold block bg-cyan-500/15 px-1.5 py-0.5 rounded border border-cyan-500/30 text-center">
+                      <span className="text-[#b91c1c] font-bold block bg-[#fef2f2] px-1.5 py-1 rounded-lg border border-[#fecaca] text-center">
                         RAW LEAK DETECTED
                       </span>
                     )}
@@ -1537,32 +1313,32 @@ function EditorialLandingInner({
 
                 {/* NODE 04: BLUE GUARDRAIL */}
                 <div
-                  className={`p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c]/95 ${
+                  className={`p-3.5 rounded-2xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-white shadow-sm ${
                     pipelineScenario === 'SC-01'
-                      ? 'border-white/10 opacity-40 border-dashed'
-                      : 'border-teal-500/60 shadow-[0_0_15px_rgba(20,184,166,0.25)]'
+                      ? 'border-[#dfd2bc] opacity-50 border-dashed bg-[#faf5ea]'
+                      : 'border-[#dfd2bc] hover:border-[#b8a990]'
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
-                      <span className="font-bold text-teal-400">04 // SCRUBBER</span>
-                      <span className={`w-2 h-2 rounded-full ${pipelineScenario === 'SC-01' ? 'bg-neutral-600' : 'bg-teal-400'}`} />
+                    <div className="flex items-center justify-between text-[10px] text-[#736c60] mb-1 font-mono">
+                      <span className="font-extrabold text-[#0f766e] bg-[#ede4d3] px-2 py-0.5 rounded">04 // SCRUBBER</span>
+                      <span className={`w-2 h-2 rounded-full ${pipelineScenario === 'SC-01' ? 'bg-[#a39682]' : 'bg-[#0f766e]'}`} />
                     </div>
-                    <div className="font-black text-white text-xs tracking-wider">BLUE GUARDRAIL</div>
-                    <div className="text-[10px] text-teal-300 font-bold uppercase mt-0.5">Pre-Egress Inspection</div>
-                    <p className="text-[11px] text-neutral-300 mt-2 font-sans leading-relaxed">
+                    <div className="font-black text-[#1a1714] text-xs tracking-wider mt-1.5">BLUE GUARDRAIL</div>
+                    <div className="text-[10px] text-[#0f766e] font-bold uppercase mt-0.5 font-mono">Pre-Egress Inspection</div>
+                    <p className="text-[11px] text-[#574e3d] mt-2 font-sans leading-relaxed">
                       {pipelineScenario === 'SC-01'
                         ? 'NOT INVOKED: Pre-target block eliminated need for downstream wire scrub.'
                         : 'Catches canary secret before network egress and rewires to [REDACTED].'}
                     </p>
                   </div>
-                  <div className="pt-2 border-t border-white/10 text-[10px]">
+                  <div className="pt-2 border-t border-[#ede4d3] text-[10px] font-mono">
                     {pipelineScenario === 'SC-01' ? (
-                      <span className="text-neutral-400 font-bold block text-center bg-white/5 py-0.5 rounded">
+                      <span className="text-[#736855] font-bold block text-center bg-[#ede4d3] py-1 rounded-lg border border-[#ded0b9]">
                         [NOT INVOKED]
                       </span>
                     ) : (
-                      <span className="text-emerald-300 font-bold block bg-emerald-500/15 px-1.5 py-0.5 rounded border border-emerald-500/30 text-center">
+                      <span className="text-[#0f766e] font-bold block bg-[#e6f4ea] px-1.5 py-1 rounded-lg border border-[#b7e1cd] text-center">
                         CANARY SCRUBBED
                       </span>
                     )}
@@ -1571,21 +1347,21 @@ function EditorialLandingInner({
 
                 {/* NODE 05: AUDIT LEDGER */}
                 <div
-                  className="p-3.5 rounded-xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-[#090e1c]/95 border-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.25)]"
+                  className="p-3.5 rounded-2xl border transition-all duration-300 flex flex-col justify-between space-y-2 bg-white shadow-sm border-[#a3e6ba] ring-1 ring-[#15803d]/20"
                 >
                   <div>
-                    <div className="flex items-center justify-between text-[10px] text-neutral-400 mb-1">
-                      <span className="font-bold text-emerald-400">05 // IMMUTABLE LOG</span>
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <div className="flex items-center justify-between text-[10px] text-[#736c60] mb-1 font-mono">
+                      <span className="font-extrabold text-[#15803d] bg-[#e8f7ee] px-2 py-0.5 rounded border border-[#a3e6ba]">05 // IMMUTABLE LOG</span>
+                      <span className="w-2 h-2 rounded-full bg-[#15803d] animate-pulse" />
                     </div>
-                    <div className="font-black text-white text-xs tracking-wider">AUDIT LEDGER</div>
-                    <div className="text-[10px] text-emerald-300 font-bold uppercase mt-0.5">Cryptographic Attestation</div>
-                    <p className="text-[11px] text-neutral-300 mt-2 font-sans leading-relaxed">
+                    <div className="font-black text-[#1a1714] text-xs tracking-wider mt-1.5">AUDIT LEDGER</div>
+                    <div className="text-[10px] text-[#15803d] font-bold uppercase mt-0.5 font-mono">Cryptographic Attestation</div>
+                    <p className="text-[11px] text-[#574e3d] mt-2 font-sans leading-relaxed">
                       Seals verdict with SHA-256 digest & Ed25519 signature. Feeds back to Stage 02.
                     </p>
                   </div>
-                  <div className="pt-2 border-t border-white/10 text-[10px]">
-                    <span className="text-emerald-300 font-bold block bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/40 text-center">
+                  <div className="pt-2 border-t border-[#ede4d3] text-[10px] font-mono">
+                    <span className="text-[#15803d] font-bold block bg-[#e8f7ee] px-1.5 py-1 rounded-lg border border-[#a3e6ba] text-center">
                       SEALED #{pipelineResult.blockSeq} (Ed25519)
                     </span>
                   </div>
@@ -1593,69 +1369,6 @@ function EditorialLandingInner({
 
               </div>
             </div>
-          </div>
-
-          {/* Test Coverage & Architecture Scope - High Contrast and Legible */}
-          <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
-            <div className="p-4 rounded-xl bg-black/60 border border-white/15 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-black text-white">4</span>
-                <span className="text-[10px] text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30 font-bold">
-                  4 OF 4 ACTIVE
-                </span>
-              </div>
-              <div className="font-black text-white text-sm tracking-wide">CORE DEFENSE LAYERS</div>
-              <p className="text-neutral-300 text-[12px] font-sans leading-relaxed">
-                Active runtime boundaries: Input Shield (SC-01), Data Privacy (SC-02), Network Guard (SC-03), and System Armor (SC-04r).
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-black/60 border border-white/15 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-black text-white">14</span>
-                <span className="text-[10px] text-cyan-300 bg-cyan-500/20 px-2 py-0.5 rounded border border-cyan-500/30 font-bold">
-                  DEFINED MATRIX
-                </span>
-              </div>
-              <div className="font-black text-white text-sm tracking-wide">SCENARIO CATALOGUE</div>
-              <p className="text-neutral-300 text-[12px] font-sans leading-relaxed">
-                Full adversarial test suite in /scenarios/ covering prompt jailbreaks, canary leaks, SSRF, memory leaks, and EROFS write probes.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-black/60 border border-white/15 space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-black text-white">6</span>
-                <span className="text-[10px] text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded border border-purple-500/30 font-bold">
-                  CHECKPOINTS
-                </span>
-              </div>
-              <div className="font-black text-white text-sm tracking-wide">GUIDED DEMO STAGES</div>
-              <p className="text-neutral-300 text-[12px] font-sans leading-relaxed">
-                Sequential inspection checkpoints in the Evidence Console: Ingress, Pre-target Block, Sandbox, Wire Scrub, Merkle Link, and Attestation.
-              </p>
-            </div>
-          </div>
-
-          {/* Session Verification Status Bar */}
-          <div className="mt-4 px-4 py-3 rounded-lg bg-black/60 border border-white/15 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-neutral-300">
-            <div className="flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
-              <span className="text-neutral-400">SESSION VERIFICATION:</span>
-              <span className="text-white font-bold">
-                {sessionExecutionCount} Live Execution{sessionExecutionCount !== 1 ? 's' : ''} in Session
-              </span>
-              <span className="text-neutral-500">·</span>
-              <span className="text-emerald-400 font-semibold">0 Unsubstantiated Guarantees</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => onOpenConsole()}
-              className="text-cyan-400 hover:text-cyan-300 font-bold tracking-wider uppercase flex items-center gap-1.5 cursor-pointer bg-cyan-500/10 px-3 py-1 rounded border border-cyan-500/20 hover:border-cyan-400/40 transition-all"
-            >
-              <span>EXPLORE FULL 14-SCENARIO EVIDENCE CONSOLE</span>
-              <span>[↗]</span>
-            </button>
           </div>
 
         </div>
